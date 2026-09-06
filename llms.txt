@@ -87,6 +87,11 @@ pairing, and the checklist before submitting. It travels inside the
 project, so it is still there when easypaper is not, and it is the
 document to read on the first day.
 
+What every command takes — `journal`, `caption_style`, `split`,
+`suppl_figures`, `label`, `figure_format`, `blinded`, `snapshot` — is
+laid out with its default in [Get
+started](https://danielsangarci.github.io/easypaper/articles/easypaper.html).
+
 ## Where the code lives
 
 The build logic is **copied into each project**, not kept in this

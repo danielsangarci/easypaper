@@ -34,7 +34,7 @@ Here is what lands on disk:
 
 dir <- file.path(tempdir(), "demo_paper")
 easypaper::create_paper(dir, git = FALSE)
-#> Project created: /tmp/RtmpTteD9h/demo_paper
+#> Project created: /tmp/RtmpopxV32/demo_paper
 #>   1. open demo_paper.Rproj
 #>   2. source("make.R")
 #>   3. render_html()      # or see run.R for every command
@@ -160,7 +160,7 @@ and `render_preprint()` take all four.
 
 | Argument | Default | What it decides |
 |----|----|----|
-| `journal` | `"ecology"` | Which `.csl` in `references_styles/` sets the citation style. `list_journals()` lists the ones you have |
+| `journal` | `"myrmecological-news"` | Which `.csl` in `references_styles/` sets the citation style. `list_journals()` lists the ones you have |
 | `caption_style` | `"default"` | How a caption is written: `"default"` gives *Figure 1.*, `"abbrev"` gives *Fig. 1.*, `"nature"` gives *Figure 1* followed by a vertical rule, `"compact"` gives *F1:* |
 | `split` | `FALSE` | `FALSE` builds the complete document, supplement included — the one to circulate among co-authors. `TRUE` leaves the supplement out and rewrites the citations to it, which is what a journal wants; `make_submission()` always uses `TRUE` |
 | `suppl_figures` | `"separate"` | Only bites when `split = TRUE`: whether the supplementary figures and tables travel in their own document or stay at the end of the main text |
@@ -206,7 +206,7 @@ make_submission("myrmecological-news", label = "MyrmecologicalNews") # the real 
 
 | Argument | Default | What it decides |
 |----|----|----|
-| `journal` | `"ecology"` | The `.csl` the citations come out in |
+| `journal` | `"myrmecological-news"` | The `.csl` the citations come out in |
 | `label` | `"default"` | Names the folder inside `submission/` and every file in it. The default is deliberate: a trial run is then unmistakably a trial, and never carries the name of a journal you did not choose |
 | `caption_style` | `"default"` | As in the renders above |
 | `figure_format` | `"tiff"` | The standalone figures the journal uploads: `"tiff"`, `"png"` or `"jpg"`. TIFF unless they say otherwise — JPEG is lossy and poor for line art |
