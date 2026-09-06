@@ -1,9 +1,9 @@
 /* Justified prose.
  *
- * hyphens is not decoration here: justifying a line of ~110 characters
- * without breaking words forces the browser to stretch the word spacing
- * instead, which opens the white "rivers" that run down a badly set page.
- * With automatic hyphenation the slack is taken up at the line ends and the
+ * hyphens is not decoration here: justifying a line of ~85 characters without
+ * breaking words forces the browser to stretch the word spacing instead,
+ * which opens the white "rivers" that run down a badly set page. With
+ * automatic hyphenation the slack is taken up at the line ends and the
  * spacing stays even. It works because pkgdown writes <html lang="en">, which
  * is what tells the browser which hyphenation dictionary to use.
  *
