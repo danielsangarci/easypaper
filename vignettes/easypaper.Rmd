@@ -72,7 +72,41 @@ in the YAML and in the R code alike. `_quarto.yml` sets `execute-dir: project`,
 so a chunk runs with the working directory at the root, and `here::here()`
 resolves the same way.
 
+### Where each thing goes
+
+| | |
+|---|---|
+| `_sections/*.qmd` | The text. This is where you write |
+| `data/raw/` | The originals, as they arrived. Read only, never edited |
+| `data/processed/` | The same data in open format, written by code |
+| `R/setup.R` | Seed, palette, table and figure helpers |
+| `references/references.bib` | The bibliography you cite from |
+| `references_styles/*.csl` | One citation style per journal |
+| `format/` | The Word templates the `.docx` is built on |
+| `figures/`, `output/`, `cache/` | Produced by the render. Regenerable, and in `.gitignore` |
+| `submission/` | Built by `make_submission()`. Never edited by hand |
+
+Two of those deserve the emphasis. `data/raw/` is read-only on purpose: the
+file that came off the instrument, or out of a collaborator's mail, is the one
+thing a reproducible project cannot regenerate. And everything under `output/`
+and `figures/` is disposable by design — if deleting it makes you nervous,
+something is being done by hand that should be done by code.
+
 ## Writing
+
+The order of a first day, once the project exists:
+
+1. Open the `.Rproj`, then `source("make.R")`.
+2. Fill in the affiliations in `_sections/0_authors.qmd`. The names are
+   already there if you passed `authors`, with their marks in place.
+3. Write. `_sections/2_introduction.qmd` is plain markdown: headings and
+   paragraphs, nothing to declare.
+4. Put the data in `data/raw/` and read it from a chunk, with the path
+   relative to the project root.
+5. `render_html()` whenever you want to look at it. Seconds, not minutes.
+
+From there it is one loop — write, render, repeat — and the analysis lives
+inside the section that reports it:
 
 A typical analysis inside a Results section:
 

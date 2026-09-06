@@ -1,13 +1,22 @@
 # Reproducible scientific paper template (Quarto)
 
-Skeleton for writing ecology papers reproducibly. Copy the whole thing for
-every new paper.
+The reference for this project: where each thing goes, how the numbering
+works, what the traps are, and what to check before you send anything. It
+travels inside the project, so it is still here when easypaper is not.
 
-This is the Quarto version of the template that used to run on Rmarkdown +
-bookdown. What changed and why is at the end, in
-[From Rmarkdown to Quarto](#from-rmarkdown-to-quarto). The previous structure
-is kept in `_legacy_rmd/`: delete it once you have checked that the first
-render comes out right.
+**Start here.** Open the `.Rproj`, then:
+
+```r
+source("make.R")     # loads every command
+render_html()        # see what you have, in seconds
+```
+
+`run.R` lists every command with its arguments explained, ready to run one
+line at a time — it is the file to open when you cannot remember a name. You
+write in `_sections/`; everything else is either configuration or generated.
+
+The history of the template, for the curious, is at the end in
+[From Rmarkdown to Quarto](#from-rmarkdown-to-quarto).
 
 ## Requirements
 
@@ -99,7 +108,6 @@ references_styles/     .csl per journal
 output/                Outputs. Regenerable, in .gitignore.
 figures/               png/ jpg/ tiff/, one copy per format. Regenerable.
 cache/                 Written by knitr. Regenerable, in .gitignore.
-_legacy_rmd/           The previous template. Safe to delete.
 ```
 
 Quarto ignores folders starting with `_` when looking for documents to render:

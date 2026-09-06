@@ -66,6 +66,32 @@ Quarto manuscript**, with fields for the title and the authors.
   references with no target, figures nobody cites, a title page that no longer
   matches the manuscript, a missing `renv.lock`.
 
+## What the project looks like
+
+```
+manuscript.qmd       The spine: title, authors, and the list of includes
+_sections/           The text, one file per section. This is where you write
+data/raw/            The originals, as they arrived. Read only
+data/processed/      The same data in open format, written by code
+R/setup.R            Seed, palette, table and figure helpers
+references/          The .bib you cite from
+references_styles/   One .csl per journal
+format/              The Word templates the .docx is built on
+figures/  output/    Everything the render produces. Regenerable
+submission/          What make_submission() builds
+make.R               The only entry point
+run.R                Every command, explained, one line at a time
+```
+
+You write in `_sections/`. Everything else is configuration you set once, or
+output you never edit by hand.
+
+Each project also carries **its own `README.md`**: the full reference — the
+path rule, the numbering convention, the known traps, the licence pairing,
+and the checklist before submitting. It travels inside the project, so it is
+still there when easypaper is not, and it is the document to read on the
+first day.
+
 ## Where the code lives
 
 The build logic is **copied into each project**, not kept in this package.
