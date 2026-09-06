@@ -1,0 +1,18 @@
+/* The measure.
+ *
+ * pkgdown's default column runs to about 109 characters per line on a 1280 px
+ * screen. Comfortable reading is 45-75: past that the eye loses the line on
+ * the return sweep, and a page of prose feels heavier than it is. The type
+ * size is not the problem -- it is the standard 16 px -- so this caps the
+ * width of the prose and leaves it alone.
+ *
+ * Code blocks and tables are deliberately excluded: they are not read line by
+ * line, and cramping them would force horizontal scrolling.
+ */
+
+main p,
+main li,
+main blockquote,
+main h1, main h2, main h3, main h4 {
+  max-width: 68ch;
+}
