@@ -102,7 +102,7 @@ affiliations themselves live in
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"demo_paper"</span><span class="op">)</span></span>
 <span><span class="fu">easypaper</span><span class="fu">::</span><span class="fu"><a href="../reference/create_paper.html">create_paper</a></span><span class="op">(</span><span class="va">dir</span>, git <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Project created: /tmp/RtmpbqEiOD/demo_paper</span></span>
+<span><span class="co">#&gt; Project created: /tmp/RtmpTteD9h/demo_paper</span></span>
 <span><span class="co">#&gt;   1. open demo_paper.Rproj</span></span>
 <span><span class="co">#&gt;   2. source("make.R")</span></span>
 <span><span class="co">#&gt;   3. render_html()      # or see run.R for every command</span></span>
@@ -252,15 +252,72 @@ can check, not in a spreadsheet nobody can trace.
 <span><span class="fu">render_journal</span><span class="op">(</span><span class="st">"myrmecological-news"</span><span class="op">)</span>   <span class="co"># .docx with that journal's citation style</span></span>
 <span><span class="fu">render_preprint</span><span class="op">(</span><span class="op">)</span>                   <span class="co"># .pdf</span></span>
 <span><span class="fu">make_all</span><span class="op">(</span><span class="op">)</span>                          <span class="co"># all of it</span></span></code></pre></div>
-<p>The journal is an argument, not an edit: it names a <code>.csl</code>
-in <code>references_styles/</code>, and <code>list_journals()</code>
-tells you which ones you have. Caption style is a second argument —
-<code>"default"</code> gives <code>Figure 1.</code>,
-<code>"abbrev"</code> gives <code>Fig. 1.</code>, <code>"nature"</code>
-gives <code>Figure 1 |</code>.</p>
+<p>The journal is an argument, not an edit: nothing in the
+<code>.qmd</code> files changes when you send the same paper somewhere
+else.</p>
+<div class="section level3">
+<h3 id="the-arguments">The arguments<a class="anchor" aria-label="anchor" href="#the-arguments"></a>
+</h3>
+<p><code>render_html()</code> and <code>make_all()</code> take the first
+two. <code>render_journal()</code> and <code>render_preprint()</code>
+take all four.</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Argument</th>
+<th>Default</th>
+<th>What it decides</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>journal</code></td>
+<td><code>"ecology"</code></td>
+<td>Which <code>.csl</code> in <code>references_styles/</code> sets the
+citation style. <code>list_journals()</code> lists the ones you
+have</td>
+</tr>
+<tr class="even">
+<td><code>caption_style</code></td>
+<td><code>"default"</code></td>
+<td>How a caption is written: <code>"default"</code> gives <em>Figure
+1.</em>, <code>"abbrev"</code> gives <em>Fig. 1.</em>,
+<code>"nature"</code> gives <em>Figure 1</em> followed by a vertical
+rule, <code>"compact"</code> gives <em>F1:</em>
+</td>
+</tr>
+<tr class="odd">
+<td><code>split</code></td>
+<td><code>FALSE</code></td>
+<td>
+<code>FALSE</code> builds the complete document, supplement included
+— the one to circulate among co-authors. <code>TRUE</code> leaves the
+supplement out and rewrites the citations to it, which is what a journal
+wants; <code>make_submission()</code> always uses <code>TRUE</code>
+</td>
+</tr>
+<tr class="even">
+<td><code>suppl_figures</code></td>
+<td><code>"separate"</code></td>
+<td>Only bites when <code>split = TRUE</code>: whether the supplementary
+figures and tables travel in their own document or stay at the end of
+the main text</td>
+</tr>
+</tbody>
+</table>
+<p>Two more exist for the supplement alone:
+<code>render_supplementary()</code> takes <code>output_format</code>
+(<code>"docx"</code> by default) and <code>files</code>, a subset of the
+supplementary documents — which is how <code>make_submission()</code>
+renders only the supplementary <em>text</em> when the figures are
+staying in the main document.</p>
 <p><code>run.R</code>, inside the project, lists every command with each
 argument explained, ready to run one line at a time. It is the file to
 open when you cannot remember a name.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="supplementary-material">Supplementary material<a class="anchor" aria-label="anchor" href="#supplementary-material"></a>
@@ -291,9 +348,67 @@ citations work either way:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">make_submission</span><span class="op">(</span><span class="st">"myrmecological-news"</span><span class="op">)</span>                        <span class="co"># -&gt; submission/default/</span></span>
 <span><span class="fu">make_submission</span><span class="op">(</span><span class="st">"myrmecological-news"</span>, label <span class="op">=</span> <span class="st">"MyrmecologicalNews"</span><span class="op">)</span> <span class="co"># the real submission</span></span></code></pre></div>
-<p><code>label</code> names the folder and every file in it, and
-defaults to <code>"default"</code>, so a trial run is unmistakably a
-trial and never carries the name of a journal you did not choose.</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Argument</th>
+<th>Default</th>
+<th>What it decides</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>journal</code></td>
+<td><code>"ecology"</code></td>
+<td>The <code>.csl</code> the citations come out in</td>
+</tr>
+<tr class="even">
+<td><code>label</code></td>
+<td><code>"default"</code></td>
+<td>Names the folder inside <code>submission/</code> and every file in
+it. The default is deliberate: a trial run is then unmistakably a trial,
+and never carries the name of a journal you did not choose</td>
+</tr>
+<tr class="odd">
+<td><code>caption_style</code></td>
+<td><code>"default"</code></td>
+<td>As in the renders above</td>
+</tr>
+<tr class="even">
+<td><code>figure_format</code></td>
+<td><code>"tiff"</code></td>
+<td>The standalone figures the journal uploads: <code>"tiff"</code>,
+<code>"png"</code> or <code>"jpg"</code>. TIFF unless they say otherwise
+— JPEG is lossy and poor for line art</td>
+</tr>
+<tr class="odd">
+<td><code>blinded</code></td>
+<td><code>TRUE</code></td>
+<td>Splits title page from main text the way double-blind review asks:
+the title block is dropped and <code>0_authors.qmd</code> is left out,
+so no name travels in the main text. <code>FALSE</code> when the journal
+wants them in</td>
+</tr>
+<tr class="even">
+<td><code>snapshot</code></td>
+<td><code>TRUE</code></td>
+<td>Runs <code>renv::snapshot()</code> first, so the
+<code>renv.lock</code> in the compendium describes the environment
+<em>this</em> submission came out of. <code>FALSE</code> if you keep the
+lockfile by hand and do not want it rewritten</td>
+</tr>
+<tr class="odd">
+<td><code>suppl_figures</code></td>
+<td><code>"separate"</code></td>
+<td>Whether the supplementary figures and tables go out on their own or
+at the end of the main text. Either way they are cited from the main
+text</td>
+</tr>
+</tbody>
+</table>
 <p>That builds, from what is already in the project:</p>
 <pre><code>submission/default/
   cover_letter_default.docx               template, never overwritten
@@ -306,10 +421,11 @@ trial and never carries the name of a journal you did not choose.</p>
   data_and_code/                          data, metadata, scripts, renv.lock
   data_and_code.zip                       for Zenodo or Dryad</code></pre>
 <p>The split into title page and main text is what double-blind review
-asks for, and the main text is verified to carry no author name. What is
-<em>not</em> checked for you — acknowledgements, CRediT, and
-self-citations of the kind “in our previous study (Author et al.)” — is
-listed in the <code>CHECKLIST.md</code>.</p>
+asks for. The names cannot leak into the main text because it is not
+built with them: the title block is dropped and the authors section is
+left out. What is <em>not</em> checked for you — acknowledgements,
+CRediT, and self-citations of the kind “in our previous study (Author et
+al.)” — is listed in the <code>CHECKLIST.md</code>.</p>
 <p>The compendium publishes open formats only: the <code>.csv</code>,
 never the source <code>.xlsx</code>, and only the analysis code, not
 your authoring tooling. Its <code>README.txt</code> is written from what

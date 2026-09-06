@@ -34,7 +34,7 @@ Here is what lands on disk:
 
 dir <- file.path(tempdir(), "demo_paper")
 easypaper::create_paper(dir, git = FALSE)
-#> Project created: /tmp/RtmpbqEiOD/demo_paper
+#> Project created: /tmp/RtmpTteD9h/demo_paper
 #>   1. open demo_paper.Rproj
 #>   2. source("make.R")
 #>   3. render_html()      # or see run.R for every command
@@ -150,10 +150,26 @@ render_preprint()                   # .pdf
 make_all()                          # all of it
 ```
 
-The journal is an argument, not an edit: it names a `.csl` in
-`references_styles/`, and `list_journals()` tells you which ones you
-have. Caption style is a second argument — `"default"` gives
-`Figure 1.`, `"abbrev"` gives `Fig. 1.`, `"nature"` gives `Figure 1 |`.
+The journal is an argument, not an edit: nothing in the `.qmd` files
+changes when you send the same paper somewhere else.
+
+### The arguments
+
+`render_html()` and `make_all()` take the first two. `render_journal()`
+and `render_preprint()` take all four.
+
+| Argument | Default | What it decides |
+|----|----|----|
+| `journal` | `"ecology"` | Which `.csl` in `references_styles/` sets the citation style. `list_journals()` lists the ones you have |
+| `caption_style` | `"default"` | How a caption is written: `"default"` gives *Figure 1.*, `"abbrev"` gives *Fig. 1.*, `"nature"` gives *Figure 1* followed by a vertical rule, `"compact"` gives *F1:* |
+| `split` | `FALSE` | `FALSE` builds the complete document, supplement included — the one to circulate among co-authors. `TRUE` leaves the supplement out and rewrites the citations to it, which is what a journal wants; `make_submission()` always uses `TRUE` |
+| `suppl_figures` | `"separate"` | Only bites when `split = TRUE`: whether the supplementary figures and tables travel in their own document or stay at the end of the main text |
+
+Two more exist for the supplement alone: `render_supplementary()` takes
+`output_format` (`"docx"` by default) and `files`, a subset of the
+supplementary documents — which is how `make_submission()` renders only
+the supplementary *text* when the figures are staying in the main
+document.
 
 `run.R`, inside the project, lists every command with each argument
 explained, ready to run one line at a time. It is the file to open when
@@ -188,9 +204,15 @@ make_submission("myrmecological-news")                        # -> submission/de
 make_submission("myrmecological-news", label = "MyrmecologicalNews") # the real submission
 ```
 
-`label` names the folder and every file in it, and defaults to
-`"default"`, so a trial run is unmistakably a trial and never carries
-the name of a journal you did not choose.
+| Argument | Default | What it decides |
+|----|----|----|
+| `journal` | `"ecology"` | The `.csl` the citations come out in |
+| `label` | `"default"` | Names the folder inside `submission/` and every file in it. The default is deliberate: a trial run is then unmistakably a trial, and never carries the name of a journal you did not choose |
+| `caption_style` | `"default"` | As in the renders above |
+| `figure_format` | `"tiff"` | The standalone figures the journal uploads: `"tiff"`, `"png"` or `"jpg"`. TIFF unless they say otherwise — JPEG is lossy and poor for line art |
+| `blinded` | `TRUE` | Splits title page from main text the way double-blind review asks: the title block is dropped and `0_authors.qmd` is left out, so no name travels in the main text. `FALSE` when the journal wants them in |
+| `snapshot` | `TRUE` | Runs `renv::snapshot()` first, so the `renv.lock` in the compendium describes the environment *this* submission came out of. `FALSE` if you keep the lockfile by hand and do not want it rewritten |
+| `suppl_figures` | `"separate"` | Whether the supplementary figures and tables go out on their own or at the end of the main text. Either way they are cited from the main text |
 
 That builds, from what is already in the project:
 
@@ -206,10 +228,11 @@ That builds, from what is already in the project:
       data_and_code.zip                       for Zenodo or Dryad
 
 The split into title page and main text is what double-blind review asks
-for, and the main text is verified to carry no author name. What is
-*not* checked for you — acknowledgements, CRediT, and self-citations of
-the kind “in our previous study (Author et al.)” — is listed in the
-`CHECKLIST.md`.
+for. The names cannot leak into the main text because it is not built
+with them: the title block is dropped and the authors section is left
+out. What is *not* checked for you — acknowledgements, CRediT, and
+self-citations of the kind “in our previous study (Author et al.)” — is
+listed in the `CHECKLIST.md`.
 
 The compendium publishes open formats only: the `.csv`, never the source
 `.xlsx`, and only the analysis code, not your authoring tooling. Its
