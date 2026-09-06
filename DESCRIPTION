@@ -1,0 +1,31 @@
+Package: easypaper
+Title: Scaffold a Reproducible Quarto Manuscript Project
+Version: 0.1.0
+Authors@R:
+    person("Daniel", "Sanchez-Garcia", email = "danielsangarci@gmail.com",
+           role = c("aut", "cre"))
+Description: Creates, in one call, the directory structure of a reproducible
+    scientific manuscript written in Quarto: sections as separate files, a
+    single make.R entry point, journal styles as .csl files, independent
+    bibliographies for the supplementary material, figures exported to PNG,
+    JPG and TIFF at 600 dpi, and a submission folder holding the blinded
+    manuscript together with a data and code compendium ready for a data
+    repository. The build logic is copied into the project, not kept in this
+    package, so the project stays self-contained and reproducible without it.
+URL: https://github.com/danielsangarci/easypaper,
+    https://danielsangarci.github.io/easypaper/
+BugReports: https://github.com/danielsangarci/easypaper/issues
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+Depends:
+    R (>= 4.1)
+Suggests:
+    knitr,
+    rmarkdown,
+    rstudioapi,
+    testthat (>= 3.0.0),
+    yaml
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0

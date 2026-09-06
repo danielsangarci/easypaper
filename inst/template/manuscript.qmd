@@ -1,0 +1,123 @@
+---
+title: "TITLE HERE"
+# Affiliation marks go INSIDE the name, and the affiliations themselves in the
+# body right below. Why: Quarto rebuilds the author line of the title block on
+# its own, and any Lua filter that tries to build it loses the superscripts and
+# the correspondence line. Verified with Quarto 1.9.38 -> .docx.
+# Affiliation numbering is manual, but it is explicit and comes out identical
+# in .docx, .pdf and .html.
+# The copyright holders in LICENSE-CODE and in the README come from this block.
+author:
+  - name: "First Author name^1,\\*^"
+  - name: "Second Author name^2^"
+keywords: [keyword 1, keyword 2, keyword 3]
+date: today
+date-format: long
+---
+
+{{< include _sections/0_authors.qmd >}}
+
+<!-- ==========================================================================
+PATHS: one single rule. Everything is relative to the PROJECT ROOT, both in the
+YAML (_quarto.yml) and in R code (execute-dir: project). The double rule of the
+Rmarkdown project ("../format/ in the YAML but here() in the code") is gone.
+
+CONTENT: this file is only the skeleton. The text is written in _sections/.
+That folder starts with "_" so Quarto does not try to render each section as a
+standalone document.
+=========================================================================== -->
+
+```{r setup}
+#| include: false
+#| purl: false
+# Seed, packages, palette, table helpers. It can also be loaded from the
+# console (source("R/setup.R")) to work interactively with the same objects the
+# manuscript sees.
+source(here::here("R/setup.R"))
+```
+
+# Abstract
+
+{{< include _sections/1_abstract.qmd >}}
+
+# Introduction
+
+{{< include _sections/2_introduction.qmd >}}
+
+# Material and Methods
+
+{{< include _sections/3_methods.qmd >}}
+
+# Results
+
+{{< include _sections/4.1_results1.qmd >}}
+
+{{< include _sections/4.2_results2.qmd >}}
+
+# Discussion
+
+{{< include _sections/5_discussion.qmd >}}
+
+# Acknowledgements
+
+# CRediT authorship contribution statement
+
+# Conflict of Interest Statement
+
+The authors declare no conflict of interests.
+
+# Data availability statement
+
+<!-- Where the compendium ends up (the DOI that Zenodo or Dryad gives you when
+     you upload data_and_code.zip), and how the analysis can be re-run. This is
+     also where infrastructure gets cited -- renv, and the scaffold this
+     project was built with -- NOT in Methods among the packages that produced
+     the results. Cite here only what a reader can actually resolve: a package
+     with no public repository and no DOI is better left unmentioned. Example:
+
+     Data and code are archived at Zenodo (doi:10.5281/zenodo.XXXXXXX). The
+     analysis environment is recorded in `renv.lock` and can be restored with
+     renv [@R-renv]; the project structure was generated with easypaper
+     [@R-easypaper]. -->
+
+# References
+
+::: {#refs}
+:::
+
+{{< pagebreak >}}
+
+# Figures
+
+{{< include _sections/6_figures.qmd >}}
+
+{{< pagebreak >}}
+
+# Tables
+
+{{< include _sections/7_tables.qmd >}}
+
+{{< pagebreak >}}
+
+# Supporting information
+
+{{< include _sections/8_suppl_material.qmd >}}
+
+```{r package-bibliography}
+#| include: false
+#| purl: false
+# Writes the .bib entries of the packages in use, so they can be cited in
+# Methods. It runs last, once they are all loaded. Pandoc reads packages.bib
+# after knitr, so citations already work in this same pass.
+#
+# .packages() only sees what is ATTACHED during the render. Packages that
+# prepared the data or the metadata (dataspice, readxl) ran in another session
+# and would never get an entry, yet they deserve the citation as much as the
+# rest. They are added by name; any that is not installed is skipped.
+pkg_extra <- c("knitr", "quarto", "rmarkdown", "renv", "dataspice", "readxl",
+               "easypaper")
+pkg_extra <- pkg_extra[vapply(pkg_extra, requireNamespace, logical(1),
+                              quietly = TRUE)]
+knitr::write_bib(c(.packages(), pkg_extra),
+                 here::here("references/packages.bib"))
+```

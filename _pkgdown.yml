@@ -1,0 +1,35 @@
+url: https://danielsangarci.github.io/easypaper/
+
+template:
+  bootstrap: 5
+  bslib:
+    primary: "#1a5632"
+    base_font: {google: "Source Sans 3"}
+    code_font: {google: "Source Code Pro"}
+
+home:
+  title: Scaffold a reproducible Quarto manuscript
+  description: >
+    Creates the whole structure of a reproducible scientific paper: sections as
+    separate files, one entry point that renders it for any journal, and a
+    submission folder with the blinded manuscript and a data and code
+    compendium.
+
+navbar:
+  structure:
+    left:  [intro, reference, articles, news]
+    right: [search, github]
+
+reference:
+  - title: Creating a project
+    desc: The one function you need.
+    contents:
+      - create_paper
+  - title: Package
+    contents:
+      - easypaper-package
+
+news:
+  releases:
+    - text: "Version 0.1.0"
+      href: https://github.com/danielsangarci/easypaper/releases/tag/v0.1.0

@@ -1,0 +1,118 @@
+# ===========================================================================
+# _quarto.yml - project configuration.
+#
+# ALL format configuration lives here, not in the manuscript YAML. Two
+# practical consequences:
+#
+#   1. Paths here are relative to THE PROJECT ROOT. Gone is the rule of
+#      "../format/... in the YAML but here() in the R code", which made the
+#      project compile only from the right directory.
+#   2. manuscript.qmd only carries content (title, authors, keywords).
+#      Switching journal does not touch the manuscript.
+# ===========================================================================
+
+project:
+  type: default
+  output-dir: output
+  # Equivalent to the old knit_root_dir = here(): chunks run with the working
+  # directory at the project root.
+  execute-dir: project
+  # Without this list, `quarto render` would also render README.md.
+  render:
+    - manuscript.qmd
+    - supplementary.qmd   # the standalone supplement, for the journal
+    - title_page.qmd      # the separate title page
+
+# --- Execution (equivalent to knitr::opts_chunk$set) -----------------------
+execute:
+  echo: false
+  message: false
+  warning: false
+  error: false
+  # freeze: auto would hold results frozen until the .qmd changes. It is off
+  # because it does not notice changes in data/: per-chunk cache is used.
+  freeze: false
+
+knitr:
+  opts_chunk:
+    # include: false -> analysis chunks print nothing. Figures and tables turn
+    # it back on one by one with #| include: true.
+    include: false
+    comment: ""
+    # Figures are written out at 600 dpi, which is what journals ask for on
+    # acceptance. knitr can only write PNG here; the jpg/ and tiff/ copies are
+    # produced by export_figure_formats() at the end of every render. With the
+    # .qmd at the root, knitr writes and pandoc reads the same path.
+    fig.path: "figures/png/"
+    cache.path: "cache/"
+    dev: "ragg_png"
+    dpi: 600
+
+# --- Bibliography ----------------------------------------------------------
+bibliography:
+  - references/references.bib
+  - references/packages.bib
+csl: references_styles/ecology.csl
+
+# --- Figure and table numbering -------------------------------------------
+# Replaces R/captions.R and captioner. make.R overwrites this whole block
+# according to the caption_style argument (see R/crossref_styles.R).
+crossref:
+  fig-title: "Figure"     # caption:  "Figure 1. ..."
+  tbl-title: "Table"
+  fig-prefix: "Figure"    # in-text reference: @fig-x -> "Figure 1"
+  tbl-prefix: "Table"
+  eq-prefix: "Eq."
+  title-delim: "."
+  # Custom types for the supplementary material: independent numbering with an
+  # S prefix. Cite them with @sfig-... and @stbl-... from anywhere in the
+  # manuscript.
+  custom:
+    - kind: float
+      key: sfig
+      reference-prefix: "Figure S"
+      latex-env: sfig
+      space-before-numbering: false
+    - kind: float
+      key: stbl
+      reference-prefix: "Table S"
+      latex-env: stbl
+      space-before-numbering: false
+      caption-location: top
+
+# NOTE: there are no Lua filters here. Two were tried and neither works, for
+# the same reason: by the time a user filter runs -- even with at: pre-quarto --
+# Quarto has already replaced figures and tables with UUID divs carrying no
+# identifier, and it resolves cross-references AFTERWARDS. Verified. That is
+# why the broken-reference check (check_crossrefs) and the supplementary split
+# (make_submission) are done in R, on the source, before rendering.
+
+# --- Output formats --------------------------------------------------------
+# quarto render --to docx | pdf | html   (make.R wraps these)
+format:
+  docx:
+    reference-doc: format/word_plain_paper_style.docx
+    toc: false
+    number-sections: false
+    # The title block (authors, superscripts, affiliations, corresponding
+    # author) is written in manuscript.qmd: Quarto rebuilds the author line on
+    # its own and the Lua filters of the previous version lose the marks there.
+    # See README ("Authors and affiliations").
+
+  pdf:
+    documentclass: article
+    papersize: a4
+    geometry: margin=2.5cm
+    fontsize: 11pt
+    linestretch: 1.5
+    number-sections: false
+    pdf-engine: xelatex
+    keep-tex: false
+
+  # Working format: `quarto preview --to html` reloads only what you change as
+  # you write. Not a deliverable.
+  html:
+    theme: cosmo
+    toc: true
+    embed-resources: true
+    fig-align: center

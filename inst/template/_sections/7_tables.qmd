@@ -1,0 +1,33 @@
+<!-- WARNING: knitr RUNS chunks and inline code even inside an HTML comment
+     like this one. Use #| eval: false to disable one. -->
+<!-- One table = one chunk with a tbl-* label and its legend in #| tbl-cap.
+     Cite it from the text with @tbl-models.
+     Quarto writes the caption: do NOT also use flextable::set_caption() or it
+     will be duplicated. -->
+
+```{r}
+#| label: tbl-models
+#| include: true
+#| tbl-cap: "Legend of table 1."
+# flextable for formatted tables (bold, grouping, footnotes).
+tab <- data.frame(
+  Variable = c("Treatment", "Altitude"),
+  Estimate = c(0.42, -0.13),
+  SE       = c(0.11, 0.05),
+  p        = c(0.0002, 0.0141)
+)
+tab$p <- paste0(format.pval(tab$p, digits = 2), stars_pval(tab$p))
+fit_flextable_to_page(flextable::flextable(tab))
+```
+
+{{< pagebreak >}}
+
+```{r}
+#| label: tbl-summary
+#| include: true
+#| tbl-cap: "Legend of table 2."
+# knitr::kable() is enough for simple tables and travels better across formats.
+knitr::kable(head(iris, 3))
+```
+
+{{< pagebreak >}}

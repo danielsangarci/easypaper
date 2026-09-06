@@ -1,0 +1,43 @@
+<!-- WARNING: knitr RUNS chunks and inline code even inside an HTML comment
+     like this one. Use #| eval: false to disable one. -->
+<!-- This file carries the supplementary FIGURES AND TABLES. For
+     supplementary TEXT (an extended Methods, say) that needs its own
+     reference list, add a second file with no sfig/stbl div in it:
+     8.1_suppl_figures.qmd + 8.2_suppl_methods.qmd, and point manuscript.qmd
+     and supplementary.qmd at both. Where the figures end up -- their own
+     document or the end of the main text -- is
+     make_submission(suppl_figures = ). See the README. -->
+<!-- Supplementary material is numbered independently with an S prefix. The
+     sfig and stbl types are defined under crossref: custom: in _quarto.yml.
+     Cite them from ANYWHERE in the manuscript with @sfig-map / @stbl-raw.
+     Syntax: a div carrying the id, the content inside, and the legend as the
+     last paragraph of the div. -->
+
+::: {#sfig-map}
+
+```{r}
+#| label: suppl-map
+#| include: true
+#| fig-width: 7.09
+#| fig-height: 6.30
+plot.new(); box(col = "grey80")
+text(0.5, 0.5, "figure S1", cex = 2, col = "grey60")
+```
+
+Legend of supplementary figure 1.
+:::
+
+{{< pagebreak >}}
+
+::: {#stbl-raw}
+
+```{r}
+#| label: suppl-raw
+#| include: true
+knitr::kable(head(iris, 3))
+```
+
+Legend of supplementary table 1.
+:::
+
+{{< pagebreak >}}

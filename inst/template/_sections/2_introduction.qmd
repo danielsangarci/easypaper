@@ -1,0 +1,8 @@
+<!-- introduction -->
+<!-- To reference a figure or a table in the text, write @fig-name or
+     @tbl-name; Quarto writes "Figure 1" / "Table 1" and links it.
+     Numbering follows the ORDER OF APPEARANCE in the Figures section, not the
+     order of citation: keep that section in the order you cite them, which is
+     what journals ask for anyway.
+     If you cite @fig-whatever and that figure does not exist, make.R stops
+     before rendering (check_crossrefs). -->

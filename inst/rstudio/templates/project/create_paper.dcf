@@ -1,0 +1,17 @@
+Binding: create_paper
+Title: Reproducible Quarto manuscript
+Subtitle: Sections, journal styles, submission folder and data compendium
+Caption: Create a reproducible manuscript project
+OpenFiles: make.R
+
+Parameter: title
+Widget: TextInput
+Label: Manuscript title
+Default:
+Position: left
+
+Parameter: authors
+Widget: TextInput
+Label: Authors (comma separated)
+Default:
+Position: right

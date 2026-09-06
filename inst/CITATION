@@ -1,0 +1,16 @@
+citHeader("To cite easypaper in publications, use:")
+
+bibentry(
+  bibtype  = "Manual",
+  title    = "easypaper: Scaffold a Reproducible Quarto Manuscript Project",
+  author   = person("Daniel", "Sanchez-Garcia"),
+  year     = "2026",
+  note     = sprintf("R package version %s",
+                     utils::packageVersion("easypaper")),
+  url      = "https://github.com/danielsangarci/easypaper",
+  textVersion = paste0(
+    "Sanchez-Garcia, D. (2026). easypaper: Scaffold a Reproducible Quarto ",
+    "Manuscript Project. R package version ",
+    utils::packageVersion("easypaper"), ". https://github.com/danielsangarci/easypaper"
+  )
+)

@@ -1,0 +1,32 @@
+---
+# Separate title page, which is what most journals ask for.
+# Title and authors are injected by make.R from manuscript.qmd when building
+# the submission folder: they are not duplicated here. The affiliations come
+# from the same include the manuscript uses.
+title: "TITLE HERE"
+format:
+  docx:
+    reference-doc: format/word_plain_paper_style.docx
+---
+
+{{< include _sections/0_authors.qmd >}}
+
+**Running head:**
+
+**Keywords:**
+
+**Word count (main text):**
+
+**Figures:**    **Tables:**    **Supplementary items:**
+
+**ORCID:**
+
+**Funding:**
+
+**Acknowledgements:**
+
+**Conflict of interest:** The authors declare no conflict of interests.
+
+**CRediT authorship contribution statement:**
+
+**Data availability statement:**

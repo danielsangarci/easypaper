@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "easypaper: Scaffold a Reproducible Quarto Manuscript Project"
+abstract: >-
+  Creates, in one call, the directory structure of a reproducible scientific
+  manuscript written in Quarto: sections as separate files, a single entry
+  point, journal styles, independent bibliographies for the supplementary
+  material, and a submission folder holding the blinded manuscript together
+  with a data and code compendium ready for a data repository.
+authors:
+  - family-names: "Sanchez-Garcia"
+    given-names: "Daniel"
+    email: "danielsangarci@gmail.com"
+version: 0.1.0
+license: MIT
+repository-code: "https://github.com/danielsangarci/easypaper"
+url: "https://github.com/danielsangarci/easypaper"
+keywords:
+  - reproducible-research
+  - quarto
+  - manuscript
+  - r

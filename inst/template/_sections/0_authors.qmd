@@ -1,0 +1,5 @@
+^1^ Institution 1, Department, City, Country
+
+^2^ Institution 2, City, Country
+
+^\*^ Correspondence: correspondent@example.org

@@ -1,0 +1,19 @@
+---
+# Supplementary material as a standalone file, with the supplementary .docx
+# template. Same text as the manuscript section: one single source file
+# (_sections/8_suppl_material.qmd), nothing copied.
+title: "Supporting Information"
+format:
+  docx:
+    reference-doc: format/word_plain_paper_style_supplementary_material.docx
+---
+
+{{< include _sections/0_authors.qmd >}}
+
+```{r setup-suppl}
+#| include: false
+#| purl: false
+source(here::here("R/setup.R"))
+```
+
+{{< include _sections/8_suppl_material.qmd >}}

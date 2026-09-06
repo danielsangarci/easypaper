@@ -1,0 +1,1 @@
+This is the abstract. It supports *italics*, **bold** and citations [@Akino1999].
