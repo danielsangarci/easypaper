@@ -53,6 +53,11 @@ That is deliberate: the submission compendium ships \verb{scripts/}, and a
 reviewer reproducing your analysis should not have to install easypaper to
 do it. Once created, the project is self-contained and this package is no
 longer needed.
+
+The top of the project's \code{make.R} records the version of easypaper that
+wrote the structure. The project never needs the package again, but if the
+scaffold changes in the future, the stamp is what tells you which version
+produced a project you already have.
 }
 \examples{
 \dontrun{

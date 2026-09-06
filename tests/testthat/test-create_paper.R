@@ -60,6 +60,20 @@ test_that("path is validated", {
   expect_error(create_paper(c("a", "b")), "single non-empty")
 })
 
+test_that("the project records the version that created it", {
+  p <- tempfile("paper")
+  create_paper(p, git = FALSE)
+  # The stamp goes at the very top, before the banner, so it survives any
+  # future change to the template's make.R.
+  top <- readLines(file.path(p, "make.R"), warn = FALSE, n = 2L)
+  expect_match(top[1], "easypaper")
+  expect_match(top[1], as.character(utils::packageVersion("easypaper")),
+               fixed = TRUE)
+  # And it is a comment: make.R still has to be sourceable.
+  expect_match(top[1], "^#")
+  expect_no_error(parse(file.path(p, "make.R")))
+})
+
 test_that("git = TRUE leaves a repository with one commit", {
   skip_if(!nzchar(Sys.which("git")), "git is not installed")
   p <- tempfile("paper")

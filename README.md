@@ -1,4 +1,4 @@
-# easypaper
+# easypaper <a href="https://danielsangarci.github.io/easypaper/"><img src="man/figures/logo.png" align="right" height="138" alt="easypaper website" /></a>
 
 <!-- badges: start -->
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
@@ -72,6 +72,14 @@ The build logic is **copied into each project**, not kept in this package.
 That is deliberate: the submission compendium ships `scripts/`, and whoever
 reproduces your analysis should not need easypaper installed to do it. Once
 created, a project is self-contained; this package is only the scaffold.
+
+So there are two moments, and only the first one involves this package. You
+call `create_paper()` with easypaper loaded; from then on you work from inside
+the project, where `source("make.R")` gives you `render_html()`, `make_all()`
+and `make_submission()`. Those functions belong to the project, not to the
+package: they keep working with easypaper uninstalled, which is what makes the
+compendium you deposit reproducible on its own. The top of `make.R` records
+which version of easypaper wrote the structure.
 
 ## Requirements
 

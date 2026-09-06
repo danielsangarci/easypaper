@@ -11,6 +11,11 @@
 #' do it. Once created, the project is self-contained and this package is no
 #' longer needed.
 #'
+#' The top of the project's `make.R` records the version of easypaper that
+#' wrote the structure. The project never needs the package again, but if the
+#' scaffold changes in the future, the stamp is what tells you which version
+#' produced a project you already have.
+#'
 #' @param path Directory to create. Its base name becomes the name of the
 #'   `.Rproj` file.
 #' @param title Manuscript title, written into the YAML of `manuscript.qmd`.
@@ -96,6 +101,8 @@ create_paper <- function(path, title = NULL, authors = NULL,
   }
   if (!is.null(authors)) .set_authors(file.path(path, "manuscript.qmd"), authors)
 
+  .stamp_version(file.path(path, "make.R"))
+
   if (isTRUE(git)) .git_init(path)
 
   message("Project created: ", path, "\n",
@@ -137,6 +144,27 @@ create_paper <- function(path, title = NULL, authors = NULL,
                    ifelse(seq_along(authors) == 1L, ",\\\\*", ""))
   block <- c("author:", sprintf('  - name: "%s%s"', authors, marks))
   writeLines(c(l[seq_len(i - 1L)], block, l[seq.int(j, length(l))]), f)
+  invisible(TRUE)
+}
+
+#' Record, at the top of the project's make.R, the version that wrote it.
+#'
+#' The project carries its own build logic and never needs easypaper again;
+#' the stamp answers the other question, the one that only comes up years
+#' later: which version of the scaffold produced this structure. Best effort,
+#' like the repository: a project without the line is still a whole project.
+#' @noRd
+.stamp_version <- function(f) {
+  if (!file.exists(f)) return(invisible(FALSE))
+  v <- tryCatch(as.character(utils::packageVersion("easypaper")),
+                error = function(e) NA_character_)
+  if (is.na(v)) return(invisible(FALSE))
+  writeLines(c(
+    sprintf("# Structure created by easypaper %s on %s. This project carries",
+            v, format(Sys.Date())),
+    "# its own build logic: it renders without easypaper installed.",
+    "",
+    readLines(f, warn = FALSE)), f)
   invisible(TRUE)
 }
 
