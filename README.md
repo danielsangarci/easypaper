@@ -3,7 +3,7 @@
 <!-- badges: start -->
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![R-CMD-check](https://github.com/danielsangarci/easypaper/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/danielsangarci/easypaper/actions/workflows/R-CMD-check.yaml)
+[![R CMD check](https://github.com/danielsangarci/easypaper/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/danielsangarci/easypaper/actions/workflows/R-CMD-check.yaml)
 [![pkgdown](https://github.com/danielsangarci/easypaper/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/danielsangarci/easypaper/actions/workflows/pkgdown.yaml)
 [![Website](https://img.shields.io/badge/website-easypaper-1a5632.svg)](https://danielsangarci.github.io/easypaper/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
