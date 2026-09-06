@@ -65,7 +65,7 @@ polygon(c(nose$x, wr$x, tail$x), c(nose$y, wr$y, tail$y), col = fold,
         border = NA)
 segments(nose$x, nose$y, tail$x, tail$y, col = green, lwd = 3)
 
-text(0, -0.55, "easypaper", col = cream, cex = 1.32, family = "Palatino")
+text(0, -0.55, "easypaper", col = cream, cex = 1.48, family = "Palatino")
 dev.off()
 
 usethis::use_logo(f)
