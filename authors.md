@@ -2,7 +2,8 @@
 
 ## Authors
 
-- **Daniel Sanchez-Garcia**. Author, maintainer.
+- **Daniel Sanchez-Garcia**. Author, maintainer, copyright holder.
+  [](https://orcid.org/0000-0002-0710-6292)
 
 ## Citation
 

@@ -1,18 +1,19 @@
-/* The measure.
+/* Justified prose.
  *
- * pkgdown's default column runs to about 109 characters per line on a 1280 px
- * screen. Comfortable reading is 45-75: past that the eye loses the line on
- * the return sweep, and a page of prose feels heavier than it is. The type
- * size is not the problem -- it is the standard 16 px -- so this caps the
- * width of the prose and leaves it alone.
+ * hyphens is not decoration here: justifying a line of ~110 characters
+ * without breaking words forces the browser to stretch the word spacing
+ * instead, which opens the white "rivers" that run down a badly set page.
+ * With automatic hyphenation the slack is taken up at the line ends and the
+ * spacing stays even. It works because pkgdown writes <html lang="en">, which
+ * is what tells the browser which hyphenation dictionary to use.
  *
- * Code blocks and tables are deliberately excluded: they are not read line by
- * line, and cramping them would force horizontal scrolling.
+ * Code blocks and tables are left alone: never justify what is read by
+ * column, not by line.
  */
 
 main p,
-main li,
-main blockquote,
-main h1, main h2, main h3, main h4 {
-  max-width: 68ch;
+main li {
+  text-align: justify;
+  -webkit-hyphens: auto;   /* Safari */
+  hyphens: auto;
 }

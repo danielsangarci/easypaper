@@ -13,8 +13,7 @@
 <link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/Source_Sans_3-0.4.10/font.css" rel="stylesheet">
-<link href="../deps/Source_Code_Pro-0.4.10/font.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/Source_Code_Pro-0.4.10/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
@@ -103,7 +102,7 @@ affiliations themselves live in
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"demo_paper"</span><span class="op">)</span></span>
 <span><span class="fu">easypaper</span><span class="fu">::</span><span class="fu"><a href="../reference/create_paper.html">create_paper</a></span><span class="op">(</span><span class="va">dir</span>, git <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Project created: /tmp/Rtmp0YELAX/demo_paper</span></span>
+<span><span class="co">#&gt; Project created: /tmp/RtmpGzviGW/demo_paper</span></span>
 <span><span class="co">#&gt;   1. open demo_paper.Rproj</span></span>
 <span><span class="co">#&gt;   2. source("make.R")</span></span>
 <span><span class="co">#&gt;   3. render_html()      # or see run.R for every command</span></span>
@@ -143,9 +142,7 @@ project root</strong>, in the YAML and in the R code alike.
 <code>_quarto.yml</code> sets <code>execute-dir: project</code>, so a
 chunk runs with the working directory at the root, and
 <code>here::here()</code> resolves the same way.</p>
-<div class="section level3">
-<h3 id="where-each-thing-goes">Where each thing goes<a class="anchor" aria-label="anchor" href="#where-each-thing-goes"></a>
-</h3>
+<p>Where each thing goes, then:</p>
 <table class="table">
 <colgroup>
 <col width="50%">
@@ -203,7 +200,6 @@ regenerate. And everything under <code>output/</code> and
 nervous, something is being done by hand that should be done by
 code.</p>
 </div>
-</div>
 <div class="section level2">
 <h2 id="writing">Writing<a class="anchor" aria-label="anchor" href="#writing"></a>
 </h2>
@@ -255,13 +251,10 @@ can check, not in a spreadsheet nobody can trace.
 <span><span class="fu">make_all</span><span class="op">(</span><span class="op">)</span>                          <span class="co"># all of it</span></span></code></pre></div>
 <p>The journal is an argument, not an edit: nothing in the
 <code>.qmd</code> files changes when you send the same paper somewhere
-else.</p>
-<div class="section level3">
-<h3 id="the-arguments">The arguments<a class="anchor" aria-label="anchor" href="#the-arguments"></a>
-</h3>
-<p><code>render_html()</code> and <code>make_all()</code> take the first
-two. <code>render_journal()</code> and <code>render_preprint()</code>
-take all four.</p>
+else. Of the four arguments below, <code>render_html()</code> and
+<code>make_all()</code> take the first two;
+<code>render_journal()</code> and <code>render_preprint()</code> take
+all four.</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -318,7 +311,6 @@ staying in the main document.</p>
 <p><code>run.R</code>, inside the project, lists every command with each
 argument explained, ready to run one line at a time. It is the file to
 open when you cannot remember a name.</p>
-</div>
 </div>
 <div class="section level2">
 <h2 id="supplementary-material">Supplementary material<a class="anchor" aria-label="anchor" href="#supplementary-material"></a>

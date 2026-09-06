@@ -34,7 +34,7 @@ Here is what lands on disk:
 
 dir <- file.path(tempdir(), "demo_paper")
 easypaper::create_paper(dir, git = FALSE)
-#> Project created: /tmp/Rtmp0YELAX/demo_paper
+#> Project created: /tmp/RtmpGzviGW/demo_paper
 #>   1. open demo_paper.Rproj
 #>   2. source("make.R")
 #>   3. render_html()      # or see run.R for every command
@@ -79,7 +79,7 @@ root**, in the YAML and in the R code alike. `_quarto.yml` sets
 `execute-dir: project`, so a chunk runs with the working directory at
 the root, and `here::here()` resolves the same way.
 
-### Where each thing goes
+Where each thing goes, then:
 
 |  |  |
 |----|----|
@@ -151,12 +151,9 @@ make_all()                          # all of it
 ```
 
 The journal is an argument, not an edit: nothing in the `.qmd` files
-changes when you send the same paper somewhere else.
-
-### The arguments
-
-`render_html()` and `make_all()` take the first two. `render_journal()`
-and `render_preprint()` take all four.
+changes when you send the same paper somewhere else. Of the four
+arguments below, `render_html()` and `make_all()` take the first two;
+`render_journal()` and `render_preprint()` take all four.
 
 | Argument | Default | What it decides |
 |----|----|----|

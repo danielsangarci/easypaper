@@ -33,7 +33,9 @@ for a tour.
 ## Author
 
 **Maintainer**: Daniel Sanchez-Garcia <danielsangarci@gmail.com>
+([ORCID](https://orcid.org/0000-0002-0710-6292)) \[copyright holder\]
 
 Authors:
 
 - Daniel Sanchez-Garcia <danielsangarci@gmail.com>
+  ([ORCID](https://orcid.org/0000-0002-0710-6292)) \[copyright holder\]
