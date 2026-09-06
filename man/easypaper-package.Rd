@@ -33,11 +33,11 @@ it.
 \code{\link[=create_paper]{create_paper()}}, and \code{vignette("easypaper")} for a tour.
 }
 \author{
-\strong{Maintainer}: Daniel Sanchez-Garcia \email{danielsangarci@gmail.com}
+\strong{Maintainer}: Daniel Sanchez-Garcia \email{danielsangarci@gmail.com} (\href{https://orcid.org/0000-0002-0710-6292}{ORCID}) [copyright holder]
 
 Authors:
 \itemize{
-  \item Daniel Sanchez-Garcia \email{danielsangarci@gmail.com}
+  \item Daniel Sanchez-Garcia \email{danielsangarci@gmail.com} (\href{https://orcid.org/0000-0002-0710-6292}{ORCID}) [copyright holder]
 }
 
 }

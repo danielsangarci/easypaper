@@ -3,7 +3,8 @@ Title: Scaffold a Reproducible Quarto Manuscript Project
 Version: 0.1.0
 Authors@R:
     person("Daniel", "Sanchez-Garcia", email = "danielsangarci@gmail.com",
-           role = c("aut", "cre"))
+           role = c("aut", "cre", "cph"),
+           comment = c(ORCID = "0000-0002-0710-6292"))
 Description: Creates, in one call, the directory structure of a reproducible
     scientific manuscript written in Quarto: sections as separate files, a
     single make.R entry point, journal styles as .csl files, independent
