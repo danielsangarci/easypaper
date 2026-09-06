@@ -52,7 +52,7 @@ knitr:
 bibliography:
   - references/references.bib
   - references/packages.bib
-csl: references_styles/ecology.csl
+csl: references_styles/myrmecological-news.csl
 
 # --- Figure and table numbering -------------------------------------------
 # Replaces R/captions.R and captioner. make.R overwrites this whole block

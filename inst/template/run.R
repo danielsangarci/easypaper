@@ -9,6 +9,9 @@
 # guard below stops you if you try.
 #
 # The actual code lives in make.R, R/submission.R and R/crossref_styles.R.
+#
+# What each argument does, in tables and with its default, is in the Get
+# started guide: https://danielsangarci.github.io/easypaper/articles/easypaper.html
 # ===========================================================================
 
 if (sys.nframe() > 0L) {

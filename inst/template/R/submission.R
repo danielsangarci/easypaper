@@ -642,7 +642,7 @@
 #'   double-blind review ask for: the title page runs from the title to just
 #'   before the Abstract, and the main text starts at the Abstract, with no
 #'   authors.
-make_submission <- function(journal = "ecology", label = "default",
+make_submission <- function(journal = "myrmecological-news", label = "default",
                             caption_style = "default", figure_format = "tiff",
                             blinded = TRUE, snapshot = TRUE,
                             suppl_figures = "separate") {

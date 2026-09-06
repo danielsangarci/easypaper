@@ -14,6 +14,11 @@
 # Quarto can also be called from the terminal (`quarto render`), but then you
 # skip the citation checks and the licence synchronisation. To build for real,
 # use these functions.
+#
+# Every argument -- journal, caption_style, split, suppl_figures, label,
+# figure_format, blinded, snapshot -- is explained beside its command in run.R,
+# and laid out in tables in the Get started guide:
+#   https://danielsangarci.github.io/easypaper/articles/easypaper.html
 # ===========================================================================
 
 library(here)
@@ -426,7 +431,7 @@ export_figure_formats <- function(quiet = FALSE) {
 #'   produces the complete document, which is handier to circulate among
 #'   co-authors. With split = TRUE the bibliographies of the main text and of
 #'   the supplement are independent.
-render_journal <- function(journal = "ecology", caption_style = "default",
+render_journal <- function(journal = "myrmecological-news", caption_style = "default",
                            split = FALSE, suppl_figures = "separate") {
   f <- .render("docx", journal, caption_style, "docx", split = split,
                suppl_figures = suppl_figures)
@@ -436,7 +441,7 @@ render_journal <- function(journal = "ecology", caption_style = "default",
   invisible(dest)
 }
 
-render_preprint <- function(journal = "ecology", caption_style = "default",
+render_preprint <- function(journal = "myrmecological-news", caption_style = "default",
                             split = FALSE, suppl_figures = "separate") {
   f <- .render("pdf", journal, caption_style, "pdf", split = split,
                suppl_figures = suppl_figures)
@@ -447,7 +452,7 @@ render_preprint <- function(journal = "ecology", caption_style = "default",
 }
 
 #' Working HTML: much faster than the .docx for checking results as you go.
-render_html <- function(journal = "ecology", caption_style = "default") {
+render_html <- function(journal = "myrmecological-news", caption_style = "default") {
   f <- .render("html", journal, caption_style, "html")
   message("Written: ", f)
   invisible(f)
@@ -459,7 +464,7 @@ render_html <- function(journal = "ecology", caption_style = "default") {
 #' @param files supplementary documents to render. By default every
 #'   _sections/8*suppl*.qmd; make_submission() passes a subset when the figures
 #'   are staying in the main document.
-render_supplementary <- function(journal = "ecology", caption_style = "default",
+render_supplementary <- function(journal = "myrmecological-news", caption_style = "default",
                                  output_format = "docx", files = NULL) {
   csl <- here("references_styles", paste0(journal, ".csl"))
   if (!file.exists(csl)) {
@@ -589,7 +594,7 @@ export_code <- function() {
 
 # --- Everything ------------------------------------------------------------
 
-make_all <- function(journal = "ecology", caption_style = "default") {
+make_all <- function(journal = "myrmecological-news", caption_style = "default") {
   render_journal(journal, caption_style)
   render_preprint(journal, caption_style)
   render_supplementary(journal, caption_style)

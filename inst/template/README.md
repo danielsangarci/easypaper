@@ -12,8 +12,10 @@ render_html()        # see what you have, in seconds
 ```
 
 `run.R` lists every command with its arguments explained, ready to run one
-line at a time — it is the file to open when you cannot remember a name. You
-write in `_sections/`; everything else is either configuration or generated.
+line at a time — it is the file to open when you cannot remember a name. The
+same arguments, in tables and with their defaults, are in the *Get started*
+guide: <https://danielsangarci.github.io/easypaper/articles/easypaper.html>. You write in `_sections/`; everything else is either
+configuration or generated.
 
 The history of the template, for the curious, is at the end in
 [From Rmarkdown to Quarto](#from-rmarkdown-to-quarto).
