@@ -68,7 +68,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Getting started with easypaper</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/danielsangarci/easypaper/blob/v0.1.0/vignettes/easypaper.Rmd" class="external-link"><code>vignettes/easypaper.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/danielsangarci/easypaper/blob/main/vignettes/easypaper.Rmd" class="external-link"><code>vignettes/easypaper.Rmd</code></a></small>
       <div class="d-none name"><code>easypaper.Rmd</code></div>
     </div>
 
@@ -102,7 +102,7 @@ affiliations themselves live in
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"demo_paper"</span><span class="op">)</span></span>
 <span><span class="fu">easypaper</span><span class="fu">::</span><span class="fu"><a href="../reference/create_paper.html">create_paper</a></span><span class="op">(</span><span class="va">dir</span>, git <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Project created: /tmp/RtmpYmx1XF/demo_paper</span></span>
+<span><span class="co">#&gt; Project created: /tmp/RtmpbqEiOD/demo_paper</span></span>
 <span><span class="co">#&gt;   1. open demo_paper.Rproj</span></span>
 <span><span class="co">#&gt;   2. source("make.R")</span></span>
 <span><span class="co">#&gt;   3. render_html()      # or see run.R for every command</span></span>
@@ -142,10 +142,87 @@ project root</strong>, in the YAML and in the R code alike.
 <code>_quarto.yml</code> sets <code>execute-dir: project</code>, so a
 chunk runs with the working directory at the root, and
 <code>here::here()</code> resolves the same way.</p>
+<div class="section level3">
+<h3 id="where-each-thing-goes">Where each thing goes<a class="anchor" aria-label="anchor" href="#where-each-thing-goes"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><code>_sections/*.qmd</code></td>
+<td>The text. This is where you write</td>
+</tr>
+<tr class="even">
+<td><code>data/raw/</code></td>
+<td>The originals, as they arrived. Read only, never edited</td>
+</tr>
+<tr class="odd">
+<td><code>data/processed/</code></td>
+<td>The same data in open format, written by code</td>
+</tr>
+<tr class="even">
+<td><code>R/setup.R</code></td>
+<td>Seed, palette, table and figure helpers</td>
+</tr>
+<tr class="odd">
+<td><code>references/references.bib</code></td>
+<td>The bibliography you cite from</td>
+</tr>
+<tr class="even">
+<td><code>references_styles/*.csl</code></td>
+<td>One citation style per journal</td>
+</tr>
+<tr class="odd">
+<td><code>format/</code></td>
+<td>The Word templates the <code>.docx</code> is built on</td>
+</tr>
+<tr class="even">
+<td>
+<code>figures/</code>, <code>output/</code>,
+<code>cache/</code>
+</td>
+<td>Produced by the render. Regenerable, and in
+<code>.gitignore</code>
+</td>
+</tr>
+<tr class="odd">
+<td><code>submission/</code></td>
+<td>Built by <code>make_submission()</code>. Never edited by hand</td>
+</tr>
+</tbody>
+</table>
+<p>Two of those deserve the emphasis. <code>data/raw/</code> is
+read-only on purpose: the file that came off the instrument, or out of a
+collaborator’s mail, is the one thing a reproducible project cannot
+regenerate. And everything under <code>output/</code> and
+<code>figures/</code> is disposable by design — if deleting it makes you
+nervous, something is being done by hand that should be done by
+code.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="writing">Writing<a class="anchor" aria-label="anchor" href="#writing"></a>
 </h2>
+<p>The order of a first day, once the project exists:</p>
+<ol style="list-style-type: decimal">
+<li>Open the <code>.Rproj</code>, then
+<code>source("make.R")</code>.</li>
+<li>Fill in the affiliations in <code>_sections/0_authors.qmd</code>.
+The names are already there if you passed <code>authors</code>, with
+their marks in place.</li>
+<li>Write. <code>_sections/2_introduction.qmd</code> is plain markdown:
+headings and paragraphs, nothing to declare.</li>
+<li>Put the data in <code>data/raw/</code> and read it from a chunk,
+with the path relative to the project root.</li>
+<li>
+<code>render_html()</code> whenever you want to look at it. Seconds,
+not minutes.</li>
+</ol>
+<p>From there it is one loop — write, render, repeat — and the analysis
+lives inside the section that reports it:</p>
 <p>A typical analysis inside a Results section:</p>
 <pre><code>```{r}
 #| label: richness-model

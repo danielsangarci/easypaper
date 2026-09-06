@@ -109,6 +109,24 @@
 </ul>
 </div>
 <div class="section level2">
+<h2 id="what-the-project-looks-like">What the project looks like<a class="anchor" aria-label="anchor" href="#what-the-project-looks-like"></a>
+</h2>
+<pre><code>manuscript.qmd       The spine: title, authors, and the list of includes
+_sections/           The text, one file per section. This is where you write
+data/raw/            The originals, as they arrived. Read only
+data/processed/      The same data in open format, written by code
+R/setup.R            Seed, palette, table and figure helpers
+references/          The .bib you cite from
+references_styles/   One .csl per journal
+format/              The Word templates the .docx is built on
+figures/  output/    Everything the render produces. Regenerable
+submission/          What make_submission() builds
+make.R               The only entry point
+run.R                Every command, explained, one line at a time</code></pre>
+<p>You write in <code>_sections/</code>. Everything else is configuration you set once, or output you never edit by hand.</p>
+<p>Each project also carries <strong>its own <code>README.md</code></strong>: the full reference — the path rule, the numbering convention, the known traps, the licence pairing, and the checklist before submitting. It travels inside the project, so it is still there when easypaper is not, and it is the document to read on the first day.</p>
+</div>
+<div class="section level2">
 <h2 id="where-the-code-lives">Where the code lives<a class="anchor" aria-label="anchor" href="#where-the-code-lives"></a>
 </h2>
 <p>The build logic is <strong>copied into each project</strong>, not kept in this package. That is deliberate: the submission compendium ships <code>scripts/</code>, and whoever reproduces your analysis should not need easypaper installed to do it. Once created, a project is self-contained; this package is only the scaffold.</p>
