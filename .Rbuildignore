@@ -1,0 +1,11 @@
+^\.github$
+\.DS_Store$
+^dev$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^CITATION\.cff$
+^.*\.Rproj$
+^\.Rproj\.user$
+^cran-comments\.md$
+^CRAN-SUBMISSION$
