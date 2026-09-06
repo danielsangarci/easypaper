@@ -4,7 +4,9 @@ template:
   bootstrap: 5
   bslib:
     primary: "#1a5632"
+    base_font: {google: "Source Sans 3"}
     code_font: {google: "Source Code Pro"}
+    font_scale: 1.2
 
 home:
   title: Scaffold a reproducible Quarto manuscript
