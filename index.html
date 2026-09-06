@@ -6,6 +6,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Scaffold a reproducible Quarto manuscript • easypaper</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" sizes="any" href="favicon.ico">
+<link rel="manifest" href="site.webmanifest">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/Source_Sans_3-0.4.10/font.css" rel="stylesheet">
@@ -17,6 +22,7 @@
 ">
 <meta property="og:description" content="Creates the whole structure of a reproducible scientific paper: sections as separate files, one entry point that renders it for any journal, and a submission folder with the blinded manuscript and a data and code compendium.
 ">
+<meta property="og:image" content="https://danielsangarci.github.io/easypaper/logo.png">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -60,8 +66,11 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="easypaper">easypaper<a class="anchor" aria-label="anchor" href="#easypaper"></a>
-</h1></div>
+<div class="page-header">
+<img src="logo.png" class="logo" alt=""><h1 id="easypaper-">easypaper 
+<a class="anchor" aria-label="anchor" href="#easypaper-"></a>
+</h1>
+</div>
 <!-- badges: start -->
 
 <p>Creates, in one call, the directory structure of a reproducible scientific manuscript written in Quarto.</p>
@@ -103,6 +112,7 @@
 <h2 id="where-the-code-lives">Where the code lives<a class="anchor" aria-label="anchor" href="#where-the-code-lives"></a>
 </h2>
 <p>The build logic is <strong>copied into each project</strong>, not kept in this package. That is deliberate: the submission compendium ships <code>scripts/</code>, and whoever reproduces your analysis should not need easypaper installed to do it. Once created, a project is self-contained; this package is only the scaffold.</p>
+<p>So there are two moments, and only the first one involves this package. You call <code><a href="reference/create_paper.html">create_paper()</a></code> with easypaper loaded; from then on you work from inside the project, where <code>source("make.R")</code> gives you <code>render_html()</code>, <code>make_all()</code> and <code>make_submission()</code>. Those functions belong to the project, not to the package: they keep working with easypaper uninstalled, which is what makes the compendium you deposit reproducible on its own. The top of <code>make.R</code> records which version of easypaper wrote the structure.</p>
 </div>
 <div class="section level2">
 <h2 id="requirements">Requirements<a class="anchor" aria-label="anchor" href="#requirements"></a>

@@ -71,6 +71,16 @@ and whoever reproduces your analysis should not need easypaper installed
 to do it. Once created, a project is self-contained; this package is
 only the scaffold.
 
+So there are two moments, and only the first one involves this package.
+You call
+[`create_paper()`](https://danielsangarci.github.io/easypaper/reference/create_paper.md)
+with easypaper loaded; from then on you work from inside the project,
+where `source("make.R")` gives you `render_html()`, `make_all()` and
+`make_submission()`. Those functions belong to the project, not to the
+package: they keep working with easypaper uninstalled, which is what
+makes the compendium you deposit reproducible on its own. The top of
+`make.R` records which version of easypaper wrote the structure.
+
 ## Requirements
 
 R \>= 4.1 and Quarto, which ships inside RStudio and Positron — nothing

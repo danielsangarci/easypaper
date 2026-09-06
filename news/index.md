@@ -14,5 +14,9 @@ First version.
 - Initialises a git repository and makes the first commit
   (`git = TRUE`), skipping it with a clear message when git is absent or
   has no identity configured.
+- The top of the project’s `make.R` records which version of easypaper
+  wrote the structure. The project never needs the package again; the
+  stamp is what tells you, later, which version produced a project you
+  already have.
 - Also available from RStudio as **File \> New Project \> New Directory
   \> Reproducible Quarto manuscript**.
