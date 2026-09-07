@@ -103,7 +103,7 @@ affiliations themselves live in
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"demo_paper"</span><span class="op">)</span></span>
 <span><span class="fu">easypaper</span><span class="fu">::</span><span class="fu"><a href="../reference/create_paper.html">create_paper</a></span><span class="op">(</span><span class="va">dir</span>, git <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Project created: /tmp/RtmpXdHZPF/demo_paper</span></span>
+<span><span class="co">#&gt; Project created: /tmp/Rtmp6naMJe/demo_paper</span></span>
 <span><span class="co">#&gt;   1. open demo_paper.Rproj</span></span>
 <span><span class="co">#&gt;   2. source("make.R")</span></span>
 <span><span class="co">#&gt;   3. render_html()      # or see run.R for every command</span></span>
@@ -255,8 +255,8 @@ twice.</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"make.R"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">render_html</span><span class="op">(</span><span class="op">)</span>                       <span class="co"># seconds, while you write</span></span>
-<span><span class="fu">render_journal</span><span class="op">(</span><span class="st">"myrmecological-news"</span><span class="op">)</span>   <span class="co"># .docx with that journal's citation style</span></span>
-<span><span class="fu">render_preprint</span><span class="op">(</span><span class="op">)</span>                   <span class="co"># .pdf</span></span>
+<span><span class="fu">render_docx</span><span class="op">(</span><span class="st">"myrmecological-news"</span><span class="op">)</span>  <span class="co"># the .docx, in that journal's style</span></span>
+<span><span class="fu">render_pdf</span><span class="op">(</span><span class="op">)</span>                        <span class="co"># the .pdf, for a preprint server</span></span>
 <span><span class="fu">make_all</span><span class="op">(</span><span class="op">)</span>                          <span class="co"># the four below, in order</span></span></code></pre></div>
 <table class="table">
 <colgroup>
@@ -276,13 +276,13 @@ twice.</p>
 <td><code>output/</code></td>
 </tr>
 <tr class="even">
-<td><code>render_journal()</code></td>
+<td><code>render_docx()</code></td>
 <td>the <code>.docx</code>, with the journal’s citation style and Word
 template</td>
 <td><code>output/journal/</code></td>
 </tr>
 <tr class="odd">
-<td><code>render_preprint()</code></td>
+<td><code>render_pdf()</code></td>
 <td>the <code>.pdf</code> for bioRxiv or EcoEvoRxiv</td>
 <td><code>output/preprint/</code></td>
 </tr>
@@ -340,9 +340,8 @@ everything” shortcut — the reason is in <a href="#submitting">Submitting</a>
 <p>The journal is an argument, not an edit: nothing in the
 <code>.qmd</code> files changes when you send the same paper somewhere
 else. Of the four arguments below, <code>render_html()</code> and
-<code>make_all()</code> take the first two;
-<code>render_journal()</code> and <code>render_preprint()</code> take
-all four.</p>
+<code>make_all()</code> take the first two; <code>render_docx()</code>
+and <code>render_pdf()</code> take all four.</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -374,22 +373,35 @@ rule, <code>"compact"</code> gives <em>F1:</em>
 <tr class="odd">
 <td><code>split</code></td>
 <td><code>FALSE</code></td>
-<td>
-<code>FALSE</code> builds the complete document, supplement included
-— the one to circulate among co-authors. <code>TRUE</code> leaves the
-supplement out and rewrites the citations to it, which is what a journal
-wants; <code>make_submission()</code> always uses <code>TRUE</code>
+<td>The supplement is <em>always</em> rendered on its own, which is the
+only way it can carry its own reference list. <code>split</code> decides
+what you get back: <code>FALSE</code> merges the two into the single
+file you circulate, <code>TRUE</code> leaves them as two, which is what
+a journal wants. <code>make_submission()</code> always uses
+<code>TRUE</code>
 </td>
 </tr>
 <tr class="even">
 <td><code>suppl_figures</code></td>
 <td><code>"separate"</code></td>
-<td>Only bites when <code>split = TRUE</code>: whether the supplementary
-figures and tables travel in their own document or stay at the end of
-the main text</td>
+<td>Whether the supplementary figures and tables travel with the
+supplement or stay at the end of the manuscript. Either way they are
+cited from the main text</td>
 </tr>
 </tbody>
 </table>
+<p>One warning you will meet, and it is worth reading once. Merging a
+<code>.pdf</code> costs nothing: <code>qpdf</code> concatenates pages,
+so what Quarto composed arrives untouched. Merging a <code>.docx</code>
+is another matter — pandoc <em>rebuilds</em> the document rather than
+copying it. Text, figures, tables and merged cells survive; <strong>what
+a table drew for itself does not</strong>. Cell shading and custom
+borders are dropped, and the tables fall back on the Word template’s
+<code>Table</code> style, which for that reason carries the three rules
+a scientific table wants: above, under the header row, and below.
+Nothing you submit is ever merged, so this only affects the copy you
+circulate; <code>split = TRUE</code> gives you two files with every
+table exactly as flextable drew it.</p>
 <p>Two more exist for the supplement alone:
 <code>render_supplementary()</code> takes <code>output_format</code>
 (<code>"docx"</code> by default) and <code>files</code>, a subset of the
@@ -443,7 +455,7 @@ fixed a typo.</p>
 </colgroup>
 <thead><tr class="header">
 <th></th>
-<th><code>render_journal()</code></th>
+<th><code>render_docx()</code></th>
 <th><code>make_submission()</code></th>
 </tr></thead>
 <tbody>
