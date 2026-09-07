@@ -52,8 +52,17 @@ render_html("myrmecological-news", "nature")        # "Figure 1 | caption"
 make_all()                                         # docx + pdf + supplement
 make_all("ecology-letters", "abbrev")              # the same, another journal
 
+# make_all() is those four renders and nothing else. It writes into output/,
+# and it does NOT build a submission: that is section 3, and it is separate on
+# purpose -- see the note there.
+
 
 # --- 3. SUBMISSION ---------------------------------------------------------
+# Not part of make_all(). A render is disposable; a submission is a moment you
+# will want to return to: it rewrites renv.lock to record the environment this
+# version came out of, and labels every file it writes. That does not belong
+# in a command you run after fixing a typo.
+#
 # label         = name of the folder inside submission/ and the suffix of every
 #                 file in it. Defaults to "default" so a trial run cannot be
 #                 mistaken for a real submission

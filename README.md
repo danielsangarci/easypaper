@@ -27,10 +27,15 @@ Then open the `.Rproj` it leaves behind and:
 ```r
 source("make.R")
 render_html()          # fast, while you write
-make_all()             # .docx + .pdf + supplement
+make_all()             # .docx + .pdf + supplement, into output/
 make_submission("myrmecological-news")            # -> submission/default/
 make_submission("myrmecological-news", label = "MyrmecologicalNews")   # the real one
 ```
+
+`make_all()` renders; `make_submission()` submits. The first writes documents
+to read, into `output/`. The second builds what the journal asks for — blinded,
+split in two, figures apart, compendium included — into `submission/`, and is
+not part of `make_all()`.
 
 `run.R`, inside the new project, lists every command with its arguments
 explained, ready to run one line at a time.
