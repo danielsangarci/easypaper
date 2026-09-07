@@ -57,6 +57,10 @@ Quarto manuscript**, with fields for the title and the authors.
 - **One source, many outputs.** The text lives in `_sections/*.qmd`; `make.R`
   renders the journal `.docx`, the preprint `.pdf`, a working `.html` and the
   supplement, each with the citation style of the journal you name.
+- **Preprint deposit.** `make_preprint()` builds the other destination: the
+  manuscript as one signed `.pdf`, its supplement, its figures and the data and
+  code compendium, ready to split between a preprint server and a data
+  repository.
 - **Submission folder.** `make_submission()` builds the blinded manuscript
   (title page and main text split the way double-blind review asks for),
   figures at 600 dpi renumbered in order, a cover letter, a checklist, and a

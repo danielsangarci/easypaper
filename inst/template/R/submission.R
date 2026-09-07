@@ -722,3 +722,119 @@ make_submission <- function(journal = "myrmecological-news", label = "default",
   message("\nSubmission folder ready: ", root)
   invisible(root)
 }
+
+#' What goes where, written into the preprint deposit itself.
+#' @noRd
+.write_preprint_readme <- function(dest, label) {
+  own <- rmarkdown::yaml_front_matter(MASTER)
+  title <- if (!is.null(own$title)) own$title else "Untitled"
+  writeLines(c(
+    sprintf("# Preprint deposit: %s", title),
+    "",
+    sprintf("Built by `make_preprint()` on %s. Two destinations, one folder.",
+            format(Sys.Date())),
+    "",
+    "## To the preprint server (bioRxiv, EcoEvoRxiv, PCI Ecology...)",
+    "",
+    sprintf("- `manuscript/preprint_%s.pdf` -- the manuscript, signed: the", label),
+    "  authors are on the front page. A preprint is not reviewed blind, so this",
+    "  is deliberately NOT the blinded document `make_submission()` builds.",
+    "- `manuscript/supporting_information*.pdf` -- upload as supplementary files.",
+    "- `manuscript/figures/` -- only if the server asks for figures separately.",
+    "  The PDF already embeds them at full resolution.",
+    "",
+    "## To the data repository (Zenodo, Dryad, figshare...)",
+    "",
+    "- `data_and_code.zip` -- data, metadata, the analysis code, the licences",
+    "  and `renv.lock`. It has its own README, written from what it holds.",
+    "",
+    "## Before you press submit",
+    "",
+    "- [ ] Deposit the data and code FIRST: you need its DOI to cite it in the",
+    "      manuscript, and editing a preprint after posting is a new version.",
+    "- [ ] The DOI, written into the manuscript (\"Data and code are available",
+    "      at https://doi.org/...\") and rebuilt before uploading the PDF.",
+    "- [ ] Licences: the code travels MIT, the text and data CC BY 4.0. Say so",
+    "      in the repository's licence field, which is a separate declaration.",
+    "- [ ] ORCID for every author, on the server's form.",
+    "- [ ] Competing interests and funding, if the server asks for them.",
+    "- [ ] Check the journal you plan to submit to accepts preprints. Most",
+    "      ecology journals do; a few still do not, and posting first would",
+    "      close that door."
+  ), dest)
+  invisible(dest)
+}
+
+#' Build a preprint deposit: the manuscript as a signed PDF, its supplement,
+#' its figures, and the data and code compendium -- everything a preprint
+#' server and a data repository ask for between them.
+#'
+#' This is `make_submission()`'s sibling, and the differences are the point.
+#' The manuscript comes out as ONE signed PDF, not a blinded pair of Word
+#' files: a preprint carries its authors, and there is no editor to write a
+#' cover letter to. Everything else -- the standalone figures, the compendium,
+#' the lockfile -- is the same machinery, because a deposit has to stand on its
+#' own just as hard as a submission does.
+#'
+#' @param journal the .csl the citations come out in. A preprint has no house
+#'   style, so this is only about which convention you prefer to read.
+#' @param label names the folder inside submission/ and every file in it.
+#'   Defaults to the server you are most likely to post to; change it for
+#'   another one, or for a second version.
+#' @param caption_style default | abbrev | nature | compact.
+#' @param figure_format standalone figures: "tiff", "png" or "jpg".
+#' @param snapshot TRUE records renv.lock before building the compendium.
+#' @param suppl_figures "separate" leaves the supplementary figures and tables
+#'   in their own document; "main" keeps them at the end of the manuscript.
+#' @return the path of the deposit, invisibly.
+make_preprint <- function(journal = "myrmecological-news", label = "bioRxiv",
+                          caption_style = "default", figure_format = "tiff",
+                          snapshot = TRUE, suppl_figures = "separate") {
+  figure_format <- match.arg(figure_format, FIG_FORMATS)
+  suppl_figures <- match.arg(suppl_figures, c("separate", "main"))
+  if (is.null(label) || !nzchar(label)) label <- "bioRxiv"
+  root <- here("submission", label)
+  man  <- file.path(root, "manuscript")
+  dir.create(man, recursive = TRUE, showWarnings = FALSE)
+
+  .check_quarto(); .check_license(); sync_licenses(quiet = TRUE)
+  check_citations(); check_crossrefs(quiet = TRUE); check_title(quiet = TRUE)
+
+  # 1) the manuscript, as one signed PDF. split = TRUE takes the supplement
+  #    out; blinded = FALSE keeps the title block, which is the whole
+  #    difference from a submission.
+  f <- .render("pdf", journal, caption_style, "pdf", split = TRUE,
+               blinded = FALSE, suppl_figures = suppl_figures)
+  file.rename(f, file.path(man, sprintf("preprint_%s.pdf", label)))
+
+  # 2) the supplement(s), also as PDF: a server takes one file per document.
+  all_suppl <- .suppl_files()
+  to_render <- if (suppl_figures == "main") {
+                 setdiff(all_suppl, .suppl_float_files(all_suppl))
+               } else all_suppl
+  sup <- render_supplementary(journal, caption_style, output_format = "pdf",
+                              files = to_render)
+  for (i in seq_along(sup)) {
+    nm <- if (length(sup) == 1L) sprintf("supporting_information_%s.pdf", label)
+          else sprintf("supporting_information_%s_%s.pdf",
+                       .suppl_name(to_render[i]), label)
+    file.copy(sup[i], file.path(man, nm), overwrite = TRUE)
+  }
+
+  # 3) figures on their own, the code, and the environment they ran in
+  .export_figures(file.path(man, "figures"), figure_format)
+  export_code()
+  if (isTRUE(snapshot)) .record_env()
+
+  # 4) the compendium, never blinded: a preprint deposit is signed
+  dc <- file.path(root, "data_and_code")
+  .export_data_code(dc, blinded = FALSE)
+  zip::zip(file.path(root, "data_and_code.zip"), basename(dc), root = root)
+
+  # 5) what is left to do by hand
+  .write_preprint_readme(file.path(root, "README.md"), label)
+  unlink(file.path(OUTPUT, "figures"), recursive = TRUE)
+
+  message("\nPreprint deposit ready: ", root)
+  invisible(root)
+}

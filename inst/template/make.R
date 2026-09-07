@@ -10,6 +10,8 @@
 #   make_all()                  # all of the above
 #
 #   make_submission("myrmecological-news")  # label = "MyrmecologicalNews" for the real thing
+#   make_preprint()             # the whole preprint deposit: signed .pdf,
+#                               # supplement, figures, data and code
 #
 # Quarto can also be called from the terminal (`quarto render`), but then you
 # skip the citation checks and the licence synchronisation. To build for real,
@@ -283,14 +285,53 @@ check_citations <- function() {
 
 # --- Figures: png (native) + jpg + tiff ------------------------------------
 
+#' Record, in renv.lock, the environment this document came out of.
+#'
+#' Called by the renders that produce a document somebody else will read, and
+#' deliberately NOT by render_html(): the .html is the loop you run every two
+#' minutes while writing, and it is what you render after renv::restore()ing an
+#' old environment to look into a reviewer's complaint. Snapshotting there
+#' would silently rewrite your record with the versions you were only visiting.
+#'
+#' Only the packages the manuscript actually uses, plus their recursive
+#' dependencies: something you installed to try out, and never mention in the
+#' project, does not travel into the lockfile.
+#'
+#' Silent when nothing changed, which is most of the time: renv only rewrites
+#' the file when the environment really moved.
+#' @noRd
+.record_env <- function() {
+  if (!requireNamespace("renv", quietly = TRUE)) return(invisible(NA))
+  lock <- here("renv.lock")
+  before <- if (file.exists(lock)) unname(tools::md5sum(lock)) else NA_character_
+  pkgs <- tryCatch(.analysis_packages(), error = function(e) character(0))
+  ok <- tryCatch({
+    suppressMessages(
+      if (length(pkgs)) {
+        renv::snapshot(project = here(), packages = pkgs, prompt = FALSE)
+      } else {
+        # Nothing detected (an empty template): record everything rather than
+        # write a lockfile that promises less than the paper needs.
+        renv::snapshot(project = here(), prompt = FALSE)
+      })
+    TRUE
+  }, error = function(e) {
+    warning("Could not record the environment: ", conditionMessage(e),
+            call. = FALSE, immediate. = TRUE)
+    FALSE
+  })
+  after <- if (file.exists(lock)) unname(tools::md5sum(lock)) else NA_character_
+  if (isTRUE(ok) && !identical(before, after)) {
+    message("renv.lock updated: it now describes the environment this render ",
+            "came out of.")
+  }
+  invisible(ok)
+}
+
 #' Is renv.lock there, and does it match the library actually in use?
 #'
-#' It LOOKS, it does not write. renv::snapshot() is deliberately NOT called
-#' automatically on render: the lockfile is a versioned file, and a build step
-#' that rewrites your dependency manifest behind your back is how you end up
-#' recording a half-installed library, or a package you were only trying out,
-#' as the environment of the paper. Recording the environment is a decision,
-#' so it stays a command you type.
+#' It LOOKS, it does not write. The writing is done by .record_env(), from the
+#' renders that produce a document for someone else; this only reports.
 #'
 #' @return TRUE in sync, FALSE not, NA if it cannot be determined.
 check_renv <- function(quiet = FALSE) {
@@ -438,6 +479,7 @@ render_journal <- function(journal = "myrmecological-news", caption_style = "def
   dest <- here("output/journal", paste0("manuscript_", journal, ".docx"))
   file.rename(f, dest)
   message("Written: ", dest)
+  .record_env()
   invisible(dest)
 }
 
@@ -448,6 +490,7 @@ render_preprint <- function(journal = "myrmecological-news", caption_style = "de
   dest <- here("output/preprint/preprint.pdf")
   file.rename(f, dest)
   message("Written: ", dest)
+  .record_env()
   invisible(dest)
 }
 
@@ -531,6 +574,7 @@ render_supplementary <- function(journal = "myrmecological-news", caption_style 
   }
   unlink(file.path(OUTPUT, "figures"), recursive = TRUE)
   export_figure_formats(quiet = TRUE)
+  .record_env()
   invisible(dests)
 }
 

@@ -55,6 +55,11 @@ make_all("ecology-letters", "abbrev")              # the same, another journal
 # make_all() is those four renders and nothing else. It writes into output/,
 # and it does NOT build a submission: that is section 3, and it is separate on
 # purpose -- see the note there.
+#
+# All of these record renv.lock when they finish: a document somebody else
+# will read carries the environment it came out of. render_html() above does
+# not, on purpose -- it is also what you render after restoring an old
+# environment to look into something, and it must not overwrite your record.
 
 
 # --- 3. SUBMISSION ---------------------------------------------------------
@@ -89,6 +94,19 @@ make_submission("ecology-letters", label = "EcologyLetters",
                 figure_format = "png", blinded = FALSE)
 
 
+# --- 3b. PREPRINT DEPOSIT --------------------------------------------------
+# Same idea as a submission, for the other destination. The manuscript comes
+# out as ONE signed .pdf -- a preprint carries its authors -- with the
+# supplement, the figures and the data and code compendium beside it. There is
+# no cover letter: there is no editor. The folder's README says what goes to
+# the preprint server and what goes to the data repository.
+
+make_preprint()                                    # -> submission/bioRxiv/
+make_preprint(label = "EcoEvoRxiv")                 # another server
+make_preprint(label = "bioRxiv_v2")                 # the revised version
+make_preprint(suppl_figures = "main")              # figures at the end of the pdf
+
+
 # --- 4. CHECKS -------------------------------------------------------------
 # The three renders run these on their own. Call them when you want to know
 # before waiting for a render.
@@ -102,8 +120,10 @@ check_renv()           # is renv.lock there, and does it match what you are usin
 
 # --- 5. MAINTENANCE --------------------------------------------------------
 
-renv::snapshot()       # record the packages in renv.lock by hand. Renders
-                       # never touch it; make_submission() does, on purpose
+renv::snapshot()       # record the packages in renv.lock by hand. Rarely
+                       # needed now: every render that produces a document
+                       # records it, and so does make_submission(). The one
+                       # that does NOT is render_html()
 clean_cache()          # after touching data/: knitr does NOT notice by itself
 sync_licenses()        # copies the authors from the YAML into LICENSE*/README
 export_code()          # analysis_code.R + sessionInfo.txt for the supplement

@@ -58,3 +58,18 @@ test_that("no generated or dead files travel in the template", {
   # A .gitignore would not survive R CMD build; it must travel renamed.
   expect_true(file.exists(tpl("gitignore")))
 })
+
+test_that("the template ships both ways out of the project", {
+  # A sync from the working project that dropped one of these would leave a
+  # documented command with no code behind it.
+  defined <- function(f, fn) {
+    any(vapply(as.list(parse(tpl(f))), function(e) {
+      is.call(e) && identical(as.character(e[[1]]), "<-") &&
+        identical(as.character(e[[2]]), fn)
+    }, logical(1)))
+  }
+  expect_true(defined("R/submission.R", "make_submission"))
+  expect_true(defined("R/submission.R", "make_preprint"))
+  expect_true(defined("make.R", "make_all"))
+  expect_true(defined("make.R", "render_preprint"))
+})

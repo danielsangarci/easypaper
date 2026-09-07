@@ -50,15 +50,38 @@ render_preprint()            # -> output/preprint/preprint.pdf
 render_supplementary()       # -> output/supplementary/supporting_information.docx
 render_html()                # -> output/manuscript.html  (fast, to check as you go)
 export_code()                # -> output/supplementary/analysis_code.R
-make_all()                   # all of the above
+make_all()                   # the four above -- not the .html
 
-make_submission("myrmecological-news")       # submission folder
+make_submission("myrmecological-news")       # submission folder, for a journal
+make_preprint()                              # deposit folder, for a preprint
 
 preview()                    # live preview while you write
 list_journals()              # available CSL files
 clean_cache()                # after changing data/raw/
 check_citations()            # cited keys missing from the .bib
 ```
+
+### The verbs
+
+Five prefixes, and each one is a promise:
+
+- **`render_*`** -- one call to Quarto, one document to read, written into
+  `output/`. The four of them are the same internal function with the format
+  changed.
+- **`make_*`** -- a deliverable assembled from several steps: a batch, or a
+  folder. They are the targets of `make.R`, which is a Makefile written in R.
+  None of them renders on its own; they chain the ones above.
+- **`export_*`** -- derive a file from what already exists, without going
+  through Quarto: the analysis code, the figure formats.
+- **`check_*`** -- look and report. **Never writes.** This is the promise that
+  matters most: it is why recording the environment lives in `.record_env()`
+  and not in `check_renv()`, which only ever warns.
+- everything else is a utility: `sync_licenses()`, `clean_cache()`,
+  `list_journals()`, `preview()`.
+
+The short form, worth keeping when you add the sixth function:
+**`render_` makes a document, `make_` makes a deliverable, `check_` makes
+nothing.**
 
 Switching journal is an argument; no `.qmd` is touched:
 
@@ -189,12 +212,14 @@ out of order.
   Keep projects outside the Drive folder and sync through GitHub. For
   co-authors there is `trackdown`, which uploads plain text only.
 - **`renv.lock` is written at submission time, not on render.**
-  `make_submission()` runs `renv::snapshot()` (turn it off with
-  `snapshot = FALSE`), so the lockfile in the zip describes the environment
-  that produced that submission. Renders never touch it: you build twenty of
-  them a day, and a lockfile chasing the last HTML preview would record the
-  package you were only trying out rather than the one you shipped. You do not
-  need `renv::init()` for this -- snapshot reads the project code and records
+  Every render that produces a document -- `render_journal()`,
+  `render_preprint()`, `render_supplementary()`, and therefore `make_all()` --
+  records `renv.lock` when it finishes, and so does `make_submission()` (turn
+  it off there with `snapshot = FALSE`). `render_html()` does not: it is the
+  loop you run while writing, and it is what you render after restoring an old
+  environment to look into something, so it must never overwrite your record.
+  You do not need `renv::init()` for any of this -- snapshot reads the project
+  code and records
   what your own library holds. It records the dependencies of the *analysis*
   only: the manuscript, its sections and the scripts that go into the
   compendium. `trackdown`, `dataspice` and `EML` are your tooling and stay out,
@@ -360,7 +385,9 @@ no longer in the document.
 ## Submission folder
 
 `make_submission()` builds, out of what is already in the project, the folder
-you send to the journal and upload to the data repository:
+you send to the journal and upload to the data repository. For a preprint the
+sibling is `make_preprint()`, further down: same machinery, one signed `.pdf`
+instead of a blinded pair of Word files.
 
 ```r
 make_submission("myrmecological-news")                             # -> submission/default/
@@ -568,6 +595,38 @@ Availability Statement* so it does not look contradictory.
 subscription journals), CC BY still applies to the *preprint* and to the
 compendium, not to the publisher's typeset version. Each journal's specific
 policy is at [SHERPA/RoMEO](https://v2.sherpa.ac.uk/romeo/).
+
+## Preprint deposit
+
+```r
+make_preprint()                       # -> submission/bioRxiv/
+make_preprint(label = "EcoEvoRxiv")   # another server
+make_preprint(label = "bioRxiv_v2")   # the revised version
+```
+
+The other destination, built with the same parts:
+
+```
+submission/bioRxiv/
+  README.md                       what goes to the server, what to the repository
+  manuscript/
+    preprint_bioRxiv.pdf          the manuscript, signed
+    supporting_information_bioRxiv.pdf
+    figures/Figure_1.tiff ...
+  data_and_code/                  as above
+  data_and_code.zip
+```
+
+Two differences from a submission, and both are deliberate. The manuscript is
+**one signed PDF**: a preprint is not reviewed blind, and hiding the authors
+would defeat the reason for posting it. And there is no cover letter, because
+there is no editor.
+
+The order matters more than it looks: **deposit the data and code first**. You
+need the DOI of that deposit to cite it in the manuscript, and a preprint
+edited after posting becomes a new version rather than a correction. The
+`README.md` inside the folder carries that reminder and the rest of what is
+left to you.
 
 ## Before submitting
 
