@@ -56,8 +56,26 @@
 #' div. The rest are supplementary TEXT (an extended Methods, a longer
 #' rationale), which is what you want in its own document so that it carries
 #' its own reference list.
+#' The two ways Quarto lets you label a supplementary float: wrapped in a div
+#' (`{#sfig-x}`) or as a chunk option (`#| label: sfig-x`). Both are read, and
+#' from ONE place. This pattern drifting apart from .crossref_labels() in
+#' make.R -- which always read both -- is how a citation could survive
+#' unreplaced and reach a submitted .docx as "?@sfig-x", with check_crossrefs()
+#' seeing nothing wrong because the label did exist.
+#' @noRd
+SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
+
+#' The float ids of one supplementary file, in order of appearance.
+#' @noRd
+.suppl_label_ids <- function(f) {
+  txt <- readLines(f, warn = FALSE)
+  ids <- unlist(regmatches(txt, gregexpr(SUPPL_LABEL, txt, perl = TRUE)))
+  ids <- sub("^(?:\\{#|#\\|\\s*label:\\s*)", "", ids, perl = TRUE)
+  ids[!duplicated(ids)]   # a div and its chunk may carry the same id
+}
+
 .suppl_is_floats <- function(f) {
-  any(grepl("\\{#(sfig|stbl)-", readLines(f, warn = FALSE)))
+  length(.suppl_label_ids(f)) > 0L
 }
 
 .suppl_float_files <- function(files = .suppl_files()) {
@@ -104,9 +122,7 @@
     for (kind in .suppl_crossref(k, length(files), caption_style)$custom) {
       if (!is.null(kind$key)) pref[[kind$key]] <- kind[["reference-prefix"]]
     }
-    txt <- readLines(files[k], warn = FALSE)
-    ids <- unlist(regmatches(txt, gregexpr("(?<=\\{#)(sfig|stbl)-[A-Za-z0-9_:.-]+",
-                                           txt, perl = TRUE)))
+    ids <- .suppl_label_ids(files[k])
     n <- list(sfig = 0L, stbl = 0L)
     for (id in ids) {
       kind <- sub("-.*$", "", id)

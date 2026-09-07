@@ -38,16 +38,25 @@ list_journals()        # which .csl you have in references_styles/
 # --- 2. FULL RENDERS -------------------------------------------------------
 # journal       = name of a .csl, without the extension (list_journals())
 # caption_style = "default" | "abbrev" | "nature" | "compact"
-# split         = TRUE leaves the supplement out and gives each document its
-#                 own bibliography; FALSE is the whole thing in one file
+# split         = the supplement is ALWAYS rendered on its own, so that it
+#                 carries its own reference list. split decides what you get
+#                 back: FALSE merges the two into one file to circulate, TRUE
+#                 leaves them as two, which is what a journal wants
+# suppl_figures = "separate" or "main": whether the supplementary figures and
+#                 tables travel with the supplement or stay at the end of the
+#                 manuscript
+#
+# Merging a .docx costs the table borders and shading (pandoc rebuilds the
+# document; qpdf, for .pdf, only concatenates pages and costs nothing). You
+# get a warning when it happens.
 
-render_journal("myrmecological-news")               # -> output/journal/*.docx
-render_journal("ecology-letters", "abbrev")        # another journal, "Fig. 1."
-render_preprint("myrmecological-news")              # -> output/preprint/*.pdf
-render_supplementary("myrmecological-news")         # the supplement(s) on their
+render_docx("myrmecological-news")                 # -> output/journal/*.docx
+render_docx("ecology-letters", "abbrev")           # another journal, "Fig. 1."
+render_pdf("myrmecological-news")                  # -> output/preprint/*.pdf
+render_supplementary("myrmecological-news")        # the supplement(s) on their
                                                    # own: one document per
                                                    # _sections/8*suppl*.qmd
-render_html("myrmecological-news", "nature")        # "Figure 1 | caption"
+render_html("myrmecological-news", "nature")       # "Figure 1 | caption"
 
 make_all()                                         # docx + pdf + supplement
 make_all("ecology-letters", "abbrev")              # the same, another journal

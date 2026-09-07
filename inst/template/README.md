@@ -29,7 +29,8 @@ pandoc inside.
 brew install --cask quarto && quarto check
 ```
 
-In R: `install.packages(c("quarto", "here", "knitr", "flextable", "ragg", "magick", "zip", "renv"))`.
+In R: `install.packages(c("quarto", "here", "knitr", "flextable", "ragg", "magick", "zip", "renv", "qpdf"))`.
+`qpdf` is what merges the manuscript and its supplement into a single `.pdf`.
 And only if you are going to sync with Google Docs, `trackdown` **from
 GitHub**: the CRAN version (1.1.1) does not accept `.qmd`, and neither does the
 latest tagged release (v1.3.0) — Quarto support landed in 1.4.0, which was
@@ -45,8 +46,8 @@ then you skip the citation checks and the licence synchronisation.
 ```r
 source("make.R")
 
-render_journal("myrmecological-news")    # -> output/journal/manuscript_myrmecological-news.docx
-render_preprint()            # -> output/preprint/preprint.pdf
+render_docx("myrmecological-news")   # -> output/journal/manuscript_myrmecological-news.docx
+render_pdf()                 # -> output/preprint/preprint.pdf
 render_supplementary()       # -> output/supplementary/supporting_information.docx
 render_html()                # -> output/manuscript.html  (fast, to check as you go)
 export_code()                # -> output/supplementary/analysis_code.R
@@ -86,7 +87,7 @@ nothing.**
 Switching journal is an argument; no `.qmd` is touched:
 
 ```r
-render_journal("ecology-letters", caption_style = "abbrev")
+render_docx("ecology-letters", caption_style = "abbrev")
 ```
 
 | `caption_style` | Result             |
@@ -212,8 +213,8 @@ out of order.
   Keep projects outside the Drive folder and sync through GitHub. For
   co-authors there is `trackdown`, which uploads plain text only.
 - **`renv.lock` is written at submission time, not on render.**
-  Every render that produces a document -- `render_journal()`,
-  `render_preprint()`, `render_supplementary()`, and therefore `make_all()` --
+  Every render that produces a document -- `render_docx()`,
+  `render_pdf()`, `render_supplementary()`, and therefore `make_all()` --
   records `renv.lock` when it finishes, and so does `make_submission()` (turn
   it off there with `snapshot = FALSE`). `render_html()` does not: it is the
   loop you run while writing, and it is what you render after restoring an old
@@ -375,7 +376,7 @@ whole paper among co-authors and for a single-file preprint.
 If you want the `.docx` without the supplement outside the submission flow too:
 
 ```r
-render_journal("myrmecological-news", split = TRUE)    # same in render_preprint()
+render_docx("myrmecological-news", split = TRUE)    # same in render_pdf()
 ```
 
 With `split = TRUE` the citations from the main text to the supplement
@@ -561,8 +562,8 @@ every copy. Without a name, that clause points at nobody.
 
 **Nothing has to be filled in by hand.** `sync_licenses()` reads the authors
 from the YAML of `manuscript.qmd` and writes the holders into `LICENSE-CODE`
-and into the notice above. It runs on its own in every `render_journal()` /
-`render_preprint()`, so the YAML is the single source of truth: change a
+and into the notice above. It runs on its own in every `render_docx()` /
+`render_pdf()`, so the YAML is the single source of truth: change a
 co-author there and the licences update in the next build.
 
 Neither file has a `.md` extension, for two reasons. GitHub detects the licence

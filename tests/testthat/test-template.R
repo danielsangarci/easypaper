@@ -71,5 +71,27 @@ test_that("the template ships both ways out of the project", {
   expect_true(defined("R/submission.R", "make_submission"))
   expect_true(defined("R/submission.R", "make_preprint"))
   expect_true(defined("make.R", "make_all"))
-  expect_true(defined("make.R", "render_preprint"))
+  expect_true(defined("make.R", "render_pdf"))
+})
+
+test_that("a supplementary float is found whichever way it is labelled", {
+  # The bug this guards against: .suppl_numbering() once read only {#sfig-x}
+  # divs, while check_crossrefs() also read chunk labels. A float labelled the
+  # other way was numbered by one and ignored by the other, so the citation to
+  # it survived unreplaced and reached the .docx as "?@sfig-x" -- with no
+  # warning, because the label did exist.
+  e <- new.env()
+  sys.source(tpl("R/submission.R"), envir = e)
+
+  f <- tempfile(fileext = ".qmd")
+  writeLines(c("::: {#sfig-map}", "#| label: suppl-map", ":::",
+               "```{r}", "#| label: sfig-model", "```",
+               "::: {#stbl-raw}", ":::",
+               "   #| label:   stbl-extra ",
+               "As shown in @sfig-map and @stbl-raw."), f)
+
+  # Both syntaxes, in order of appearance, and no citation mistaken for one.
+  expect_identical(e$.suppl_label_ids(f),
+                   c("sfig-map", "sfig-model", "stbl-raw", "stbl-extra"))
+  expect_true(e$.suppl_is_floats(f))
 })
