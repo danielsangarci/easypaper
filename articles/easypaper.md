@@ -34,7 +34,7 @@ Here is what lands on disk:
 
 dir <- file.path(tempdir(), "demo_paper")
 easypaper::create_paper(dir, git = FALSE)
-#> Project created: /tmp/RtmpejA2AQ/demo_paper
+#> Project created: /tmp/RtmpbAaF50/demo_paper
 #>   1. open demo_paper.Rproj
 #>   2. source("make.R")
 #>   3. render_html()      # or see run.R for every command
@@ -140,6 +140,16 @@ recomputing it.
 
 ## Rendering
 
+Two different jobs live in this project, and the function names make
+more sense once they are told apart. **Rendering** produces documents to
+read: one file each, complete, with the authors on the front, written
+into `output/`. You will do it a hundred times. **Submitting** builds
+the package a journal asks for — blinded, split in two, figures as
+separate files, the data and code compendium — written into
+`submission/`. You will do it twice.
+
+This section is the first job.
+
 ``` r
 
 source("make.R")
@@ -147,8 +157,25 @@ source("make.R")
 render_html()                       # seconds, while you write
 render_journal("myrmecological-news")   # .docx with that journal's citation style
 render_preprint()                   # .pdf
-make_all()                          # all of it
+make_all()                          # the four below, in order
 ```
+
+| Command | What comes out | Where |
+|----|----|----|
+| `render_html()` | the working `.html`, images embedded | `output/` |
+| `render_journal()` | the `.docx`, with the journal’s citation style and Word template | `output/journal/` |
+| `render_preprint()` | the `.pdf` for bioRxiv or EcoEvoRxiv | `output/preprint/` |
+| `render_supplementary()` | the supplement on its own, with its own reference list | `output/supplementary/` |
+| `export_code()` | `analysis_code.R` and `sessionInfo.txt` | `output/supplementary/` |
+| `preview()` | a live `.html` that reloads every time you save | — |
+| `make_all()` | the four: journal, preprint, supplement, code | `output/` |
+
+Two things about `make_all()` that its name does not tell you. It leaves
+out `render_html()`, because the `.html` is the one you run while
+writing and it would only slow down the batch. And **it does not build a
+submission**: that is `make_submission()`, it writes somewhere else
+entirely, and it is deliberately not part of any “do everything”
+shortcut — the reason is in [Submitting](#submitting).
 
 The journal is an argument, not an edit: nothing in the `.qmd` files
 changes when you send the same paper somewhere else. Of the four
@@ -194,6 +221,27 @@ make_submission("myrmecological-news", suppl_figures = "main") # end of the main
 ```
 
 ## Submitting
+
+`make_submission()` is not the last step of `make_all()`, and that is on
+purpose. A render is cheap and disposable: you run it after every
+paragraph. A submission is a moment you will want to return to — it
+rewrites `renv.lock` to record the environment this exact version came
+out of, and it stamps a label on every file it writes. Folding that into
+a “build everything” command would mean rewriting your dependency
+manifest every time you fixed a typo.
+
+What it does that a render does not:
+
+|  | `render_journal()` | `make_submission()` |
+|----|----|----|
+| Writes into | `output/journal/` | `submission/<label>/` |
+| The manuscript | one file, complete | title page and main text, as two files |
+| The authors | on the front | only on the title page; the main text is built without them |
+| The supplement | inside the document | its own file, cited as *Figure S1* from the main text |
+| The figures | embedded in the document | also on their own, at 600 dpi and renumbered in order |
+| Data and code | — | the compendium and its `.zip`, `renv.lock` included |
+| Also writes | — | a cover letter and a `CHECKLIST.md` |
+| `renv.lock` | untouched | rewritten, to describe this submission |
 
 ``` r
 
