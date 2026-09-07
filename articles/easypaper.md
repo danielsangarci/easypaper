@@ -34,7 +34,7 @@ Here is what lands on disk:
 
 dir <- file.path(tempdir(), "demo_paper")
 easypaper::create_paper(dir, git = FALSE)
-#> Project created: /tmp/RtmpbAaF50/demo_paper
+#> Project created: /tmp/RtmpXdHZPF/demo_paper
 #>   1. open demo_paper.Rproj
 #>   2. source("make.R")
 #>   3. render_html()      # or see run.R for every command
@@ -117,8 +117,6 @@ The order of a first day, once the project exists:
 From there it is one loop — write, render, repeat — and the analysis
 lives inside the section that reports it:
 
-A typical analysis inside a Results section:
-
     ```{r}
     #| label: richness-model
     #| cache: true
@@ -169,6 +167,25 @@ make_all()                          # the four below, in order
 | `export_code()` | `analysis_code.R` and `sessionInfo.txt` | `output/supplementary/` |
 | `preview()` | a live `.html` that reloads every time you save | — |
 | `make_all()` | the four: journal, preprint, supplement, code | `output/` |
+
+The prefixes are a convention, and worth reading once: **`render_`** is
+one call to Quarto and one document, into `output/`. **`make_`** is a
+deliverable assembled from several steps — a batch, or a folder — and
+they are the targets of `make.R`, which is a Makefile written in R.
+**`export_`** derives a file without going through Quarto. And
+**`check_`** looks and warns, but never writes: that promise is why
+recording the environment is not something a `check_` does. In short:
+`render_` makes a document, `make_` makes a deliverable, `check_` makes
+nothing.
+
+Every one of those except `render_html()` records `renv.lock` when it
+finishes: a document somebody else will read carries the environment it
+came out of, and it costs about three tenths of a second. The `.html` is
+left out on purpose — it is the loop you run every two minutes, and it
+is also what you render after restoring an old environment to look into
+a reviewer’s complaint, where overwriting your record is the last thing
+you want. The lockfile is only rewritten when the environment really
+moved, so most renders leave it alone and say nothing.
 
 Two things about `make_all()` that its name does not tell you. It leaves
 out `render_html()`, because the `.html` is the one you run while
@@ -241,7 +258,7 @@ What it does that a render does not:
 | The figures | embedded in the document | also on their own, at 600 dpi and renumbered in order |
 | Data and code | — | the compendium and its `.zip`, `renv.lock` included |
 | Also writes | — | a cover letter and a `CHECKLIST.md` |
-| `renv.lock` | untouched | rewritten, to describe this submission |
+| `renv.lock` | rewritten, to describe this render | rewritten, and copied into the compendium |
 
 ``` r
 
@@ -256,7 +273,7 @@ make_submission("myrmecological-news", label = "MyrmecologicalNews") # the real 
 | `caption_style` | `"default"` | As in the renders above |
 | `figure_format` | `"tiff"` | The standalone figures the journal uploads: `"tiff"`, `"png"` or `"jpg"`. TIFF unless they say otherwise — JPEG is lossy and poor for line art |
 | `blinded` | `TRUE` | Splits title page from main text the way double-blind review asks: the title block is dropped and `0_authors.qmd` is left out, so no name travels in the main text. `FALSE` when the journal wants them in |
-| `snapshot` | `TRUE` | Runs `renv::snapshot()` first, so the `renv.lock` in the compendium describes the environment *this* submission came out of. `FALSE` if you keep the lockfile by hand and do not want it rewritten |
+| `snapshot` | `TRUE` | Runs `renv::snapshot()` first, so the `renv.lock` that travels in the compendium describes the environment *this* submission came out of. The renders record it too, but a submission is the one you will be asked about. `FALSE` if you keep the lockfile by hand |
 | `suppl_figures` | `"separate"` | Whether the supplementary figures and tables go out on their own or at the end of the main text. Either way they are cited from the main text |
 
 That builds, from what is already in the project:
@@ -283,6 +300,42 @@ The compendium publishes open formats only: the `.csv`, never the source
 `.xlsx`, and only the analysis code, not your authoring tooling. Its
 `README.txt` is written from what the folder actually holds, so it never
 needs editing.
+
+## The preprint deposit
+
+A preprint goes to two places at once — the manuscript to a server, the
+data and code to a repository — and `make_preprint()` builds both halves
+into `submission/bioRxiv/`.
+
+``` r
+
+make_preprint()                       # -> submission/bioRxiv/
+make_preprint(label = "EcoEvoRxiv")   # another server
+make_preprint(label = "bioRxiv_v2")   # the revised version
+```
+
+    submission/bioRxiv/
+      README.md                     what goes to the server, what to the repository
+      manuscript/
+        preprint_bioRxiv.pdf        the manuscript, signed
+        supporting_information_bioRxiv.pdf
+        figures/Figure_1.tiff ...
+      data_and_code/                data, metadata, scripts, renv.lock
+      data_and_code.zip             for Zenodo or Dryad
+
+It is `make_submission()`’s sibling, and the two differences are the
+whole point. The manuscript comes out as **one signed PDF**, not a
+blinded pair of Word files: a preprint is not reviewed blind, and hiding
+the authors would defeat the reason for posting it. And there is no
+cover letter, because there is no editor to address.
+
+Everything else is the same machinery — standalone figures, the
+compendium, the lockfile — because a deposit has to stand on its own
+exactly as hard as a submission does. The `README.md` it leaves behind
+lists what still depends on you, starting with the one that catches
+people out: **deposit the data first**. You need its DOI to cite in the
+manuscript, and a preprint edited after posting is a new version, not a
+correction.
 
 ## The checks
 

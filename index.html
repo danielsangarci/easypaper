@@ -101,6 +101,8 @@
 <li>
 <strong>One source, many outputs.</strong> The text lives in <code>_sections/*.qmd</code>; <code>make.R</code> renders the journal <code>.docx</code>, the preprint <code>.pdf</code>, a working <code>.html</code> and the supplement, each with the citation style of the journal you name.</li>
 <li>
+<strong>Preprint deposit.</strong> <code>make_preprint()</code> builds the other destination: the manuscript as one signed <code>.pdf</code>, its supplement, its figures and the data and code compendium, ready to split between a preprint server and a data repository.</li>
+<li>
 <strong>Submission folder.</strong> <code>make_submission()</code> builds the blinded manuscript (title page and main text split the way double-blind review asks for), figures at 600 dpi renumbered in order, a cover letter, a checklist, and a data-and-code compendium ready for Zenodo or Dryad, <code>renv.lock</code> included.</li>
 <li>
 <strong>Supplementary material with independent references.</strong> Supplementary figures and tables are numbered <code>Figure S1</code>, <code>Table S1</code>, cited from the main text, and can either travel in their own document or sit at the end of the main one. Supplementary <em>text</em> always goes out as its own document, with its own reference list.</li>
