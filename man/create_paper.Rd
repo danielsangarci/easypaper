@@ -14,15 +14,21 @@ create_paper(
 )
 }
 \arguments{
-\item{path}{Directory to create. Its base name becomes the name of the
-\code{.Rproj} file.}
+\item{path}{Directory to create, as a single non-empty string; \code{~} is
+expanded. Its base name becomes the name of the \code{.Rproj} file. A path
+that exists as a file is refused.}
 
-\item{title}{Manuscript title, written into the YAML of \code{manuscript.qmd}.
-\code{NULL} leaves the placeholder, which \code{make.R} warns about.}
+\item{title}{Manuscript title, written into the YAML of \code{manuscript.qmd}
+and \code{title_page.qmd}. Quotes and backslashes are escaped for YAML, so a
+LaTeX fragment such as \verb{\\textit\{Formica\}} survives. A vector is joined
+with spaces. \code{NULL} or \code{""} leaves the placeholder, which \code{make.R} warns
+about.}
 
-\item{authors}{Character vector of author names, in order. The first one is
-marked as the corresponding author. Affiliations are not guessed: fill
-them in \verb{_sections/0_authors.qmd}. \code{NULL} leaves the placeholders.}
+\item{authors}{Character vector of author names, in order, or one
+comma-separated string, which is how the RStudio wizard sends them. The
+first one is marked as the corresponding author. Affiliations are not
+guessed: fill them in \verb{_sections/0_authors.qmd}. \code{NULL} or an empty
+string leaves the placeholders.}
 
 \item{overwrite}{Write into a directory that already has files in it.
 \code{FALSE} (the default) refuses, so an existing manuscript is never
@@ -36,10 +42,12 @@ decision. Needs \code{git} on the PATH and a configured \code{user.name} /
 \code{user.email}; if either is missing, the project is still created and you
 are told what to run.}
 
-\item{open}{Open the new project in RStudio when the session allows it.}
+\item{open}{Open the new project in RStudio. Needs an RStudio session and
+the rstudioapi package; outside one, the project is created and a message
+says so.}
 }
 \value{
-The path of the created project, invisibly.
+The absolute path of the created project, invisibly.
 }
 \description{
 Writes, into \code{path}, the complete structure of a reproducible manuscript:
@@ -58,11 +66,28 @@ The top of the project's \code{make.R} records the version of easypaper that
 wrote the structure. The project never needs the package again, but if the
 scaffold changes in the future, the stamp is what tells you which version
 produced a project you already have.
+
+Every argument is checked before anything is written, so a wrong call
+stops with a message naming the argument and leaves no half-made project
+behind.
 }
 \examples{
+dir <- file.path(tempdir(), "ant_chemistry")
+create_paper(dir,
+             title   = "Chemical mimicry in Maculinea rebeli",
+             authors = c("Ada Lovelace", "Alan Turing"),
+             git     = FALSE)
+list.files(dir)
+unlink(dir, recursive = TRUE)
+
 \dontrun{
+# A real project, with its git history started for you:
 create_paper("~/papers/ant_chemistry",
              title   = "Chemical mimicry in Maculinea rebeli",
              authors = c("Daniel Sanchez-Garcia", "Second Author"))
 }
+}
+\seealso{
+\code{\link[=convert_data]{convert_data()}} to bring the data into the project's \verb{data/}
+folder, and \code{vignette("easypaper")} for a tour of what the project can do.
 }

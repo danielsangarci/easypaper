@@ -6,10 +6,14 @@
 \alias{easypaper-package}
 \title{easypaper: scaffold a reproducible Quarto manuscript}
 \description{
-One function, \code{\link[=create_paper]{create_paper()}}, writes the whole directory structure of a
-reproducible scientific manuscript: the text split into sections, a single
-entry point that renders it for any journal, and a submission folder holding
-the blinded manuscript together with a data and code compendium.
+\code{\link[=create_paper]{create_paper()}} writes the whole directory structure of a reproducible
+scientific manuscript: the text split into sections, a single entry point
+that renders it for any journal, and a submission folder holding the
+blinded manuscript together with a data and code compendium. Three more
+functions serve a project once it exists: \code{\link[=convert_data]{convert_data()}} brings the data
+into the one folder that publishes, \code{\link[=add_journal]{add_journal()}} fetches a citation
+style the template does not ship, and \code{\link[=update_project]{update_project()}} refreshes the
+build logic from a newer easypaper without touching what you wrote.
 }
 \section{What you get}{
 
@@ -26,11 +30,13 @@ The build logic is copied into each project rather than kept in this
 package. The submission compendium ships \verb{scripts/}, and whoever reproduces
 your analysis should not need easypaper installed to do it. Once created, a
 project is self-contained and this package is only the scaffold that made
-it.
+it. \code{convert_data()} is the one function that lives in both places: the
+package exports it, and every project carries an identical copy.
 }
 
 \seealso{
-\code{\link[=create_paper]{create_paper()}}, and \code{vignette("easypaper")} for a tour.
+\code{\link[=create_paper]{create_paper()}}, \code{\link[=convert_data]{convert_data()}}, \code{\link[=add_journal]{add_journal()}},
+\code{\link[=update_project]{update_project()}}, and \code{vignette("easypaper")} for a tour.
 }
 \author{
 \strong{Maintainer}: Daniel Sanchez-Garcia \email{danielsangarci@gmail.com} (\href{https://orcid.org/0000-0002-0710-6292}{ORCID}) [copyright holder]

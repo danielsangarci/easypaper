@@ -78,3 +78,72 @@ test_that("every open format the code accepts is named in the data README", {
             function(e) grepl(paste0(".", e), txt, fixed = TRUE), logical(1))]
   expect_identical(missing, character(0))
 })
+
+test_that("inputs are checked before anything is written", {
+  p <- tempfile("cd")
+  dir.create(p)
+  old <- setwd(p); on.exit(setwd(old), add = TRUE)
+  expect_error(convert_data(c("a", "b")), "single non-empty")
+  expect_error(convert_data(""), "single non-empty")
+  expect_error(convert_data("nothing_here"), "nothing at")
+  expect_error(convert_data(".", overwrite = "yes"), "TRUE or FALSE")
+  expect_error(convert_data(".", also = 1), "`also`")
+  expect_error(convert_data(".", to = character(0)), "`to`")
+  expect_false(dir.exists(file.path(p, "data")))
+})
+
+test_that("a workbook becomes one .csv per sheet, and a .sav one .csv", {
+  skip_if_not_installed("readxl")
+  skip_if_not_installed("haven")
+  p <- tempfile("cd")
+  dir.create(file.path(p, "originals"), recursive = TRUE)
+  old <- setwd(p); on.exit(setwd(old), add = TRUE)
+  file.copy(readxl::readxl_example("datasets.xlsx"), "originals/datasets.xlsx")
+  file.copy(system.file("examples", "iris.sav", package = "haven"),
+            "originals/iris.sav")
+
+  said <- capture_messages(written <- convert_data("originals"))
+  sheets <- readxl::excel_sheets("originals/datasets.xlsx")
+  expect_setequal(basename(written),
+                  c(paste0("datasets_", make.names(sheets), ".csv"), "iris.csv"))
+  expect_identical(nrow(utils::read.csv("data/datasets_mtcars.csv")), 32L)
+  # The values travelled, the labels did not, and the message says so.
+  expect_true(is.numeric(utils::read.csv("data/iris.csv")$Species))
+  expect_true(any(grepl("labelled format", said)))
+})
+
+test_that("a file that cannot be read is named, and the batch goes on", {
+  skip_if_not_installed("readxl")
+  p <- tempfile("cd")
+  dir.create(file.path(p, "originals"), recursive = TRUE)
+  old <- setwd(p); on.exit(setwd(old), add = TRUE)
+  writeLines("not a workbook", "originals/broken.xlsx")
+  utils::write.csv(data.frame(a = 1), "originals/fine.csv", row.names = FALSE)
+
+  expect_warning(written <- suppressMessages(convert_data("originals")),
+                 "broken.xlsx could not be read")
+  expect_identical(basename(written), "fine.csv")
+})
+
+test_that("a working directory with regex characters in its name is fine", {
+  # The closing message used the working directory as a regular expression.
+  p <- file.path(tempfile("cd"), "a+b (c).d")
+  dir.create(file.path(p, "originals"), recursive = TRUE)
+  old <- setwd(p); on.exit(setwd(old), add = TRUE)
+  utils::write.csv(data.frame(a = 1), "originals/x.csv", row.names = FALSE)
+  expect_message(convert_data("originals"), "^data/ updated")
+  expect_message(convert_data("originals", to = "clean"), "^clean/ updated")
+})
+
+test_that("names that differ only in case are one name", {
+  # The deposit has to unpack on a file system that cannot tell them apart.
+  p <- tempfile("cd")
+  dir.create(file.path(p, "originals", "deep"), recursive = TRUE)
+  old <- setwd(p); on.exit(setwd(old), add = TRUE)
+  utils::write.csv(data.frame(a = 1), "originals/deep/Counts.csv",
+                   row.names = FALSE)
+  utils::write.csv(data.frame(a = 2), "originals/counts.csv",
+                   row.names = FALSE)
+  expect_warning(suppressMessages(convert_data("originals")), "was refused")
+  expect_length(list.files("data"), 1L)
+})

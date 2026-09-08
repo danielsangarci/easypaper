@@ -33,6 +33,18 @@ reference:
       into every project, so it works with easypaper uninstalled.
     contents:
       - convert_data
+  - title: Adding a journal
+    desc: >
+      Any journal's citation style, fetched from the official CSL repository
+      into references_styles/, where render_docx("<journal>") looks for it.
+    contents:
+      - add_journal
+  - title: Keeping a project current
+    desc: >
+      A project carries its own copy of the build logic. This refreshes it
+      from the installed easypaper and touches nothing you wrote.
+    contents:
+      - update_project
   - title: Package
     contents:
       - easypaper-package

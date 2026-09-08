@@ -1,12 +1,12 @@
 Package: easypaper
-Title: Scaffold a Reproducible Quarto Manuscript Project
+Title: Scaffold a Reproducible 'Quarto' Manuscript Project
 Version: 0.2.0
 Authors@R:
     person("Daniel", "Sanchez-Garcia", email = "danielsangarci@gmail.com",
            role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0002-0710-6292"))
 Description: Creates, in one call, the directory structure of a reproducible
-    scientific manuscript written in Quarto: sections as separate files, a
+    scientific manuscript written in 'Quarto': sections as separate files, a
     single make.R entry point, journal styles as .csl files, independent
     bibliographies for the supplementary material, figures exported to PNG,
     JPG and TIFF at 600 dpi, and a submission folder holding the blinded

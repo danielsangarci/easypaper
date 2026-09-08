@@ -7,12 +7,12 @@
 convert_data(path, to = NULL, overwrite = FALSE, also = character(0))
 }
 \arguments{
-\item{path}{File or folder to read, relative to the working directory --
-the project root, when you have opened the project's \code{.Rproj} -- or an
-absolute path. A folder is read whole, subfolders included. The originals
-are only ever read.}
+\item{path}{File or folder to read, as a single string: relative to the
+working directory -- the project root, when you have opened the project's
+\code{.Rproj} -- or absolute. A folder is read whole, subfolders included. The
+originals are only ever read.}
 
-\item{to}{Where the results go. Defaults to \verb{data/} beside the working
+\item{to}{Where the results go. Defaults to \verb{data/} inside the working
 directory.}
 
 \item{overwrite}{\code{FALSE} (the default) writes only what is missing from
@@ -37,7 +37,10 @@ Each file takes one of three roads, decided by its extension alone:
 \item \strong{Converted} to \code{.csv}: \code{.xlsx} and \code{.xls}, one \code{.csv} per sheet (needs
 readxl); \code{.sav}, \code{.dta} and \code{.sas7bdat}, one \code{.csv} per file (needs
 haven). These are closed formats with an open equivalent faithful enough
-to publish.
+to publish. A file that cannot be read -- corrupt, or not really what its
+extension says -- is named in a warning and skipped, and the rest of the
+batch goes on. A missing readxl or haven is reported once per call, with
+the files it held back.
 \item \strong{Copied byte for byte}, because they already are the open format and
 converting one would destroy it rather than open it:
 \itemize{
@@ -69,10 +72,22 @@ Subfolders of a source folder are read but not reproduced: everything lands
 flat in \verb{data/}. When two originals want the same name there, one keeps it
 -- whichever comes first in alphabetical order by path -- and the rest are
 refused with a warning saying which was kept and which was not, rather than
-one table quietly overwriting another.
+one table quietly overwriting another. Names that differ only in case count
+as the same name, because the deposit has to unpack on a file system that
+cannot tell \code{Counts.csv} from \code{counts.csv}.
 }
 \examples{
+src <- file.path(tempdir(), "originals")
+dir.create(src, showWarnings = FALSE)
+write.csv(head(iris), file.path(src, "iris.csv"), row.names = FALSE)
+out <- file.path(tempdir(), "data")
+
+convert_data(src, to = out)   # copied: a .csv is already open
+list.files(out)
+unlink(c(src, out), recursive = TRUE)
+
 \dontrun{
+# Inside a project, with the working directory at its root:
 convert_data("originals/counts.xlsx")   # one workbook, one .csv per sheet
 convert_data("originals")               # a whole folder
 convert_data("~/Downloads/plots.gpkg")  # copied, not converted

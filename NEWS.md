@@ -46,6 +46,57 @@
   and variable labels do not, and `data/metadata/attributes.csv` is where they
   belong in the deposit.
 
+## update_project() and add_journal()
+
+* **`update_project()`** brings a project written by an earlier version up to
+  the installed one. The build logic a project carries -- `make.R`, `run.R`,
+  `R/submission.R`, `R/convert_data.R`, the Word templates, the `.csl` files
+  the template ships -- is refreshed from the package; what you wrote --
+  `_sections/`, the YAML, `_quarto.yml`, `references/`, `data/`, `R/setup.R`
+  -- is never touched, and nothing is ever deleted. `dry_run = TRUE` lists
+  what would change. It insists on a clean git working tree, so the update
+  is one commit you can read with `git diff` and revert file by file;
+  without a repository it keeps the replaced files under `tempdir()` for the
+  session. Open formats you had added to `R/convert_data.R` are named so you
+  can put them back, and the steps a version leaves to you -- for 0.2.0, the
+  move from `data/csv/` to `data/` -- are printed when the project needs
+  them. The stamp at the top of `make.R` then records both versions: the one
+  that created the project and the one it was updated to.
+* **`add_journal()`** fetches any journal's citation style from the official
+  CSL repository into `references_styles/`, where `render_docx("<journal>")`
+  and `make_submission("<journal>")` find it. Most journals' styles are
+  dependent -- a pointer at a parent whose rules they share -- and pandoc
+  cannot follow the pointer, so the parent's rules are what lands in the
+  project, under the name you asked for. Base R downloads the file and checks
+  it is a style; nothing new is installed, and a local checkout of the
+  repository works offline.
+
+## Hardened
+
+* Every argument of `create_paper()` and `convert_data()` is checked before
+  anything is written: a `path` that is not one string, a `title` that is not
+  text, a flag that is not `TRUE` or `FALSE`, stop with a message naming the
+  argument and leave no half-made project behind. A `path` that exists as a
+  file is refused rather than written into, and `open = TRUE` outside RStudio
+  says so instead of doing nothing.
+* A title with a backslash -- a LaTeX fragment, say -- or a double quote
+  reached the YAML unescaped and broke it, and a title given as a vector
+  wrote a broken header with a warning. Titles and author names are now
+  escaped for YAML, and a vector is joined into one title.
+* `create_paper()` looked for `title:` and `author:` anywhere in the file, and
+  assumed the author block was followed by another key. A line of prose
+  starting with `title:`, or an author list at the end of the header, would
+  have corrupted the file. Both keys are now replaced inside the YAML fences
+  only. The project also takes its name from the resolved path, so `"."` and
+  a trailing slash give the `.Rproj` its real name.
+* `convert_data()`: a working directory with a regex character in its name
+  (`+`, `(`, a dot) broke the closing message. A workbook or a `.sav` that
+  cannot be read is now named and skipped instead of aborting the batch, a
+  copy that fails is reported instead of counted as written, a missing readxl
+  or haven is reported once per call instead of once per file, and two names
+  that differ only in case count as a collision, because the deposit has to
+  unpack on a file system that cannot tell them apart.
+
 ## Fixed
 
 * `source("make.R")` now defines the data function. It did not, so the second

@@ -47,8 +47,9 @@ make_preprint()                                                       # the whol
 
 Every render checks first — citations with no entry, cross-references with no
 target, data files nobody reads — and records the environment it came out of.
-`list_journals()` tells you which citation styles you have; `check_data()`,
-`check_renv()` and their siblings can be called on their own.
+`list_journals()` tells you which citation styles you have, and
+`easypaper::add_journal("plos-one")` fetches one the template does not ship;
+`check_data()`, `check_renv()` and their siblings can be called on their own.
 
 `make_all()` renders; `make_submission()` submits. The first writes documents
 to read, into `output/`. The second builds what the journal asks for — blinded,
@@ -180,7 +181,10 @@ the project, where `source("make.R")` gives you `render_html()`, `make_all()`
 and `make_submission()`. Those functions belong to the project, not to the
 package: they keep working with easypaper uninstalled, which is what makes the
 compendium you deposit reproducible on its own. The top of `make.R` records
-which version of easypaper wrote the structure.
+which version of easypaper wrote the structure, and
+`easypaper::update_project()` refreshes that build logic from a newer version
+without touching what you wrote: `dry_run = TRUE` shows what would change, and
+the update goes in as one commit you can read and revert file by file.
 
 ## Requirements
 

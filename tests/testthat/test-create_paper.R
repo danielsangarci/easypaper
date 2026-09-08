@@ -107,3 +107,104 @@ test_that("git = FALSE leaves no repository", {
   create_paper(p, git = FALSE)
   expect_false(dir.exists(file.path(p, ".git")))
 })
+
+test_that("a title with quotes and backslashes reaches the YAML intact", {
+  p <- tempfile("paper")
+  title <- 'Effects of \\textit{Formica} on "guests" and C:\\path'
+  create_paper(p, title = title, git = FALSE)
+  expect_identical(
+    rmarkdown::yaml_front_matter(file.path(p, "manuscript.qmd"))$title, title)
+  expect_identical(
+    rmarkdown::yaml_front_matter(file.path(p, "title_page.qmd"))$title, title)
+})
+
+test_that("a title given as a vector is one title, not a broken header", {
+  p <- tempfile("paper")
+  expect_no_warning(
+    create_paper(p, title = c("Chemical mimicry", "in ants"), git = FALSE))
+  expect_identical(
+    rmarkdown::yaml_front_matter(file.path(p, "manuscript.qmd"))$title,
+    "Chemical mimicry in ants")
+})
+
+test_that("author names are escaped like the title", {
+  p <- tempfile("paper")
+  create_paper(p, authors = c('Conan "the" O\'Brien', "Zoe Mueller"),
+               git = FALSE)
+  y <- rmarkdown::yaml_front_matter(file.path(p, "manuscript.qmd"))
+  expect_identical(y$author[[1]]$name, 'Conan "the" O\'Brien^1,\\*^')
+  expect_identical(y$author[[2]]$name, "Zoe Mueller^2^")
+})
+
+test_that("every argument is checked before anything is written", {
+  p <- tempfile("paper")
+  expect_error(create_paper(), "missing")
+  expect_error(create_paper(NA_character_), "single non-empty")
+  expect_error(create_paper(p, title = 42), "`title`")
+  expect_error(create_paper(p, authors = list("a")), "`authors`")
+  expect_error(create_paper(p, overwrite = NA), "`overwrite`")
+  expect_error(create_paper(p, git = "yes"), "`git`")
+  expect_error(create_paper(p, open = c(TRUE, FALSE)), "`open`")
+  expect_false(dir.exists(p))
+})
+
+test_that("a path that exists as a file is refused", {
+  f <- tempfile("paper")
+  writeLines("x", f)
+  expect_error(create_paper(f), "is a file")
+})
+
+test_that("the project takes its name from the resolved path", {
+  # "." and a trailing slash both used to give the .Rproj a wrong name.
+  p <- tempfile("paper")
+  dir.create(p)
+  old <- setwd(p); on.exit(setwd(old), add = TRUE)
+  out <- create_paper(".", git = FALSE)
+  expect_identical(basename(out), basename(p))
+  expect_true(file.exists(file.path(p, paste0(basename(p), ".Rproj"))))
+
+  q <- tempfile("paper")
+  create_paper(paste0(q, "/"), git = FALSE)
+  expect_true(file.exists(file.path(q, paste0(basename(q), ".Rproj"))))
+})
+
+test_that("the YAML is edited only inside its fences", {
+  # `title:` and `author:` used to be looked for anywhere in the file, and the
+  # author block was assumed to be followed by another key: a list at the end
+  # of the header would have swallowed the closing fence and the body.
+  f <- tempfile(fileext = ".qmd")
+  writeLines(c("---",
+               "title: \"Old\"",
+               "author:",
+               "  - name: \"A^1^\"",
+               "  - name: \"B^2^\"",
+               "---",
+               "",
+               "title: this is prose, not metadata",
+               "author: so is this"), f)
+  expect_true(.set_title(f, "New"))
+  expect_true(.set_authors(f, c("Ada", "Alan")))
+  y <- rmarkdown::yaml_front_matter(f)
+  expect_identical(y$title, "New")
+  expect_length(y$author, 2L)
+  expect_match(y$author[[2]]$name, "^Alan\\^2\\^$")
+  l <- readLines(f)
+  expect_identical(sum(l == "---"), 2L)
+  expect_identical(utils::tail(l, 2),
+                   c("title: this is prose, not metadata",
+                     "author: so is this"))
+})
+
+test_that("a file with no front matter is left alone", {
+  f <- tempfile(fileext = ".qmd")
+  writeLines(c("# Heading", "title: x"), f)
+  expect_false(.set_title(f, "New"))
+  expect_identical(readLines(f), c("# Heading", "title: x"))
+})
+
+test_that("open = TRUE outside RStudio says so instead of doing nothing", {
+  skip_if(requireNamespace("rstudioapi", quietly = TRUE) &&
+            rstudioapi::isAvailable(), "running inside RStudio")
+  p <- tempfile("paper")
+  expect_message(create_paper(p, git = FALSE, open = TRUE), "rstudioapi")
+})
