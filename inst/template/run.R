@@ -8,7 +8,8 @@
 # Do NOT source() it: that would fire every render, one after another. The
 # guard below stops you if you try.
 #
-# The actual code lives in make.R, R/submission.R and R/crossref_styles.R.
+# The actual code lives in make.R, R/submission.R, R/convert_data.R and
+# R/crossref_styles.R.
 #
 # What each argument does, in tables and with its default, is in the Get
 # started guide: https://danielsangarci.github.io/easypaper/articles/easypaper.html
@@ -25,6 +26,25 @@ if (sys.nframe() > 0L) {
 # 'could not find function', this is what you forgot).
 
 source("make.R")
+
+
+# --- 0b. GETTING DATA IN ---------------------------------------------------
+# data/ is the folder that publishes: what is in it is what the analysis
+# reads, what the metadata describes and what the deposit carries. This brings
+# an original in, converted or copied. It does NOT run by itself.
+#
+# The path is relative to the project root, or absolute. Your originals live
+# wherever you keep them -- the project does not publish them, so it does not
+# prescribe a place. They are never moved, edited or converted in place.
+#
+# What it does with each format, and how to teach it one more, is at the top
+# of R/convert_data.R.
+
+convert_data("originals/counts.xlsx")          # one workbook, one .csv/sheet
+convert_data("originals")                      # a whole folder at once
+convert_data("~/Drive/plots.gpkg")             # already open: copied as it is
+convert_data("originals", overwrite = TRUE)    # rebuild, ignoring what is there
+convert_data("originals", also = "las")        # one more extension as open
 
 
 # --- 1. WHILE WRITING ------------------------------------------------------
@@ -125,7 +145,7 @@ check_crossrefs()      # @fig-/@tbl- with no target, and figures nobody cites
 check_title()          # does title_page.qmd still match the manuscript?
 export_figure_formats()# figures/png/ -> figures/jpg/ and figures/tiff/ at 600 dpi
 check_renv()           # is renv.lock there, and does it match what you are using?
-check_data()           # .csv sitting in data/csv/ that nothing reads --
+check_data()           # files sitting in data/ that nothing reads --
                        # they would travel to the repository anyway
 
 
@@ -159,5 +179,3 @@ td_download("2_introduction")   # bring back their edits BEFORE editing locally
 #                               # Not needed for the lockfile: make_submission()
 #                               # writes renv.lock from the library you use
 # source("R/create_metadata.R") # dataspice metadata, filled in by hand
-# source("R/sync_data.R")       # then sync_data(): converts or copies every
-#                               # original in data/raw/ into data/csv/

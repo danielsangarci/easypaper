@@ -317,7 +317,7 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
 #' syncs drafts with Google Docs -- ends up in the lockfile of a data deposit.
 #' The rule here is narrower but not arbitrary: a package belongs in the lock
 #' if its output travels. That is the analysis (manuscript, sections, setup),
-#' the .csv conversion (sync_data.R -> data/csv/) and the metadata
+#' the format conversion (convert_data.R -> data/) and the metadata
 #' (create_metadata.R -> metadata/), even though those last two scripts are
 #' not themselves published. Left out: trackdown, and the build tooling
 #' (make.R, submission.R, crossref_styles.R, renv_setup.R), which produce
@@ -329,7 +329,7 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
   files <- c(MASTER, here("supplementary.qmd"), here("title_page.qmd"),
              list.files(here("_sections"), "[.]qmd$", full.names = TRUE),
              here("R/setup.R"),
-             here("R/sync_data.R"), here("R/create_metadata.R"),
+             here("R/convert_data.R"), here("R/create_metadata.R"),
              list.files(here("R"), "^analysis.*[.]R$", full.names = TRUE))
   files <- files[file.exists(files)]
   p <- tryCatch(sort(unique(renv::dependencies(files, quiet = TRUE)$Package)),
@@ -343,18 +343,13 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
   dir.create(file.path(dest, "data"), recursive = TRUE, showWarnings = FALSE)
   dir.create(file.path(dest, "scripts"), showWarnings = FALSE)
 
-  # Only the open formats are published: the .csv, never the source .xlsx.
-  # The originals stay in the private project as the archive copy; a .csv is
-  # plain text and will still be readable when nothing opens an .xlsx.
-  # The .csv go straight into data/, not into data/csv/: inside the compendium
-  # there is nothing to tell them apart from, and a folder with one thing in it
-  # is a folder too many.
-  if (dir.exists(here("data/csv"))) {
-    file.copy(list.files(here("data/csv"), full.names = TRUE),
-              file.path(dest, "data"), recursive = TRUE)
-  }
-  if (file.exists(here("data/README.md"))) {
-    file.copy(here("data/README.md"), file.path(dest, "data"), overwrite = TRUE)
+  # data/ travels whole, minus its subfolders: metadata/ goes out on its own,
+  # below, and nothing else should be in there. Whatever the project reads is
+  # what the deposit carries -- that is the point of there being one folder.
+  if (dir.exists(here("data"))) {
+    files <- list.files(here("data"), full.names = TRUE)
+    files <- files[!dir.exists(files)]
+    if (length(files)) file.copy(files, file.path(dest, "data"))
   }
   non_open <- list.files(file.path(dest, "data"), recursive = TRUE,
                          pattern = "[.](xlsx|xls|sav|dta|mdb|accdb)$",
@@ -527,10 +522,14 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
           if (!is.na(d)) return(unname(d))
           if (grepl("[.]R$", f)) .first_comment(f) else ""
         }),
-    strwrap(paste("Data are distributed as .csv: plain text, readable by any software,",
-                  "and still readable when today's spreadsheet formats are not. The",
-                  "original spreadsheets are not part of this deposit; the .csv are a",
-                  "faithful copy of them."), width = 76), ""
+    strwrap(paste("Data are distributed in open formats: .csv where the table",
+                  "allows it, and the original open format where converting it",
+                  "would destroy it -- a GeoPackage, a NetCDF, a SQLite",
+                  "database. None of it needs proprietary software to read.",
+                  "The spreadsheets and statistical files some of it was",
+                  "converted from are not part of this deposit: they stay in",
+                  "the authors' project as the archive copy."),
+            width = 76), ""
   )
 
   has_lock <- file.exists(file.path(dest, "renv.lock"))
@@ -638,7 +637,7 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
     "      `make_submission(figure_format = \"png\")`.",
     "- [ ] `renv.lock` present in `data_and_code/`: without it the package",
     "      versions are not recorded. `renv::snapshot()` if it is missing.",
-    "- [ ] Everything in `data_and_code/data/csv/` belongs to this paper.",
+    "- [ ] Everything in `data_and_code/data/` belongs to this paper.",
     "      check_data() lists the files nothing reads: they travel to the",
     "      repository and into the metadata all the same.",
     "- [ ] Upload `data_and_code.zip` to Zenodo/Dryad and put the DOI in the",

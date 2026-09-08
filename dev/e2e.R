@@ -71,6 +71,9 @@ cat("\n== a project with data, citations, figures and tables ==\n")
 suppressMessages(create_paper(p, title = "Chemical mimicry in Maculinea rebeli",
                               authors = c("Ada Lovelace", "Alan Turing"),
                               git = FALSE))
+# The originals live outside data/: the project does not publish them, so it
+# does not prescribe a place for them either.
+dir.create(file.path(p, "originals"), showWarnings = FALSE)
 set.seed(42)
 write.csv(data.frame(
   colony     = sprintf("MR-%02d", 1:24),
@@ -78,7 +81,7 @@ write.csv(data.frame(
   treatment  = rep(c("control", "treated"), each = 12),
   richness   = rpois(24, 8),
   head_width = round(rnorm(24, 1.42, 0.12), 2)),
-  file.path(p, "data/raw/colonies.csv"), row.names = FALSE)
+  file.path(p, "originals/colonies.csv"), row.names = FALSE)
 
 cat('
 @article{lovelace1843,
@@ -102,7 +105,7 @@ writeLines(c(
 writeLines(c(
   "```{r}",
   "#| label: richness-model",
-  "colonies <- read.csv(here::here('data/csv/colonies.csv'))",
+  "colonies <- read.csv(here::here('data/colonies.csv'))",
   "b <- round(coef(lm(richness ~ treatment, data = colonies))[[2]], 2)",
   "```",
   "",
@@ -118,14 +121,18 @@ cat("\n\nThe protocol follows the classic census method [@holldobler1990],",
 
 setwd(p); on.exit(setwd(pkg), add = TRUE)
 source("make.R")
-source("R/sync_data.R")
+ok("source(\"make.R\") alone defines convert_data()", exists("convert_data"))
 
 # --- 2. every command ------------------------------------------------------
 cat("\n== the commands ==\n")
-# A format sync_data() cannot convert must be named, not dropped in silence.
-file.create(file.path(p, "data/raw/colonies.sqlite"))
-said_raw <- paste(capture.output(sync_data(), type = "message"), collapse = " ")
-run("sync_data()",             sync_data())
+# The three roads out of an originals folder: a format nothing knows must be
+# named rather than dropped in silence, and one that is already open must
+# travel byte for byte.
+file.create(file.path(p, "originals/spectra.raw"))
+writeLines("not really a GeoPackage", file.path(p, "originals/plots.gpkg"))
+said_raw <- paste(capture.output(convert_data("originals"), type = "message"),
+                  collapse = " ")
+run("convert_data()",          convert_data("originals"))
 run("check_citations()",       check_citations())
 run("check_crossrefs()",       check_crossrefs(quiet = TRUE))
 run("check_title()",           check_title(quiet = TRUE))
@@ -230,22 +237,72 @@ ok("and does not overwrite what you wrote by hand",
 
 # A .csv from a path you abandoned: it must be named, and it must survive --
 # check_data() reports, it never removes.
-write.csv(data.frame(x = 1:3), file.path(p, "data/csv/pilot_2024.csv"),
+write.csv(data.frame(x = 1:3), file.path(p, "data/pilot_2024.csv"),
           row.names = FALSE)
 said <- paste(capture.output(check_data(), type = "message"), collapse = " ")
 ok("an unread data file is reported", grepl("pilot_2024.csv", said))
-ok("an unconvertible original is named, not silently dropped",
-   grepl("colonies.sqlite", said_raw))
-ok("and it was not copied into data/csv/",
-   !file.exists(file.path(p, "data/csv/colonies.sqlite")))
-ok("the original in raw/ reached data/csv/",
-   file.exists(file.path(p, "data/csv/colonies.csv")))
+ok("a format nothing knows is named, not silently dropped",
+   grepl("spectra.raw", said_raw))
+ok("and it was not copied into data/",
+   !file.exists(file.path(p, "data/spectra.raw")))
+ok("a format that is already open is copied, not named", {
+  # It is named in the list of files written, so look only at the other list:
+  # the one of originals left behind.
+  left <- if (grepl("not a format this knows: ", said_raw)) {
+    sub("They will not reach.*", "",
+        sub(".*not a format this knows: ", "", said_raw))
+  } else ""
+  file.exists(file.path(p, "data/plots.gpkg")) &&
+    !grepl("plots.gpkg", left, fixed = TRUE)
+})
+ok("and it reached the compendium beside the .csv",
+   file.exists(file.path(p, "submission/Test/data_and_code/data/plots.gpkg")))
+ok("an extension named in `also` is copied too", {
+  file.create(file.path(p, "originals/cloud.las"))
+  invisible(capture.output(
+    suppressWarnings(convert_data("originals", also = "las")),
+    type = "message"))
+  file.exists(file.path(p, "data/cloud.las"))
+})
+ok("the original outside data/ reached data/",
+   file.exists(file.path(p, "data/colonies.csv")))
+ok("and the original itself was left alone",
+   file.exists(file.path(p, "originals/colonies.csv")))
 ok("and the compendium holds it flat, not in a subfolder",
    file.exists(file.path(p, "submission/Test/data_and_code/data/colonies.csv")))
 ok("and is not removed",
-   file.exists(file.path(p, "data/csv/pilot_2024.csv")))
+   file.exists(file.path(p, "data/pilot_2024.csv")))
 ok("while the one the analysis reads is not mentioned",
    !grepl("colonies.csv", said))
+
+# A shapefile is one dataset spread over several files, and the code only ever
+# names the .shp: its companions must not be reported as unread.
+for (e in c("shp", "dbf", "shx", "prj")) {
+  file.create(file.path(p, paste0("data/sites.", e)))
+}
+cat("\n# the map comes from here::here('data/sites.shp')\n",
+    file = file.path(p, "R/setup.R"), append = TRUE)
+said_shp <- paste(capture.output(check_data(), type = "message"), collapse = " ")
+ok("the sidecars of a shapefile are not reported as unread",
+   !grepl("sites[.](dbf|shx|prj)", said_shp))
+ok("but a file nothing reads still is", grepl("pilot_2024.csv", said_shp))
+ok("and data/metadata/ is never reported as unread data",
+   !grepl("attributes.csv|biblio.csv|creators.csv", said_shp))
+
+# Two originals that want the same name: subfolders are not reproduced, so one
+# would overwrite the other without a word.
+dir.create(file.path(p, "originals/pilot"), showWarnings = FALSE)
+write.csv(data.frame(x = 1), file.path(p, "originals/pilot/colonies.csv"),
+          row.names = FALSE)
+said_clash <- paste(capture.output(
+  suppressWarnings(withCallingHandlers(
+    convert_data("originals"),
+    warning = function(w) message(conditionMessage(w)))),
+  type = "message"), collapse = " ")
+ok("two originals wanting one name are reported",
+   grepl("pilot/colonies.csv", said_clash) && grepl("both give", said_clash))
+ok("and the one already in data/ is not overwritten",
+   nrow(utils::read.csv(file.path(p, "data/colonies.csv"))) > 1)
 
 ok("renv.lock recorded", file.exists(file.path(p, "renv.lock")))
 ok("no temporary file left behind",

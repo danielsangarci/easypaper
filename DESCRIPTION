@@ -1,6 +1,6 @@
 Package: easypaper
 Title: Scaffold a Reproducible Quarto Manuscript Project
-Version: 0.1.0
+Version: 0.2.0
 Authors@R:
     person("Daniel", "Sanchez-Garcia", email = "danielsangarci@gmail.com",
            role = c("aut", "cre", "cph"),
@@ -25,8 +25,13 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Depends:
     R (>= 4.1)
+Imports:
+    tools,
+    utils
 Suggests:
+    haven,
     knitr,
+    readxl,
     rmarkdown,
     rstudioapi,
     testthat (>= 3.0.0),

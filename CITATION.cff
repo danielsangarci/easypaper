@@ -15,7 +15,7 @@ authors:
     given-names: "Daniel"
     email: "danielsangarci@gmail.com"
     orcid: "https://orcid.org/0000-0002-0710-6292"
-version: 0.1.0
+version: 0.2.0
 license: MIT
 repository-code: "https://github.com/danielsangarci/easypaper"
 url: "https://github.com/danielsangarci/easypaper"

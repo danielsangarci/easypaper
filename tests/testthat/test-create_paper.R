@@ -8,7 +8,7 @@ test_that("it writes the whole structure", {
     expect_true(file.exists(file.path(p, f)), info = f)
   }
   for (d in c("_sections", "R", "format", "references", "references_styles",
-              "data/raw", "data/csv", "data/metadata",
+              "data", "data/metadata",
               "output/journal", "output/preprint", "output/supplementary",
               "figures", "cache")) {
     expect_true(dir.exists(file.path(p, d)), info = d)

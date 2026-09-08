@@ -58,7 +58,7 @@ make_preprint()                              # deposit folder, for a preprint
 
 preview()                    # live preview while you write
 list_journals()              # available CSL files
-clean_cache()                # after changing data/raw/
+clean_cache()                # after changing data/
 check_citations()            # cited keys missing from the .bib
 ```
 
@@ -121,18 +121,17 @@ R/
   submission.R         Builds the submission folder
   crossref_styles.R    Caption style per journal
   renv_setup.R         Dependencies
-  sync_data.R          data/raw/* -> data/csv/*.csv (converts or copies)
+  convert_data.R       brings an original into data/ (converts or copies)
   create_metadata.R    dataspice metadata
   trackdown.R          Google Docs sync for co-authors
-data/
-  raw/                 Originals. UNTOUCHABLE, read only. Not published.
-  csv/                 Same data, in open format, from sync_data(). What
-                       gets published, and what the metadata describes.
+data/                  The data, in open formats. THIS is what gets published
+                       and what the metadata describes. convert_data() brings
+                       originals in; the originals themselves live wherever
+                       you keep them, outside the project or in it
   metadata/            dataspice. `sync_metadata()` fills in what the project
                        already knows -- title, keywords, authors, the variable
-                       names of data/csv/ -- on every render, and only
-                       ever adds: your descriptions and units are never
-                       rewritten
+                       names of data/ -- on every render, and only ever adds:
+                       your descriptions and units are never rewritten
 format/                Word templates: the manuscript (line-numbered, ragged
                        right), the supplement and the cover letter (both
                        justified, neither numbered)
@@ -167,7 +166,7 @@ A typical analysis in a results section:
     ```{r}
     #| label: richness-model
     #| cache: true
-    richness <- readr::read_csv(here::here("data/csv/richness.csv")) |>
+    richness <- readr::read_csv(here::here("data/richness.csv")) |>
       dplyr::filter(!is.na(S), status != "dead") |>
       dplyr::mutate(treatment = factor(treatment, levels = c("control", "warmed")))
 
@@ -233,7 +232,7 @@ out of order.
   compendium. `trackdown`, `dataspice` and `EML` are your tooling and stay out,
   which took the lockfile of this template from 112 packages to 60.
 - **The knitr cache does not notice changes in data files.** After touching
-  `data/raw/`, run `clean_cache()` (it also clears `_freeze/` and `.quarto/`).
+  `data/`, run `clean_cache()` (it also clears `_freeze/` and `.quarto/`).
 - **`~/.Rprofile` is loaded in every R session.** If you define functions there
   and the manuscript uses them without you noticing, it will not reproduce on
   another machine. When in doubt:
@@ -417,7 +416,7 @@ submission/default/
     supporting_information_default.docx
     figures/Figure_1.tiff  Figure_2.tiff    600 dpi, LZW, in order
   data_and_code/
-    data/csv/                         the .csv only; no .xlsx is published
+    data/                                   open formats only; no .xlsx
     metadata/                               dataspice
     scripts/                                setup.R, analysis_code.R, sessionInfo.txt
     README.txt                              written from the folder contents
@@ -425,10 +424,11 @@ submission/default/
   data_and_code.zip                         the same, for Zenodo/Dryad
 ```
 
-**The compendium publishes only open formats and only analysis code.** The
-`.xlsx` in `data/raw/` stay in your project as the archive copy: a `.csv` is
-plain text and will still open when nothing opens a spreadsheet. And of the
-scripts, only `setup.R` and the analysis go in -- `sync_data.R`,
+**The compendium publishes only open formats and only analysis code.** It
+carries `data/` whole; your original `.xlsx` and `.sav` are not in there, and
+a closed format that finds its way into `data/` is dropped on the way out. What
+was already an open format -- a GeoPackage, a NetCDF -- travels untouched. And of the
+scripts, only `setup.R` and the analysis go in -- `convert_data.R`,
 `create_metadata.R`, `renv_setup.R`, `trackdown.R`, `submission.R` and
 `crossref_styles.R` are your tooling, not the paper's method. It is a
 whitelist: name an extra analysis script `R/analysis_*.R` and it is included

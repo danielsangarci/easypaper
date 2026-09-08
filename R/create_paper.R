@@ -84,7 +84,7 @@ create_paper <- function(path, title = NULL, authors = NULL,
               file.path(path, paste0(basename(path), ".Rproj")))
 
   # Folders git cannot carry empty, and the ones make.R writes into.
-  for (d in c("data/raw", "data/csv", "data/metadata")) {
+  for (d in c("data/metadata")) {
     dir.create(file.path(path, d), recursive = TRUE, showWarnings = FALSE)
     file.create(file.path(path, d, ".gitkeep"))
   }

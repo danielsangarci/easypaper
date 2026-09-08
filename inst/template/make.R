@@ -27,6 +27,7 @@ library(here)
 library(quarto)
 source(here("R/crossref_styles.R"))
 source(here("R/submission.R"))
+source(here("R/convert_data.R"))
 
 MASTER    <- here("manuscript.qmd")
 SECTIONS  <- here("_sections")
@@ -64,7 +65,7 @@ list_journals <- function() {
 }
 
 #' The knitr cache does not notice changes in external files. If you touch
-#' data/raw/, run this before rendering.
+#' data/, run this before rendering.
 clean_cache <- function() {
   for (d in c("cache", "_freeze", ".quarto")) {
     unlink(here(d), recursive = TRUE)
@@ -151,24 +152,27 @@ sync_licenses <- function(year = format(Sys.Date(), "%Y"), quiet = FALSE) {
   invisible(holders)
 }
 
-#' What is in data/csv/ that the analysis never reads.
+#' What is in data/ that the analysis never reads.
 #'
-#' data/csv/ is not "my clean data", it is "what I am going to publish":
+#' data/ is not "my clean data", it is "what I am going to publish":
 #' the compendium copies it whole and sync_metadata() describes every file in
 #' it. A .csv from a path you abandoned travels to the repository and gets
 #' listed in the metadata, and nothing tells you.
 #'
 #' It reports; it never removes. A file read through a path the code builds --
-#' paste0("data/csv/", species, ".csv"), a loop over list.files() -- is
+#' paste0("data/", species, ".csv"), a loop over list.files() -- is
 #' invisible to any scan, so dropping the ones that look unused would sooner or
 #' later publish a compendium with a hole in it. Shipping one file too many is
 #' a nuisance; shipping one too few breaks the reproduction. Hence the asymmetry.
 #'
 #' @return TRUE when every file the code names exists.
 check_data <- function(quiet = FALSE) {
-  dir <- here("data/csv")
+  dir <- here("data")
   if (!dir.exists(dir)) return(invisible(TRUE))
+  # metadata/ describes the data, it is not data: it reaches the deposit on its
+  # own and no analysis reads it. Same for the folder's own README.
   present <- list.files(dir, recursive = TRUE)
+  present <- present[!startsWith(present, "metadata/") & present != "README.md"]
   if (!length(present)) return(invisible(TRUE))
 
   # The same files the compendium publishes: the paper and the analysis code.
@@ -176,21 +180,30 @@ check_data <- function(quiet = FALSE) {
            list.files(here("R"), "^analysis.*[.]R$", full.names = TRUE))
   src <- src[file.exists(src)]
   txt <- unlist(lapply(src, readLines, warn = FALSE))
-  hit <- unlist(regmatches(txt, gregexpr("data/csv/[A-Za-z0-9_./-]+",
-                                         txt, perl = TRUE)))
-  read <- unique(sub("^data/csv/", "", hit))
+  hit <- unlist(regmatches(txt, gregexpr(
+    "(?<![A-Za-z0-9_.-])data/[A-Za-z0-9_./-]+", txt, perl = TRUE)))
+  read <- unique(sub("^data/", "", hit))
+  read <- read[!startsWith(read, "metadata/")]
 
   missing <- setdiff(read, present)
   if (length(missing)) {
-    warning("The analysis reads files that are not in data/csv/: ",
+    warning("The analysis reads files that are not in data/: ",
             paste(missing, collapse = ", "), call. = FALSE, immediate. = TRUE)
   }
+  # A shapefile is one dataset spread over half a dozen files, and the code
+  # only ever names the .shp. Its companions are not unused: they are the same
+  # file, and reporting them would train you to ignore this message.
+  sidecar <- c("shx", "dbf", "prj", "cpg", "sbn", "sbx", "qix")
+  shp <- tools::file_path_sans_ext(
+    read[tolower(tools::file_ext(read)) == "shp"])
   unused <- setdiff(present, read)
+  unused <- unused[!(tolower(tools::file_ext(unused)) %in% sidecar &
+                       tools::file_path_sans_ext(unused) %in% shp)]
   if (length(unused) && !quiet) {
-    message("Note: in data/csv/ but never read by the analysis: ",
+    message("Note: in data/ but never read by the analysis: ",
             paste(unused, collapse = ", "), "\n  They travel into the ",
             "compendium and into its metadata all the same. Move them out of ",
-            "data/csv/ if they are not part of the paper.")
+            "data/ if they are not part of the paper.")
   }
   invisible(!length(missing))
 }
@@ -262,9 +275,9 @@ sync_metadata <- function(quiet = FALSE) {
   utils::write.csv(cr, f, row.names = FALSE, na = "")
 
   # --- attributes and access: the data files describe themselves ------------
-  # data/csv only: that is what the compendium publishes. The raw files
-  # stay out of the deposit, so describing them would promise what is not there.
-  csvs <- list.files(here("data", "csv"), "\\.csv$", full.names = TRUE)
+  # data/ only, and not recursively: metadata/ is the description itself, not
+  # something to describe.
+  csvs <- list.files(here("data"), "\\.csv$", full.names = TRUE)
   if (length(csvs)) {
     before <- nrow(utils::read.csv(file.path(md, "attributes.csv"),
                                    colClasses = "character"))
