@@ -9,7 +9,9 @@ citHeader("To cite easypaper in publications, use:")
 bibentry(
   bibtype  = "Manual",
   key      = "easypaper",
-  title    = "easypaper: Scaffold a Reproducible Quarto Manuscript Project",
+  title    = paste("easypaper: Scaffold a Reproducible Quarto Manuscript",
+                   "Project with Output Ready for Co-Authors, Preprints",
+                   "and Journals"),
   author   = person("Daniel", "Sanchez-Garcia",
                     comment = c(ORCID = "0000-0002-0710-6292")),
   year     = year,
@@ -17,5 +19,6 @@ bibentry(
   url      = url,
   textVersion = paste0(
     "Sanchez-Garcia, D. (", year, "). easypaper: Scaffold a Reproducible ",
-    "Quarto Manuscript Project. ", vers, ". ", url)
+    "Quarto Manuscript Project with Output Ready for Co-Authors, ",
+    "Preprints and Journals. ", vers, ". ", url)
 )

@@ -152,7 +152,8 @@ citation("easypaper")
 ```
 
 > Sanchez-Garcia, D. (2026). easypaper: Scaffold a Reproducible Quarto
-> Manuscript Project. R package version 0.1.0.
+> Manuscript Project with Output Ready for Co-Authors, Preprints and
+> Journals. R package version 0.1.0.
 > https://github.com/danielsangarci/easypaper
 
 The BibTeX entry comes with the key `easypaper`, ready to paste into a `.bib`.
