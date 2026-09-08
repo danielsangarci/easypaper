@@ -103,7 +103,7 @@ affiliations themselves live in
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"demo_paper"</span><span class="op">)</span></span>
 <span><span class="fu">easypaper</span><span class="fu">::</span><span class="fu"><a href="../reference/create_paper.html">create_paper</a></span><span class="op">(</span><span class="va">dir</span>, git <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Project created: /tmp/RtmpRvE9Pr/demo_paper</span></span>
+<span><span class="co">#&gt; Project created: /tmp/RtmpTfCVp9/demo_paper</span></span>
 <span><span class="co">#&gt;   1. open demo_paper.Rproj</span></span>
 <span><span class="co">#&gt;   2. source("make.R")</span></span>
 <span><span class="co">#&gt;   3. render_html()      # or see run.R for every command</span></span>
@@ -538,6 +538,24 @@ argument explained, ready to run one line at a time. It is the file to
 open when you cannot remember a name.</p>
 </div>
 <div class="section level2">
+<h2 id="adding-a-journal">Adding a journal<a class="anchor" aria-label="anchor" href="#adding-a-journal"></a>
+</h2>
+<p>The template ships nine styles, all from ecology. Any other journal’s
+is one call away, and it goes where <code>render_docx()</code>
+looks:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">easypaper</span><span class="fu">::</span><span class="fu"><a href="../reference/add_journal.html">add_journal</a></span><span class="op">(</span><span class="st">"plos-one"</span><span class="op">)</span>   <span class="co"># -&gt; references_styles/plos-one.csl</span></span>
+<span><span class="fu">render_docx</span><span class="op">(</span><span class="st">"plos-one"</span><span class="op">)</span></span></code></pre></div>
+<p>The name is the one the official CSL repository uses — the file name
+without <code>.csl</code>, lower case, hyphens — and Zotero’s style
+finder at <a href="https://www.zotero.org/styles" class="external-link uri">https://www.zotero.org/styles</a> searches it by journal;
+its URLs work too. Most journals have a <em>dependent</em> style, a few
+lines pointing at the parent whose rules they share. Pandoc cannot
+follow that pointer, so what lands in the project are the parent’s rules
+under the name you asked for, and the message says which parent it
+was.</p>
+</div>
+<div class="section level2">
 <h2 id="supplementary-material">Supplementary material<a class="anchor" aria-label="anchor" href="#supplementary-material"></a>
 </h2>
 <p>Two kinds, told apart by what the file contains — nothing to
@@ -556,7 +574,7 @@ point — its reference list is independent from the main text’s.</li>
 </ul>
 <p>Where the figures end up is decided when you submit, and the
 citations work either way:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">make_submission</span><span class="op">(</span><span class="st">"myrmecological-news"</span><span class="op">)</span>                        <span class="co"># own document</span></span>
 <span><span class="fu">make_submission</span><span class="op">(</span><span class="st">"myrmecological-news"</span>, suppl_figures <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span> <span class="co"># end of the main text</span></span></code></pre></div>
 </div>
@@ -628,7 +646,7 @@ included</td>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">make_submission</span><span class="op">(</span><span class="st">"myrmecological-news"</span><span class="op">)</span>                        <span class="co"># -&gt; submission/default/</span></span>
 <span><span class="fu">make_submission</span><span class="op">(</span><span class="st">"myrmecological-news"</span>, label <span class="op">=</span> <span class="st">"MyrmecologicalNews"</span><span class="op">)</span> <span class="co"># the real submission</span></span></code></pre></div>
 <table class="table">
@@ -729,7 +747,7 @@ guess, the coverage and the licence of the deposit, stays yours.</p>
 <p>A preprint goes to two places at once — the manuscript to a server,
 the data and code to a repository — and <code>make_preprint()</code>
 builds both halves into <code>submission/bioRxiv/</code>.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">make_preprint</span><span class="op">(</span><span class="op">)</span>                       <span class="co"># -&gt; submission/bioRxiv/</span></span>
 <span><span class="fu">make_preprint</span><span class="op">(</span>label <span class="op">=</span> <span class="st">"EcoEvoRxiv"</span><span class="op">)</span>   <span class="co"># another server</span></span>
 <span><span class="fu">make_preprint</span><span class="op">(</span>label <span class="op">=</span> <span class="st">"bioRxiv_v2"</span><span class="op">)</span>   <span class="co"># the revised version</span></span></code></pre></div>
@@ -759,7 +777,7 @@ posting is a new version, not a correction.</p>
 <h2 id="the-checks">The checks<a class="anchor" aria-label="anchor" href="#the-checks"></a>
 </h2>
 <p>Every render runs them, and you can call them yourself:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">check_citations</span><span class="op">(</span><span class="op">)</span>   <span class="co"># @keys with no entry in references/, and the reverse</span></span>
 <span><span class="fu">check_crossrefs</span><span class="op">(</span><span class="op">)</span>   <span class="co"># @fig-/@tbl- with no target, and figures nobody cites</span></span>
 <span><span class="fu">check_title</span><span class="op">(</span><span class="op">)</span>       <span class="co"># has title_page.qmd drifted from the manuscript?</span></span>
@@ -770,9 +788,33 @@ figure defined and never cited is a figure the journal will ask you
 about.</p>
 </div>
 <div class="section level2">
+<h2 id="keeping-a-project-up-to-date">Keeping a project up to date<a class="anchor" aria-label="anchor" href="#keeping-a-project-up-to-date"></a>
+</h2>
+<p>The build logic lives in the project, which is what lets it render
+with easypaper uninstalled — and what keeps a fix in the package from
+reaching a project already written. <code><a href="../reference/update_project.html">update_project()</a></code> is the
+bridge:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">easypaper</span><span class="fu">::</span><span class="fu"><a href="../reference/update_project.html">update_project</a></span><span class="op">(</span>dry_run <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>   <span class="co"># what would change</span></span>
+<span><span class="fu">easypaper</span><span class="fu">::</span><span class="fu"><a href="../reference/update_project.html">update_project</a></span><span class="op">(</span><span class="op">)</span>                 <span class="co"># do it</span></span></code></pre></div>
+<p>It refreshes an explicit list — <code>make.R</code>,
+<code>run.R</code>, <code>R/submission.R</code>,
+<code>R/crossref_styles.R</code>, <code>R/convert_data.R</code>, the
+Word templates and the <code>.csl</code> files the template ships — and
+never touches <code>_sections/</code>, the YAML,
+<code>_quarto.yml</code>, <code>references/</code>, <code>data/</code>
+or <code>R/setup.R</code>. Nothing is deleted. It asks for a clean git
+working tree first, so the update is one commit you can read with
+<code>git diff</code> and revert file by file. What a version leaves to
+you — 0.2.0’s move from <code>data/csv/</code> to <code>data/</code>,
+say — is printed, not done. The stamp at the top of <code>make.R</code>
+then records both the version that created the project and the one it
+was updated to.</p>
+</div>
+<div class="section level2">
 <h2 id="citing-easypaper">Citing easypaper<a class="anchor" aria-label="anchor" href="#citing-easypaper"></a>
 </h2>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"easypaper"</span><span class="op">)</span></span></code></pre></div>
 <p>The BibTeX entry carries the key <code>easypaper</code>, so it drops
 into a <code>.bib</code> as it is. GitHub’s <em>Cite this

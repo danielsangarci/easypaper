@@ -62,14 +62,14 @@ years. It never writes anywhere else and never touches the original.</p>
 
 
 <dl><dt id="arg-path">path<a class="anchor" aria-label="anchor" href="#arg-path"></a></dt>
-<dd><p>File or folder to read, relative to the working directory –
-the project root, when you have opened the project's <code>.Rproj</code> – or an
-absolute path. A folder is read whole, subfolders included. The originals
-are only ever read.</p></dd>
+<dd><p>File or folder to read, as a single string: relative to the
+working directory – the project root, when you have opened the project's
+<code>.Rproj</code> – or absolute. A folder is read whole, subfolders included. The
+originals are only ever read.</p></dd>
 
 
 <dt id="arg-to">to<a class="anchor" aria-label="anchor" href="#arg-to"></a></dt>
-<dd><p>Where the results go. Defaults to <code>data/</code> beside the working
+<dd><p>Where the results go. Defaults to <code>data/</code> inside the working
 directory.</p></dd>
 
 
@@ -93,7 +93,10 @@ without the dot, e.g. <code>"las"</code>. Permanently: add them to
     <p>Each file takes one of three roads, decided by its extension alone:</p><ul><li><p><strong>Converted</strong> to <code>.csv</code>: <code>.xlsx</code> and <code>.xls</code>, one <code>.csv</code> per sheet (needs
 readxl); <code>.sav</code>, <code>.dta</code> and <code>.sas7bdat</code>, one <code>.csv</code> per file (needs
 haven). These are closed formats with an open equivalent faithful enough
-to publish.</p></li>
+to publish. A file that cannot be read – corrupt, or not really what its
+extension says – is named in a warning and skipped, and the rest of the
+batch goes on. A missing readxl or haven is reported once per call, with
+the files it held back.</p></li>
 <li><p><strong>Copied byte for byte</strong>, because they already are the open format and
 converting one would destroy it rather than open it:</p><ul><li><p>text and tables: <code>.csv</code>, <code>.tsv</code>, <code>.txt</code>, <code>.json</code>, <code>.geojson</code>, <code>.xml</code>,
 <code>.yml</code>, <code>.yaml</code></p></li>
@@ -119,12 +122,26 @@ its value labels – which is why the original is never moved or altered.</p>
 flat in <code>data/</code>. When two originals want the same name there, one keeps it
 – whichever comes first in alphabetical order by path – and the rest are
 refused with a warning saying which was kept and which was not, rather than
-one table quietly overwriting another.</p>
+one table quietly overwriting another. Names that differ only in case count
+as the same name, because the deposit has to unpack on a file system that
+cannot tell <code>Counts.csv</code> from <code>counts.csv</code>.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">src</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"originals"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">src</span>, showWarnings <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/write.table.html" class="external-link">write.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">src</span>, <span class="st">"iris.csv"</span><span class="op">)</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"data"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">convert_data</span><span class="op">(</span><span class="va">src</span>, to <span class="op">=</span> <span class="va">out</span><span class="op">)</span>   <span class="co"># copied: a .csv is already open</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> /tmp/Rtmpn1Iph9/data/ updated: 1 file(s) -- iris.csv</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">out</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "iris.csv"</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">src</span>, <span class="va">out</span><span class="op">)</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="co"># Inside a project, with the working directory at its root:</span></span></span>
 <span class="r-in"><span><span class="fu">convert_data</span><span class="op">(</span><span class="st">"originals/counts.xlsx"</span><span class="op">)</span>   <span class="co"># one workbook, one .csv per sheet</span></span></span>
 <span class="r-in"><span><span class="fu">convert_data</span><span class="op">(</span><span class="st">"originals"</span><span class="op">)</span>               <span class="co"># a whole folder</span></span></span>
 <span class="r-in"><span><span class="fu">convert_data</span><span class="op">(</span><span class="st">"~/Downloads/plots.gpkg"</span><span class="op">)</span>  <span class="co"># copied, not converted</span></span></span>

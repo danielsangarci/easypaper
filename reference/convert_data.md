@@ -16,14 +16,14 @@ convert_data(path, to = NULL, overwrite = FALSE, also = character(0))
 
 - path:
 
-  File or folder to read, relative to the working directory – the
-  project root, when you have opened the project's `.Rproj` – or an
-  absolute path. A folder is read whole, subfolders included. The
-  originals are only ever read.
+  File or folder to read, as a single string: relative to the working
+  directory – the project root, when you have opened the project's
+  `.Rproj` – or absolute. A folder is read whole, subfolders included.
+  The originals are only ever read.
 
 - to:
 
-  Where the results go. Defaults to `data/` beside the working
+  Where the results go. Defaults to `data/` inside the working
   directory.
 
 - overwrite:
@@ -48,7 +48,10 @@ Each file takes one of three roads, decided by its extension alone:
 - **Converted** to `.csv`: `.xlsx` and `.xls`, one `.csv` per sheet
   (needs readxl); `.sav`, `.dta` and `.sas7bdat`, one `.csv` per file
   (needs haven). These are closed formats with an open equivalent
-  faithful enough to publish.
+  faithful enough to publish. A file that cannot be read – corrupt, or
+  not really what its extension says – is named in a warning and
+  skipped, and the rest of the batch goes on. A missing readxl or haven
+  is reported once per call, with the files it held back.
 
 - **Copied byte for byte**, because they already are the open format and
   converting one would destroy it rather than open it:
@@ -85,12 +88,26 @@ Subfolders of a source folder are read but not reproduced: everything
 lands flat in `data/`. When two originals want the same name there, one
 keeps it – whichever comes first in alphabetical order by path – and the
 rest are refused with a warning saying which was kept and which was not,
-rather than one table quietly overwriting another.
+rather than one table quietly overwriting another. Names that differ
+only in case count as the same name, because the deposit has to unpack
+on a file system that cannot tell `Counts.csv` from `counts.csv`.
 
 ## Examples
 
 ``` r
+src <- file.path(tempdir(), "originals")
+dir.create(src, showWarnings = FALSE)
+write.csv(head(iris), file.path(src, "iris.csv"), row.names = FALSE)
+out <- file.path(tempdir(), "data")
+
+convert_data(src, to = out)   # copied: a .csv is already open
+#> /tmp/Rtmpn1Iph9/data/ updated: 1 file(s) -- iris.csv
+list.files(out)
+#> [1] "iris.csv"
+unlink(c(src, out), recursive = TRUE)
+
 if (FALSE) { # \dontrun{
+# Inside a project, with the working directory at its root:
 convert_data("originals/counts.xlsx")   # one workbook, one .csv per sheet
 convert_data("originals")               # a whole folder
 convert_data("~/Downloads/plots.gpkg")  # copied, not converted

@@ -17,6 +17,22 @@ into every project, so it works with easypaper uninstalled.
 - [`convert_data()`](https://danielsangarci.github.io/easypaper/reference/convert_data.md)
   : Convert or copy originals into the project's data folder
 
+## Adding a journal
+
+Any journal’s citation style, fetched from the official CSL repository
+into references_styles/, where render_docx(“”) looks for it.
+
+- [`add_journal()`](https://danielsangarci.github.io/easypaper/reference/add_journal.md)
+  : Add a journal's citation style to the project
+
+## Keeping a project current
+
+A project carries its own copy of the build logic. This refreshes it
+from the installed easypaper and touches nothing you wrote.
+
+- [`update_project()`](https://danielsangarci.github.io/easypaper/reference/update_project.md)
+  : Bring a project's build logic up to the installed easypaper
+
 ## Package
 
 - [`easypaper`](https://danielsangarci.github.io/easypaper/reference/easypaper-package.md)

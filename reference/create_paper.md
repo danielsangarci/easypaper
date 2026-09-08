@@ -22,19 +22,25 @@ create_paper(
 
 - path:
 
-  Directory to create. Its base name becomes the name of the `.Rproj`
-  file.
+  Directory to create, as a single non-empty string; `~` is expanded.
+  Its base name becomes the name of the `.Rproj` file. A path that
+  exists as a file is refused.
 
 - title:
 
-  Manuscript title, written into the YAML of `manuscript.qmd`. `NULL`
-  leaves the placeholder, which `make.R` warns about.
+  Manuscript title, written into the YAML of `manuscript.qmd` and
+  `title_page.qmd`. Quotes and backslashes are escaped for YAML, so a
+  LaTeX fragment such as `\textit{Formica}` survives. A vector is joined
+  with spaces. `NULL` or `""` leaves the placeholder, which `make.R`
+  warns about.
 
 - authors:
 
-  Character vector of author names, in order. The first one is marked as
-  the corresponding author. Affiliations are not guessed: fill them in
-  `_sections/0_authors.qmd`. `NULL` leaves the placeholders.
+  Character vector of author names, in order, or one comma-separated
+  string, which is how the RStudio wizard sends them. The first one is
+  marked as the corresponding author. Affiliations are not guessed: fill
+  them in `_sections/0_authors.qmd`. `NULL` or an empty string leaves
+  the placeholders.
 
 - overwrite:
 
@@ -54,11 +60,13 @@ create_paper(
 
 - open:
 
-  Open the new project in RStudio when the session allows it.
+  Open the new project in RStudio. Needs an RStudio session and the
+  rstudioapi package; outside one, the project is created and a message
+  says so.
 
 ## Value
 
-The path of the created project, invisibly.
+The absolute path of the created project, invisibly.
 
 ## Details
 
@@ -73,10 +81,41 @@ wrote the structure. The project never needs the package again, but if
 the scaffold changes in the future, the stamp is what tells you which
 version produced a project you already have.
 
+Every argument is checked before anything is written, so a wrong call
+stops with a message naming the argument and leaves no half-made project
+behind.
+
+## See also
+
+[`convert_data()`](https://danielsangarci.github.io/easypaper/reference/convert_data.md)
+to bring the data into the project's `data/` folder, and
+[`vignette("easypaper")`](https://danielsangarci.github.io/easypaper/articles/easypaper.md)
+for a tour of what the project can do.
+
 ## Examples
 
 ``` r
+dir <- file.path(tempdir(), "ant_chemistry")
+create_paper(dir,
+             title   = "Chemical mimicry in Maculinea rebeli",
+             authors = c("Ada Lovelace", "Alan Turing"),
+             git     = FALSE)
+#> Project created: /tmp/Rtmpn1Iph9/ant_chemistry
+#>   1. open ant_chemistry.Rproj
+#>   2. source("make.R")
+#>   3. render_html()      # or see run.R for every command
+list.files(dir)
+#>  [1] "LICENSE"             "LICENSE-CODE"        "R"                  
+#>  [4] "README.md"           "_quarto.yml"         "_sections"          
+#>  [7] "ant_chemistry.Rproj" "cache"               "data"               
+#> [10] "figures"             "format"              "make.R"             
+#> [13] "manuscript.qmd"      "output"              "references"         
+#> [16] "references_styles"   "run.R"               "supplementary.qmd"  
+#> [19] "title_page.qmd"     
+unlink(dir, recursive = TRUE)
+
 if (FALSE) { # \dontrun{
+# A real project, with its git history started for you:
 create_paper("~/papers/ant_chemistry",
              title   = "Chemical mimicry in Maculinea rebeli",
              authors = c("Daniel Sanchez-Garcia", "Second Author"))

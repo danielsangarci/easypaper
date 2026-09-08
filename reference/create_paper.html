@@ -69,19 +69,25 @@ and outputs.</p>
 
 
 <dl><dt id="arg-path">path<a class="anchor" aria-label="anchor" href="#arg-path"></a></dt>
-<dd><p>Directory to create. Its base name becomes the name of the
-<code>.Rproj</code> file.</p></dd>
+<dd><p>Directory to create, as a single non-empty string; <code>~</code> is
+expanded. Its base name becomes the name of the <code>.Rproj</code> file. A path
+that exists as a file is refused.</p></dd>
 
 
 <dt id="arg-title">title<a class="anchor" aria-label="anchor" href="#arg-title"></a></dt>
-<dd><p>Manuscript title, written into the YAML of <code>manuscript.qmd</code>.
-<code>NULL</code> leaves the placeholder, which <code>make.R</code> warns about.</p></dd>
+<dd><p>Manuscript title, written into the YAML of <code>manuscript.qmd</code>
+and <code>title_page.qmd</code>. Quotes and backslashes are escaped for YAML, so a
+LaTeX fragment such as <code>\textit{Formica}</code> survives. A vector is joined
+with spaces. <code>NULL</code> or <code>""</code> leaves the placeholder, which <code>make.R</code> warns
+about.</p></dd>
 
 
 <dt id="arg-authors">authors<a class="anchor" aria-label="anchor" href="#arg-authors"></a></dt>
-<dd><p>Character vector of author names, in order. The first one is
-marked as the corresponding author. Affiliations are not guessed: fill
-them in <code>_sections/0_authors.qmd</code>. <code>NULL</code> leaves the placeholders.</p></dd>
+<dd><p>Character vector of author names, in order, or one
+comma-separated string, which is how the RStudio wizard sends them. The
+first one is marked as the corresponding author. Affiliations are not
+guessed: fill them in <code>_sections/0_authors.qmd</code>. <code>NULL</code> or an empty
+string leaves the placeholders.</p></dd>
 
 
 <dt id="arg-overwrite">overwrite<a class="anchor" aria-label="anchor" href="#arg-overwrite"></a></dt>
@@ -101,12 +107,14 @@ are told what to run.</p></dd>
 
 
 <dt id="arg-open">open<a class="anchor" aria-label="anchor" href="#arg-open"></a></dt>
-<dd><p>Open the new project in RStudio when the session allows it.</p></dd>
+<dd><p>Open the new project in RStudio. Needs an RStudio session and
+the rstudioapi package; outside one, the project is created and a message
+says so.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>The path of the created project, invisibly.</p>
+    <p>The absolute path of the created project, invisibly.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -119,11 +127,39 @@ longer needed.</p>
 wrote the structure. The project never needs the package again, but if the
 scaffold changes in the future, the stamp is what tells you which version
 produced a project you already have.</p>
+<p>Every argument is checked before anything is written, so a wrong call
+stops with a message naming the argument and leaves no half-made project
+behind.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p><code><a href="convert_data.html">convert_data()</a></code> to bring the data into the project's <code>data/</code>
+folder, and <code><a href="../articles/easypaper.html">vignette("easypaper")</a></code> for a tour of what the project can do.</p></div>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"ant_chemistry"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">create_paper</span><span class="op">(</span><span class="va">dir</span>,</span></span>
+<span class="r-in"><span>             title   <span class="op">=</span> <span class="st">"Chemical mimicry in Maculinea rebeli"</span>,</span></span>
+<span class="r-in"><span>             authors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Ada Lovelace"</span>, <span class="st">"Alan Turing"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>             git     <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Project created: /tmp/Rtmpn1Iph9/ant_chemistry</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   1. open ant_chemistry.Rproj</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   2. source("make.R")</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   3. render_html()      # or see run.R for every command</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">dir</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "LICENSE"             "LICENSE-CODE"        "R"                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4] "README.md"           "_quarto.yml"         "_sections"          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "ant_chemistry.Rproj" "cache"               "data"               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10] "figures"             "format"              "make.R"             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "manuscript.qmd"      "output"              "references"         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [16] "references_styles"   "run.R"               "supplementary.qmd"  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [19] "title_page.qmd"     </span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">dir</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="co"># A real project, with its git history started for you:</span></span></span>
 <span class="r-in"><span><span class="fu">create_paper</span><span class="op">(</span><span class="st">"~/papers/ant_chemistry"</span>,</span></span>
 <span class="r-in"><span>             title   <span class="op">=</span> <span class="st">"Chemical mimicry in Maculinea rebeli"</span>,</span></span>
 <span class="r-in"><span>             authors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Daniel Sanchez-Garcia"</span>, <span class="st">"Second Author"</span><span class="op">)</span><span class="op">)</span></span></span>

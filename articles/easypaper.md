@@ -34,7 +34,7 @@ Here is what lands on disk:
 
 dir <- file.path(tempdir(), "demo_paper")
 easypaper::create_paper(dir, git = FALSE)
-#> Project created: /tmp/RtmpRvE9Pr/demo_paper
+#> Project created: /tmp/RtmpTfCVp9/demo_paper
 #>   1. open demo_paper.Rproj
 #>   2. source("make.R")
 #>   3. render_html()      # or see run.R for every command
@@ -320,6 +320,25 @@ document.
 explained, ready to run one line at a time. It is the file to open when
 you cannot remember a name.
 
+## Adding a journal
+
+The template ships nine styles, all from ecology. Any other journal’s is
+one call away, and it goes where `render_docx()` looks:
+
+``` r
+
+easypaper::add_journal("plos-one")   # -> references_styles/plos-one.csl
+render_docx("plos-one")
+```
+
+The name is the one the official CSL repository uses — the file name
+without `.csl`, lower case, hyphens — and Zotero’s style finder at
+<https://www.zotero.org/styles> searches it by journal; its URLs work
+too. Most journals have a *dependent* style, a few lines pointing at the
+parent whose rules they share. Pandoc cannot follow that pointer, so
+what lands in the project are the parent’s rules under the name you
+asked for, and the message says which parent it was.
+
 ## Supplementary material
 
 Two kinds, told apart by what the file contains — nothing to declare:
@@ -465,6 +484,30 @@ check_data()        # files in data/ that the analysis never reads
 The second one has caught more submissions than the rest together: a
 figure defined and never cited is a figure the journal will ask you
 about.
+
+## Keeping a project up to date
+
+The build logic lives in the project, which is what lets it render with
+easypaper uninstalled — and what keeps a fix in the package from
+reaching a project already written.
+[`update_project()`](https://danielsangarci.github.io/easypaper/reference/update_project.md)
+is the bridge:
+
+``` r
+
+easypaper::update_project(dry_run = TRUE)   # what would change
+easypaper::update_project()                 # do it
+```
+
+It refreshes an explicit list — `make.R`, `run.R`, `R/submission.R`,
+`R/crossref_styles.R`, `R/convert_data.R`, the Word templates and the
+`.csl` files the template ships — and never touches `_sections/`, the
+YAML, `_quarto.yml`, `references/`, `data/` or `R/setup.R`. Nothing is
+deleted. It asks for a clean git working tree first, so the update is
+one commit you can read with `git diff` and revert file by file. What a
+version leaves to you — 0.2.0’s move from `data/csv/` to `data/`, say —
+is printed, not done. The stamp at the top of `make.R` then records both
+the version that created the project and the one it was updated to.
 
 ## Citing easypaper
 
