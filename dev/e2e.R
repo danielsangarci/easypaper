@@ -78,7 +78,7 @@ write.csv(data.frame(
   treatment  = rep(c("control", "treated"), each = 12),
   richness   = rpois(24, 8),
   head_width = round(rnorm(24, 1.42, 0.12), 2)),
-  file.path(p, "data/processed/colonies.csv"), row.names = FALSE)
+  file.path(p, "data/raw/colonies.csv"), row.names = FALSE)
 
 cat('
 @article{lovelace1843,
@@ -102,7 +102,7 @@ writeLines(c(
 writeLines(c(
   "```{r}",
   "#| label: richness-model",
-  "colonies <- read.csv(here::here('data/processed/colonies.csv'))",
+  "colonies <- read.csv(here::here('data/csv/colonies.csv'))",
   "b <- round(coef(lm(richness ~ treatment, data = colonies))[[2]], 2)",
   "```",
   "",
@@ -118,9 +118,14 @@ cat("\n\nThe protocol follows the classic census method [@holldobler1990],",
 
 setwd(p); on.exit(setwd(pkg), add = TRUE)
 source("make.R")
+source("R/sync_data.R")
 
 # --- 2. every command ------------------------------------------------------
 cat("\n== the commands ==\n")
+# A format sync_data() cannot convert must be named, not dropped in silence.
+file.create(file.path(p, "data/raw/colonies.sqlite"))
+said_raw <- paste(capture.output(sync_data(), type = "message"), collapse = " ")
+run("sync_data()",             sync_data())
 run("check_citations()",       check_citations())
 run("check_crossrefs()",       check_crossrefs(quiet = TRUE))
 run("check_title()",           check_title(quiet = TRUE))
@@ -170,6 +175,78 @@ ok("standalone figures at 600 dpi",
      magick::image_info(magick::image_read(fig[1]))$width >= 4200)
 ok("the compendium is a valid archive",
    length(zip::zip_list(file.path(p, "submission/Test/data_and_code.zip"))$filename) > 5)
+# Line numbering is what a journal wants in the manuscript and what nobody
+# wants in a letter. Both come off the same Word template, so the pair is
+# checked together: it is the kind of thing that regresses in silence.
+lnum <- function(f) any(grepl("lnNumType",
+  readLines(unz(f, "word/document.xml"), warn = FALSE)))
+ok("the manuscript is line-numbered",
+   lnum(file.path(p, "submission/Test/manuscript/main_Test.docx")))
+ok("the cover letter is not",
+   !lnum(file.path(p, "submission/Test/cover_letter_Test.docx")))
+
+# Three Word templates, three answers to the same question. Justification is
+# read from the style the body text is actually written in.
+just <- function(f) {
+  x <- readLines(unz(f, "word/styles.xml"), warn = FALSE)
+  b <- regmatches(paste(x, collapse = ""),
+                  regexpr('<w:style[^>]*Textoindependiente.*?</w:style>',
+                          paste(x, collapse = ""), perl = TRUE))
+  length(b) > 0 && grepl('w:jc w:val="both"', b)
+}
+ok("the manuscript is not justified",
+   !just(file.path(p, "submission/Test/manuscript/main_Test.docx")))
+ok("the supplement is justified",
+   just(file.path(p, "output/supplementary/supporting_information.docx")))
+ok("the cover letter is justified",
+   just(file.path(p, "submission/Test/cover_letter_Test.docx")))
+
+# --- the metadata of the deposit -------------------------------------------
+meta <- function(f) utils::read.csv(file.path(p, "data/metadata", f),
+                                    colClasses = "character")
+ok("the deposit's title came from the manuscript",
+   identical(trimws(meta("biblio.csv")$title[1]),
+             "Chemical mimicry in Maculinea rebeli"))
+ok("the keywords came with it", nzchar(trimws(meta("biblio.csv")$keywords[1])))
+ok("the authors of the paper became the creators of the data",
+   all(c("Ada Lovelace", "Alan Turing") %in% trimws(meta("creators.csv")$name)))
+ok("the variables of the data file were listed",
+   all(c("colony", "richness", "head_width") %in%
+         trimws(meta("attributes.csv")$variableName)))
+
+# The promise that makes it safe to run on every render: it adds, never
+# rewrites. A description typed by hand has to survive the next render.
+a <- meta("attributes.csv")
+a$description[a$variableName == "richness"] <- "Species richness per colony"
+utils::write.csv(a, file.path(p, "data/metadata/attributes.csv"),
+                 row.names = FALSE, na = "")
+n1 <- nrow(a)
+invisible(render_html())
+ok("a second pass does not duplicate the variables", nrow(meta("attributes.csv")) == n1)
+ok("and does not overwrite what you wrote by hand",
+   identical(meta("attributes.csv")$description[
+     meta("attributes.csv")$variableName == "richness"],
+     "Species richness per colony"))
+
+# A .csv from a path you abandoned: it must be named, and it must survive --
+# check_data() reports, it never removes.
+write.csv(data.frame(x = 1:3), file.path(p, "data/csv/pilot_2024.csv"),
+          row.names = FALSE)
+said <- paste(capture.output(check_data(), type = "message"), collapse = " ")
+ok("an unread data file is reported", grepl("pilot_2024.csv", said))
+ok("an unconvertible original is named, not silently dropped",
+   grepl("colonies.sqlite", said_raw))
+ok("and it was not copied into data/csv/",
+   !file.exists(file.path(p, "data/csv/colonies.sqlite")))
+ok("the original in raw/ reached data/csv/",
+   file.exists(file.path(p, "data/csv/colonies.csv")))
+ok("and the compendium holds it flat, not in a subfolder",
+   file.exists(file.path(p, "submission/Test/data_and_code/data/colonies.csv")))
+ok("and is not removed",
+   file.exists(file.path(p, "data/csv/pilot_2024.csv")))
+ok("while the one the analysis reads is not mentioned",
+   !grepl("colonies.csv", said))
+
 ok("renv.lock recorded", file.exists(file.path(p, "renv.lock")))
 ok("no temporary file left behind",
    length(list.files(p, "^tmp_")) == 0)

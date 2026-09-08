@@ -104,3 +104,12 @@ test_that("the project declares the formats the supplement can be asked for", {
   y <- yaml::read_yaml(tpl("_quarto.yml"))
   expect_true(all(c("docx", "pdf") %in% names(y$format)))
 })
+
+test_that("every Word template the code asks for actually travels", {
+  # The cover letter names its own template from R, not from a .qmd, so no
+  # other test would notice it missing until a submission was being built.
+  src  <- readLines(tpl("R/submission.R"), warn = FALSE)
+  refs <- regmatches(src, regexpr("(?<=reference-doc: )[^\"]+", src, perl = TRUE))
+  expect_gt(length(refs), 0L)
+  for (r in trimws(refs)) expect_true(file.exists(tpl(r)), info = r)
+})

@@ -2,9 +2,21 @@
 
 - `raw/` — original files. **Untouchable, read only.** They are never edited or
   overwritten: any cleaning happens through a script.
-- `processed/` — the **same data in an open format**: the `.csv` written by
-  `R/xlsx_to_csv.R` from the `.xlsx` in `raw/`. A format conversion, not a
-  transformation. Disposable and reproducible.
+- `csv/` — the **same data in an open format**, written by `sync_data()` in
+  `R/sync_data.R`: it converts every spreadsheet in `raw/` sheet by sheet and
+  copies across anything already plain text. A format conversion, not a
+  transformation. Disposable and reproducible: delete it and one call rebuilds
+  it.
+
+  This is also **what gets published**, which is the reason it exists as its
+  own folder. A file that is not here does not reach the deposit.
+
+  It is not restricted to `.csv`, despite the name. `sync_data()` only knows
+  how to convert spreadsheets and to copy plain text, and it names whatever it
+  leaves behind; anything else that belongs in the deposit you put here
+  yourself, in whatever open format it already is -- a `.sqlite`, a GeoPackage,
+  a NetCDF. It travels as it is and nothing rewrites it. Only closed formats
+  are dropped from the compendium: `.xlsx`, `.xls`, `.sav`, `.dta`, `.mdb`.
 
   Derived datasets do **not** live here. Any filtering, recoding or aggregation
   belongs inside the analysis chunk that needs it, starting from the `.csv`, so
@@ -15,7 +27,7 @@
 
 ## What gets published
 
-The submission compendium carries `processed/` and `metadata/` only: open,
+The submission compendium carries `csv/` and `metadata/` only: open,
 plain-text formats that will still be readable decades from now. The `.xlsx`
 in `raw/` are not shipped — they are the private archive copy, kept so a
 conversion bug (dates, encodings, silently truncated columns) can always be

@@ -1,16 +1,21 @@
+# The year is the one this version was released, not today's: a citation has
+# to keep pointing at the same thing. Bump it here when you tag a new release.
+year <- "2026"
+vers <- sprintf("R package version %s", utils::packageVersion("easypaper"))
+url  <- "https://github.com/danielsangarci/easypaper"
+
 citHeader("To cite easypaper in publications, use:")
 
 bibentry(
   bibtype  = "Manual",
+  key      = "easypaper",
   title    = "easypaper: Scaffold a Reproducible Quarto Manuscript Project",
-  author   = person("Daniel", "Sanchez-Garcia"),
-  year     = "2026",
-  note     = sprintf("R package version %s",
-                     utils::packageVersion("easypaper")),
-  url      = "https://github.com/danielsangarci/easypaper",
+  author   = person("Daniel", "Sanchez-Garcia",
+                    comment = c(ORCID = "0000-0002-0710-6292")),
+  year     = year,
+  note     = vers,
+  url      = url,
   textVersion = paste0(
-    "Sanchez-Garcia, D. (2026). easypaper: Scaffold a Reproducible Quarto ",
-    "Manuscript Project. R package version ",
-    utils::packageVersion("easypaper"), ". https://github.com/danielsangarci/easypaper"
-  )
+    "Sanchez-Garcia, D. (", year, "). easypaper: Scaffold a Reproducible ",
+    "Quarto Manuscript Project. ", vers, ". ", url)
 )

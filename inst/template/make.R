@@ -151,6 +151,139 @@ sync_licenses <- function(year = format(Sys.Date(), "%Y"), quiet = FALSE) {
   invisible(holders)
 }
 
+#' What is in data/csv/ that the analysis never reads.
+#'
+#' data/csv/ is not "my clean data", it is "what I am going to publish":
+#' the compendium copies it whole and sync_metadata() describes every file in
+#' it. A .csv from a path you abandoned travels to the repository and gets
+#' listed in the metadata, and nothing tells you.
+#'
+#' It reports; it never removes. A file read through a path the code builds --
+#' paste0("data/csv/", species, ".csv"), a loop over list.files() -- is
+#' invisible to any scan, so dropping the ones that look unused would sooner or
+#' later publish a compendium with a hole in it. Shipping one file too many is
+#' a nuisance; shipping one too few breaks the reproduction. Hence the asymmetry.
+#'
+#' @return TRUE when every file the code names exists.
+check_data <- function(quiet = FALSE) {
+  dir <- here("data/csv")
+  if (!dir.exists(dir)) return(invisible(TRUE))
+  present <- list.files(dir, recursive = TRUE)
+  if (!length(present)) return(invisible(TRUE))
+
+  # The same files the compendium publishes: the paper and the analysis code.
+  src <- c(MASTER, .section_files(), here("R/setup.R"),
+           list.files(here("R"), "^analysis.*[.]R$", full.names = TRUE))
+  src <- src[file.exists(src)]
+  txt <- unlist(lapply(src, readLines, warn = FALSE))
+  hit <- unlist(regmatches(txt, gregexpr("data/csv/[A-Za-z0-9_./-]+",
+                                         txt, perl = TRUE)))
+  read <- unique(sub("^data/csv/", "", hit))
+
+  missing <- setdiff(read, present)
+  if (length(missing)) {
+    warning("The analysis reads files that are not in data/csv/: ",
+            paste(missing, collapse = ", "), call. = FALSE, immediate. = TRUE)
+  }
+  unused <- setdiff(present, read)
+  if (length(unused) && !quiet) {
+    message("Note: in data/csv/ but never read by the analysis: ",
+            paste(unused, collapse = ", "), "\n  They travel into the ",
+            "compendium and into its metadata all the same. Move them out of ",
+            "data/csv/ if they are not part of the paper.")
+  }
+  invisible(!length(missing))
+}
+
+#' Fill in what the deposit's metadata can know by itself.
+#'
+#' dataspice describes the data deposit with four .csv files, and three of
+#' their columns are already written down elsewhere in this project: the title
+#' and the keywords in the YAML of the manuscript, the authors in the same
+#' block that feeds the licences, and the variable names inside the data files.
+#' Copying them by hand is how the deposit ends up disagreeing with the paper.
+#'
+#' It only ever ADDS. A cell you have filled is never touched and a variable
+#' you have described is never rewritten, so this can run on every render
+#' without eating your work. What no machine can guess -- units, descriptions,
+#' the temporal and geographic coverage, the licence of the deposit -- is still
+#' yours to write, with edit_attributes() and its friends. See
+#' R/create_metadata.R.
+sync_metadata <- function(quiet = FALSE) {
+  if (!requireNamespace("dataspice", quietly = TRUE)) {
+    if (!quiet) {
+      message("dataspice is not installed, so the metadata of the deposit is ",
+              "not being kept in step. install.packages(\"dataspice\")")
+    }
+    return(invisible(NA))
+  }
+  # create_spice() copies its templates with file.copy() and no overwrite, so
+  # anything already filled in survives being called again.
+  suppressMessages(dataspice::create_spice(dir = here("data")))
+  md   <- here("data", "metadata")
+  yml  <- rmarkdown::yaml_front_matter(MASTER)
+  done <- character(0)
+
+  # --- biblio: the title and the keywords are in the manuscript --------------
+  f <- file.path(md, "biblio.csv")
+  b <- utils::read.csv(f, colClasses = "character")
+  if (!nrow(b)) b[1, ] <- NA_character_
+  blank <- function(x) is.na(x) || !nzchar(trimws(x))
+  put <- function(d, col, value) {
+    if (col %in% names(d) && length(value) == 1L && nzchar(value) &&
+        blank(d[[col]][1])) {
+      d[[col]][1] <- value
+      done <<- c(done, col)
+    }
+    d
+  }
+  b <- put(b, "title", if (is.null(yml$title)) "" else as.character(yml$title))
+  b <- put(b, "keywords", paste(unlist(yml$keywords), collapse = ", "))
+  utils::write.csv(b, f, row.names = FALSE, na = "")
+
+  # --- creators: the authors of the paper are the creators of the data ------
+  # dataspice keeps one `name` field, not a given/family pair: the name goes in
+  # whole, exactly as the manuscript writes it.
+  f  <- file.path(md, "creators.csv")
+  cr <- utils::read.csv(f, colClasses = "character")
+  who <- tryCatch(.author_names(), error = function(e) character(0))
+  added <- 0L
+  for (nm in who) {
+    if (!"name" %in% names(cr)) break
+    if (nrow(cr) && any(trimws(cr$name) == nm, na.rm = TRUE)) next
+    row <- as.list(rep("", ncol(cr))); names(row) <- names(cr)
+    row$name <- nm
+    keep <- if (nrow(cr)) !apply(is.na(cr) | cr == "", 1, all) else logical(0)
+    cr <- rbind(cr[keep, , drop = FALSE],
+                as.data.frame(row, stringsAsFactors = FALSE))
+    added <- added + 1L
+  }
+  if (added) done <- c(done, sprintf("%d creator(s)", added))
+  utils::write.csv(cr, f, row.names = FALSE, na = "")
+
+  # --- attributes and access: the data files describe themselves ------------
+  # data/csv only: that is what the compendium publishes. The raw files
+  # stay out of the deposit, so describing them would promise what is not there.
+  csvs <- list.files(here("data", "csv"), "\\.csv$", full.names = TRUE)
+  if (length(csvs)) {
+    before <- nrow(utils::read.csv(file.path(md, "attributes.csv"),
+                                   colClasses = "character"))
+    suppressMessages(dataspice::prep_attributes(
+      data_path = csvs, attributes_path = file.path(md, "attributes.csv")))
+    suppressMessages(dataspice::prep_access(
+      data_path = csvs, access_path = file.path(md, "access.csv")))
+    n <- nrow(utils::read.csv(file.path(md, "attributes.csv"),
+                              colClasses = "character")) - before
+    if (n > 0) done <- c(done, sprintf("%d variable(s)", n))
+  }
+
+  if (!quiet && length(done)) {
+    message("Metadata filled in: ", paste(done, collapse = ", "),
+            ". The rest is yours: see R/create_metadata.R.")
+  }
+  invisible(done)
+}
+
 #' Warn if the YAML still carries the template authors.
 .check_license <- function() {
   names_ <- .author_names()
@@ -492,8 +625,8 @@ export_figure_formats <- function(quiet = FALSE) {
          paste(list_journals(), collapse = ", "), call. = FALSE)
   }
   .check_quarto()
-  .check_license(); sync_licenses(quiet = TRUE)
-  check_citations(); check_crossrefs()
+  .check_license(); sync_licenses(quiet = TRUE); sync_metadata(quiet = TRUE)
+  check_citations(); check_crossrefs(); check_data()
 
   # The supplement is rendered on its own whatever happens, because that is
   # the only way it can carry its own reference list: one Quarto render is one

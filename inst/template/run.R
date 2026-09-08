@@ -125,6 +125,8 @@ check_crossrefs()      # @fig-/@tbl- with no target, and figures nobody cites
 check_title()          # does title_page.qmd still match the manuscript?
 export_figure_formats()# figures/png/ -> figures/jpg/ and figures/tiff/ at 600 dpi
 check_renv()           # is renv.lock there, and does it match what you are using?
+check_data()           # .csv sitting in data/csv/ that nothing reads --
+                       # they would travel to the repository anyway
 
 
 # --- 5. MAINTENANCE --------------------------------------------------------
@@ -135,6 +137,11 @@ renv::snapshot()       # record the packages in renv.lock by hand. Rarely
                        # that does NOT is render_html()
 clean_cache()          # after touching data/: knitr does NOT notice by itself
 sync_licenses()        # copies the authors from the YAML into LICENSE*/README
+sync_metadata()        # fills the deposit's metadata with what the project
+                       # already knows: title, keywords, authors, variable
+                       # names. Runs on every render too; it only ever ADDS,
+                       # so what you typed by hand is safe. The rest --units,
+                       # descriptions, coverage-- is yours: R/create_metadata.R
 export_code()          # analysis_code.R + sessionInfo.txt for the supplement
 
 
@@ -152,4 +159,5 @@ td_download("2_introduction")   # bring back their edits BEFORE editing locally
 #                               # Not needed for the lockfile: make_submission()
 #                               # writes renv.lock from the library you use
 # source("R/create_metadata.R") # dataspice metadata, filled in by hand
-# source("R/xlsx_to_csv.R")     # then xlsx_to_csv("file.xlsx", sheet = 1)
+# source("R/sync_data.R")       # then sync_data(): converts or copies every
+#                               # original in data/raw/ into data/csv/

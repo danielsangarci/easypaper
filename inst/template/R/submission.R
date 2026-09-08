@@ -317,7 +317,7 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
 #' syncs drafts with Google Docs -- ends up in the lockfile of a data deposit.
 #' The rule here is narrower but not arbitrary: a package belongs in the lock
 #' if its output travels. That is the analysis (manuscript, sections, setup),
-#' the .csv conversion (xlsx_to_csv.R -> data/processed/) and the metadata
+#' the .csv conversion (sync_data.R -> data/csv/) and the metadata
 #' (create_metadata.R -> metadata/), even though those last two scripts are
 #' not themselves published. Left out: trackdown, and the build tooling
 #' (make.R, submission.R, crossref_styles.R, renv_setup.R), which produce
@@ -329,7 +329,7 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
   files <- c(MASTER, here("supplementary.qmd"), here("title_page.qmd"),
              list.files(here("_sections"), "[.]qmd$", full.names = TRUE),
              here("R/setup.R"),
-             here("R/xlsx_to_csv.R"), here("R/create_metadata.R"),
+             here("R/sync_data.R"), here("R/create_metadata.R"),
              list.files(here("R"), "^analysis.*[.]R$", full.names = TRUE))
   files <- files[file.exists(files)]
   p <- tryCatch(sort(unique(renv::dependencies(files, quiet = TRUE)$Package)),
@@ -346,8 +346,12 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
   # Only the open formats are published: the .csv, never the source .xlsx.
   # The originals stay in the private project as the archive copy; a .csv is
   # plain text and will still be readable when nothing opens an .xlsx.
-  if (dir.exists(here("data/processed"))) {
-    file.copy(here("data/processed"), file.path(dest, "data"), recursive = TRUE)
+  # The .csv go straight into data/, not into data/csv/: inside the compendium
+  # there is nothing to tell them apart from, and a folder with one thing in it
+  # is a folder too many.
+  if (dir.exists(here("data/csv"))) {
+    file.copy(list.files(here("data/csv"), full.names = TRUE),
+              file.path(dest, "data"), recursive = TRUE)
   }
   if (file.exists(here("data/README.md"))) {
     file.copy(here("data/README.md"), file.path(dest, "data"), overwrite = TRUE)
@@ -507,8 +511,8 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
     strwrap(paste("This repository holds the data, the metadata describing it and the",
                   "code that produced the results reported in the manuscript. It is",
                   "organized into three folders:"), width = 76), "",
-    sec("A) data/processed",
-        file.path(dest, "data", "processed"),
+    sec("A) data",
+        file.path(dest, "data"),
         function(f) .describe_data(f, access)),
     sec("B) metadata",
         file.path(dest, "metadata"),
@@ -602,7 +606,7 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
   writeLines(c(
     "---", sprintf('title: "Cover letter -- %s"', journal_name),
     "format:", "  docx:",
-    "    reference-doc: format/word_plain_paper_style.docx", "---", "",
+    "    reference-doc: format/word_cover_letter.docx", "---", "",
     "[Date]", "", "Dear Editor,", "",
     "We are pleased to submit our manuscript entitled *\"[TITLE]\"* for",
     sprintf("consideration as [article type] in *%s*.", journal_name), "",
@@ -634,6 +638,9 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
     "      `make_submission(figure_format = \"png\")`.",
     "- [ ] `renv.lock` present in `data_and_code/`: without it the package",
     "      versions are not recorded. `renv::snapshot()` if it is missing.",
+    "- [ ] Everything in `data_and_code/data/csv/` belongs to this paper.",
+    "      check_data() lists the files nothing reads: they travel to the",
+    "      repository and into the metadata all the same.",
     "- [ ] Upload `data_and_code.zip` to Zenodo/Dryad and put the DOI in the",
     "      Data availability statement of the manuscript.",
     "- [ ] `git tag submission-1`", "",

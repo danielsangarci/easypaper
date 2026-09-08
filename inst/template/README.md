@@ -121,14 +121,21 @@ R/
   submission.R         Builds the submission folder
   crossref_styles.R    Caption style per journal
   renv_setup.R         Dependencies
-  xlsx_to_csv.R        data/raw/*.xlsx -> data/processed/*.csv
+  sync_data.R          data/raw/* -> data/csv/*.csv (converts or copies)
   create_metadata.R    dataspice metadata
   trackdown.R          Google Docs sync for co-authors
 data/
   raw/                 Originals. UNTOUCHABLE, read only. Not published.
-  processed/           Same data as raw/, in open format (.csv). Reproducible.
-  metadata/            dataspice
-format/                .docx templates and Lua filters
+  csv/                 Same data, in open format, from sync_data(). What
+                       gets published, and what the metadata describes.
+  metadata/            dataspice. `sync_metadata()` fills in what the project
+                       already knows -- title, keywords, authors, the variable
+                       names of data/csv/ -- on every render, and only
+                       ever adds: your descriptions and units are never
+                       rewritten
+format/                Word templates: the manuscript (line-numbered, ragged
+                       right), the supplement and the cover letter (both
+                       justified, neither numbered)
 references/            .bib
 references_styles/     .csl per journal
 output/                Outputs. Regenerable, in .gitignore.
@@ -160,7 +167,7 @@ A typical analysis in a results section:
     ```{r}
     #| label: richness-model
     #| cache: true
-    richness <- readr::read_csv(here::here("data/processed/richness.csv")) |>
+    richness <- readr::read_csv(here::here("data/csv/richness.csv")) |>
       dplyr::filter(!is.na(S), status != "dead") |>
       dplyr::mutate(treatment = factor(treatment, levels = c("control", "warmed")))
 
@@ -410,7 +417,7 @@ submission/default/
     supporting_information_default.docx
     figures/Figure_1.tiff  Figure_2.tiff    600 dpi, LZW, in order
   data_and_code/
-    data/processed/                         the .csv only; no .xlsx is published
+    data/csv/                         the .csv only; no .xlsx is published
     metadata/                               dataspice
     scripts/                                setup.R, analysis_code.R, sessionInfo.txt
     README.txt                              written from the folder contents
@@ -421,7 +428,7 @@ submission/default/
 **The compendium publishes only open formats and only analysis code.** The
 `.xlsx` in `data/raw/` stay in your project as the archive copy: a `.csv` is
 plain text and will still open when nothing opens a spreadsheet. And of the
-scripts, only `setup.R` and the analysis go in -- `xlsx_to_csv.R`,
+scripts, only `setup.R` and the analysis go in -- `sync_data.R`,
 `create_metadata.R`, `renv_setup.R`, `trackdown.R`, `submission.R` and
 `crossref_styles.R` are your tooling, not the paper's method. It is a
 whitelist: name an extra analysis script `R/analysis_*.R` and it is included

@@ -26,6 +26,7 @@ Then open the `.Rproj` it leaves behind and:
 
 ```r
 source("make.R")
+sync_data()            # data/raw/* -> data/csv/*, converted or copied
 render_html()          # fast, while you write
 make_all()             # .docx + .pdf + supplement, into output/
 make_submission("myrmecological-news")            # -> submission/default/
@@ -81,11 +82,11 @@ Quarto manuscript**, with fields for the title and the authors.
 manuscript.qmd       The spine: title, authors, and the list of includes
 _sections/           The text, one file per section. This is where you write
 data/raw/            The originals, as they arrived. Read only
-data/processed/      The same data in open format, written by code
+data/csv/            The same data in open format, written by sync_data()
 R/setup.R            Seed, palette, table and figure helpers
 references/          The .bib you cite from
 references_styles/   One .csl per journal
-format/              The Word templates the .docx is built on
+format/              Three Word templates: manuscript, supplement, letter
 figures/  output/    Everything the render produces. Regenerable
 submission/          What make_submission() builds
 make.R               The only entry point
@@ -126,6 +127,20 @@ which version of easypaper wrote the structure.
 R >= 4.1 and Quarto, which ships inside RStudio and Positron — nothing to
 install if you use either. Rendering the PDF also needs a LaTeX installation
 (`tinytex::install_tinytex()` is enough).
+
+## Citation
+
+```r
+citation("easypaper")
+```
+
+> Sanchez-Garcia, D. (2026). easypaper: Scaffold a Reproducible Quarto
+> Manuscript Project. R package version 0.1.0.
+> https://github.com/danielsangarci/easypaper
+
+The BibTeX entry comes with the key `easypaper`, ready to paste into a `.bib`.
+GitHub's *Cite this repository* button reads `CITATION.cff`, which carries the
+same details and the ORCID.
 
 ## Licence
 
