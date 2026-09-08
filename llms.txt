@@ -19,7 +19,7 @@ Then open the `.Rproj` it leaves behind and:
 ``` r
 
 source("make.R")                     # loads every command below
-sync_data()                          # data/raw/* -> data/csv/*, converted or copied
+convert_data("originals/counts.xlsx")# bring data in: converted or copied, into data/
 
 # while you write
 render_html()                        # the working .html, in seconds
@@ -95,8 +95,7 @@ authors.
 
     manuscript.qmd       The spine: title, authors, and the list of includes
     _sections/           The text, one file per section. This is where you write
-    data/raw/            The originals, as they arrived. Read only
-    data/csv/            The same data in open format, written by sync_data()
+    data/                The data, in open formats. This is what gets published
     R/setup.R            Seed, palette, table and figure helpers
     references/          The .bib you cite from
     references_styles/   One .csl per journal
@@ -119,6 +118,55 @@ What every command takes — `journal`, `caption_style`, `split`,
 `suppl_figures`, `label`, `figure_format`, `blinded`, `snapshot` — is
 laid out with its default in [Get
 started](https://danielsangarci.github.io/easypaper/articles/easypaper.html).
+
+## The data folder
+
+`data/` is the folder that publishes: whatever is in it is what the
+analysis reads, what the metadata describes and what the submission
+compendium carries to the repository. Beside it, `data/metadata/` holds
+the [dataspice](https://github.com/ropensci/dataspice) description of
+those files.
+
+Your originals live wherever you keep them — the project does not
+publish them, so it does not prescribe a place.
+[`convert_data()`](https://danielsangarci.github.io/easypaper/reference/convert_data.md)
+brings a copy in, in a format that will still open in twenty years, and
+never touches the original:
+
+``` r
+
+convert_data("originals/counts.xlsx")   # one workbook, one .csv per sheet
+convert_data("originals")               # a whole folder at once
+convert_data("~/Drive/plots.gpkg")      # already open: copied, not converted
+```
+
+The path is relative to the project root, or absolute. Each file takes
+one of three roads, decided by its extension alone:
+
+| the original | what [`convert_data()`](https://danielsangarci.github.io/easypaper/reference/convert_data.md) does |
+|----|----|
+| `.xlsx`, `.xls` | **converts** it, one `.csv` per sheet (needs `readxl`) |
+| `.sav`, `.dta`, `.sas7bdat` | **converts** it, one `.csv` per file (needs `haven`) |
+| anything already open | **copies** it byte for byte. Text and tables: `.csv` `.tsv` `.txt` `.json` `.geojson` `.xml` `.yml` `.yaml`. Containers: `.parquet` `.nc` `.h5` `.hdf5` `.sqlite` `.db` `.gpkg`. Spatial: `.shp` with its sidecars (`.shx` `.dbf` `.prj` `.cpg` `.sbn` `.sbx` `.qix`), `.kml` `.gml` `.tif` `.tiff` `.asc`. Sequences and trees: `.fasta` `.fa` `.fastq` `.fq` `.nwk` `.tre` |
+| anything else | **leaves it where it is and names it on screen** |
+
+The third row is a list you can edit — `.cd_open_formats`, at the top of
+`R/convert_data.R` inside your project — or extend for one call with
+`convert_data(path, also = "las")`. The fourth is for what nothing can
+place: a proprietary instrument file, an ArcGIS project. Export those
+yourself and drop the result into `data/`.
+
+Two rules follow. **Read from `data/`, never from wherever the original
+lives** — an analysis that reads the original works on your machine and
+publishes a compendium with no data in it, and nothing would have told
+you. And **keep the originals**: every conversion costs something, an
+`.xlsx` its formulas and an `.sav` its value labels, so the original is
+the only answer when a number here looks wrong. `check_data()` lists
+what is sitting in `data/` that the analysis never reads.
+
+The function is also exported by the package, so
+[`easypaper::convert_data()`](https://danielsangarci.github.io/easypaper/reference/convert_data.md)
+works in any project, whether or not easypaper created it.
 
 ## Where the code lives
 
@@ -155,7 +203,7 @@ citation("easypaper")
 
 > Sanchez-Garcia, D. (2026). easypaper: Scaffold a Reproducible Quarto
 > Manuscript Project with Output Ready for Co-Authors, Preprints and
-> Journals. R package version 0.1.0.
+> Journals. R package version 0.2.0.
 > <https://github.com/danielsangarci/easypaper>
 
 The BibTeX entry comes with the key `easypaper`, ready to paste into a
@@ -176,6 +224,16 @@ The one function you need.
 
 - [`create_paper()`](https://danielsangarci.github.io/easypaper/reference/create_paper.md)
   : Create a reproducible Quarto manuscript project
+
+## Bringing your data in
+
+Originals live wherever you keep them; data/ is the folder that
+publishes. This brings a copy in, converted or copied, in a format that
+will still open in twenty years. create_paper() writes the same function
+into every project, so it works with easypaper uninstalled.
+
+- [`convert_data()`](https://danielsangarci.github.io/easypaper/reference/convert_data.md)
+  : Convert or copy originals into the project's data folder
 
 ## Package
 

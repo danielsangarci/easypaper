@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="index.html">easypaper</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -86,7 +86,7 @@
 <p>Then open the <code>.Rproj</code> it leaves behind and:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"make.R"</span><span class="op">)</span>                     <span class="co"># loads every command below</span></span>
-<span><span class="fu">sync_data</span><span class="op">(</span><span class="op">)</span>                          <span class="co"># data/raw/* -&gt; data/csv/*, converted or copied</span></span>
+<span><span class="fu"><a href="reference/convert_data.html">convert_data</a></span><span class="op">(</span><span class="st">"originals/counts.xlsx"</span><span class="op">)</span><span class="co"># bring data in: converted or copied, into data/</span></span>
 <span></span>
 <span><span class="co"># while you write</span></span>
 <span><span class="fu">render_html</span><span class="op">(</span><span class="op">)</span>                        <span class="co"># the working .html, in seconds</span></span>
@@ -131,8 +131,7 @@
 </h2>
 <pre><code>manuscript.qmd       The spine: title, authors, and the list of includes
 _sections/           The text, one file per section. This is where you write
-data/raw/            The originals, as they arrived. Read only
-data/csv/            The same data in open format, written by sync_data()
+data/                The data, in open formats. This is what gets published
 R/setup.R            Seed, palette, table and figure helpers
 references/          The .bib you cite from
 references_styles/   One .csl per journal
@@ -144,6 +143,56 @@ run.R                Every command, explained, one line at a time</code></pre>
 <p>You write in <code>_sections/</code>. Everything else is configuration you set once, or output you never edit by hand.</p>
 <p>Each project also carries <strong>its own <code>README.md</code></strong>: the full reference — the path rule, the numbering convention, the known traps, the licence pairing, and the checklist before submitting. It travels inside the project, so it is still there when easypaper is not, and it is the document to read on the first day.</p>
 <p>What every command takes — <code>journal</code>, <code>caption_style</code>, <code>split</code>, <code>suppl_figures</code>, <code>label</code>, <code>figure_format</code>, <code>blinded</code>, <code>snapshot</code> — is laid out with its default in <a href="https://danielsangarci.github.io/easypaper/articles/easypaper.html">Get started</a>.</p>
+</div>
+<div class="section level2">
+<h2 id="the-data-folder">The data folder<a class="anchor" aria-label="anchor" href="#the-data-folder"></a>
+</h2>
+<p><code>data/</code> is the folder that publishes: whatever is in it is what the analysis reads, what the metadata describes and what the submission compendium carries to the repository. Beside it, <code>data/metadata/</code> holds the <a href="https://github.com/ropensci/dataspice" class="external-link">dataspice</a> description of those files.</p>
+<p>Your originals live wherever you keep them — the project does not publish them, so it does not prescribe a place. <code><a href="reference/convert_data.html">convert_data()</a></code> brings a copy in, in a format that will still open in twenty years, and never touches the original:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/convert_data.html">convert_data</a></span><span class="op">(</span><span class="st">"originals/counts.xlsx"</span><span class="op">)</span>   <span class="co"># one workbook, one .csv per sheet</span></span>
+<span><span class="fu"><a href="reference/convert_data.html">convert_data</a></span><span class="op">(</span><span class="st">"originals"</span><span class="op">)</span>               <span class="co"># a whole folder at once</span></span>
+<span><span class="fu"><a href="reference/convert_data.html">convert_data</a></span><span class="op">(</span><span class="st">"~/Drive/plots.gpkg"</span><span class="op">)</span>      <span class="co"># already open: copied, not converted</span></span></code></pre></div>
+<p>The path is relative to the project root, or absolute. Each file takes one of three roads, decided by its extension alone:</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr>
+<th>the original</th>
+<th>what <code><a href="reference/convert_data.html">convert_data()</a></code> does</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+<code>.xlsx</code>, <code>.xls</code>
+</td>
+<td>
+<strong>converts</strong> it, one <code>.csv</code> per sheet (needs <code>readxl</code>)</td>
+</tr>
+<tr>
+<td>
+<code>.sav</code>, <code>.dta</code>, <code>.sas7bdat</code>
+</td>
+<td>
+<strong>converts</strong> it, one <code>.csv</code> per file (needs <code>haven</code>)</td>
+</tr>
+<tr>
+<td>anything already open</td>
+<td>
+<strong>copies</strong> it byte for byte. Text and tables: <code>.csv</code> <code>.tsv</code> <code>.txt</code> <code>.json</code> <code>.geojson</code> <code>.xml</code> <code>.yml</code> <code>.yaml</code>. Containers: <code>.parquet</code> <code>.nc</code> <code>.h5</code> <code>.hdf5</code> <code>.sqlite</code> <code>.db</code> <code>.gpkg</code>. Spatial: <code>.shp</code> with its sidecars (<code>.shx</code> <code>.dbf</code> <code>.prj</code> <code>.cpg</code> <code>.sbn</code> <code>.sbx</code> <code>.qix</code>), <code>.kml</code> <code>.gml</code> <code>.tif</code> <code>.tiff</code> <code>.asc</code>. Sequences and trees: <code>.fasta</code> <code>.fa</code> <code>.fastq</code> <code>.fq</code> <code>.nwk</code> <code>.tre</code>
+</td>
+</tr>
+<tr>
+<td>anything else</td>
+<td><strong>leaves it where it is and names it on screen</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The third row is a list you can edit — <code>.cd_open_formats</code>, at the top of <code>R/convert_data.R</code> inside your project — or extend for one call with <code>convert_data(path, also = "las")</code>. The fourth is for what nothing can place: a proprietary instrument file, an ArcGIS project. Export those yourself and drop the result into <code>data/</code>.</p>
+<p>Two rules follow. <strong>Read from <code>data/</code>, never from wherever the original lives</strong> — an analysis that reads the original works on your machine and publishes a compendium with no data in it, and nothing would have told you. And <strong>keep the originals</strong>: every conversion costs something, an <code>.xlsx</code> its formulas and an <code>.sav</code> its value labels, so the original is the only answer when a number here looks wrong. <code>check_data()</code> lists what is sitting in <code>data/</code> that the analysis never reads.</p>
+<p>The function is also exported by the package, so <code><a href="reference/convert_data.html">easypaper::convert_data()</a></code> works in any project, whether or not easypaper created it.</p>
 </div>
 <div class="section level2">
 <h2 id="where-the-code-lives">Where the code lives<a class="anchor" aria-label="anchor" href="#where-the-code-lives"></a>
@@ -159,10 +208,10 @@ run.R                Every command, explained, one line at a time</code></pre>
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"easypaper"</span><span class="op">)</span></span></code></pre></div>
 <blockquote>
-<p>Sanchez-Garcia, D. (2026). easypaper: Scaffold a Reproducible Quarto Manuscript Project with Output Ready for Co-Authors, Preprints and Journals. R package version 0.1.0. <a href="https://github.com/danielsangarci/easypaper" class="external-link uri">https://github.com/danielsangarci/easypaper</a></p>
+<p>Sanchez-Garcia, D. (2026). easypaper: Scaffold a Reproducible Quarto Manuscript Project with Output Ready for Co-Authors, Preprints and Journals. R package version 0.2.0. <a href="https://github.com/danielsangarci/easypaper" class="external-link uri">https://github.com/danielsangarci/easypaper</a></p>
 </blockquote>
 <p>The BibTeX entry comes with the key <code>easypaper</code>, ready to paste into a <code>.bib</code>. GitHub’s <em>Cite this repository</em> button reads <code>CITATION.cff</code>, which carries the same details and the ORCID.</p>
 </div>

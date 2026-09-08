@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">easypaper</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,34 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.0" id="easypaper-020">easypaper 0.2.0<a class="anchor" aria-label="anchor" href="#easypaper-020"></a></h2>
+<div class="section level3">
+<h3 id="one-data-folder-0-2-0">One data folder<a class="anchor" aria-label="anchor" href="#one-data-folder-0-2-0"></a></h3>
+<ul><li>A project used to carry <code>data/raw/</code> and <code>data/csv/</code>: the originals in one, their converted copies in the other. <strong>There is now a single <code>data/</code></strong>, and it is the folder that publishes – what the analysis reads, what the metadata describes and what the deposit carries. <code>data/metadata/</code> stays where it was, beside it.</li>
+<li>Your originals live wherever you keep them. The project no longer prescribes a place, because it never published them: a <code>.xlsx</code> in <code>data/raw/</code> was an archive copy that travelled nowhere, and every <code>.csv</code> in there existed twice in the repository for no gain.</li>
+<li>
+<strong>Migrating a project written by 0.1.0</strong>: move the contents of <code>data/csv/</code> up into <code>data/</code> and delete the empty folder; move <code>data/raw/</code> wherever you want your originals to live, inside the project or outside it; and change the paths the analysis reads from <code>data/csv/...</code> to <code>data/...</code>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="convert_data-replacing-sync_data-0-2-0">convert_data(), replacing sync_data()<a class="anchor" aria-label="anchor" href="#convert_data-replacing-sync_data-0-2-0"></a></h3>
+<ul><li>
+<code>sync_data()</code> kept two folders in step. Nothing is in step any more, so the function is <strong><code>convert_data(path)</code></strong>: you name an original – a file or a whole folder, relative to the working directory or absolute – and it lands in <code>data/</code>, converted or copied. It never runs by itself and it never moves, edits or converts an original in place.</li>
+<li>It is <strong>exported by the package</strong>, so <code><a href="../reference/convert_data.html">easypaper::convert_data()</a></code> works in any project, and <code><a href="../reference/create_paper.html">create_paper()</a></code> writes the identical file into the project’s <code>R/</code> so a project keeps working with easypaper uninstalled. A test checks the two copies never drift apart.</li>
+<li>Every file takes one of three roads: <strong>converted</strong> (<code>.xlsx</code>, <code>.xls</code> through readxl; <code>.sav</code>, <code>.dta</code>, <code>.sas7bdat</code> through haven), <strong>copied byte for byte</strong> when it already is an open format, or <strong>named on screen</strong> when it is neither. The copy list is <code>.cd_open_formats</code> at the top of the file – plain text, <code>.json</code>, <code>.parquet</code>, <code>.nc</code>, <code>.h5</code>, <code>.sqlite</code>, <code>.gpkg</code>, a <code>.shp</code> with all its sidecars, <code>.tif</code>, <code>.fasta</code> and more – and it is a list you can edit, because the file lives in your project. <code>also = "las"</code> extends it for a single call. Before this, a GeoPackage or a NetCDF was named and left behind even though it needed no conversion at all.</li>
+<li>Two originals that would land on the same name no longer overwrite each other silently. Everything lands flat, so <code>a/counts.csv</code> and <code>b/counts.csv</code> – or two sheets whose names differ only in a character a file name cannot hold – used to collapse into one, with the count of files written still looking right. One keeps the name, the rest are refused, and a warning says which was which.</li>
+<li>Converting a labelled <code>.sav</code> or <code>.dta</code> says so: the values travel, the value and variable labels do not, and <code>data/metadata/attributes.csv</code> is where they belong in the deposit.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="fixed-0-2-0">Fixed<a class="anchor" aria-label="anchor" href="#fixed-0-2-0"></a></h3>
+<ul><li>
+<code>source("make.R")</code> now defines the data function. It did not, so the second line of the quickstart failed with “could not find function”.</li>
+<li>
+<code>check_data()</code> no longer reports the sidecars of a shapefile as unread. The code only ever names the <code>.shp</code>; its <code>.dbf</code>, <code>.shx</code> and <code>.prj</code> are the same dataset. It also ignores <code>data/metadata/</code>, which describes the data rather than being data.</li>
+<li>Two stale paths in the project’s own documentation: the submission checklist and the deposit tree pointed at a <code>data/csv/</code> subfolder inside <code>data_and_code/</code>, which the compendium has never created – it flattens the data into <code>data_and_code/data/</code>.</li>
+<li>The deposit’s README no longer promises that the data are <code>.csv</code>: it can now carry any open format.</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="easypaper-010">easypaper 0.1.0<a class="anchor" aria-label="anchor" href="#easypaper-010"></a></h2>
 <p>First version.</p>
 <ul><li>
@@ -48,7 +76,8 @@
 <li>The top of the project’s <code>make.R</code> records which version of easypaper wrote the structure. The project never needs the package again; the stamp is what tells you, later, which version produced a project you already have.</li>
 <li>Also available from RStudio as <strong>File &gt; New Project &gt; New Directory &gt; Reproducible Quarto manuscript</strong>.</li>
 </ul></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

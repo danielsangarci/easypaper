@@ -34,7 +34,7 @@ Here is what lands on disk:
 
 dir <- file.path(tempdir(), "demo_paper")
 easypaper::create_paper(dir, git = FALSE)
-#> Project created: /tmp/RtmpxG4bAI/demo_paper
+#> Project created: /tmp/RtmpRvE9Pr/demo_paper
 #>   1. open demo_paper.Rproj
 #>   2. source("make.R")
 #>   3. render_html()      # or see run.R for every command
@@ -84,8 +84,7 @@ Where each thing goes, then:
 |  |  |
 |----|----|
 | `_sections/*.qmd` | The text. This is where you write |
-| `data/raw/` | The originals, as they arrived. Read only, never edited |
-| `data/csv/` | The same data in open format, written by `sync_data()`. **This is what gets published** |
+| `data/` | The data, in open formats. **This is what gets published** |
 | `R/setup.R` | Seed, palette, table and figure helpers |
 | `references/references.bib` | The bibliography you cite from |
 | `references_styles/*.csl` | One citation style per journal |
@@ -93,52 +92,101 @@ Where each thing goes, then:
 | `figures/`, `output/`, `cache/` | Produced by the render. Regenerable, and in `.gitignore` |
 | `submission/` | Built by `make_submission()`. Never edited by hand |
 
-Two of those deserve the emphasis. `data/raw/` is read-only on purpose:
-the file that came off the instrument, or out of a collaborator’s mail,
-is the one thing a reproducible project cannot regenerate. And
-everything under `output/` and `figures/` is disposable by design — if
-deleting it makes you nervous, something is being done by hand that
-should be done by code.
+Two of those deserve the emphasis. `data/` is the folder that publishes:
+whatever is in it is what the analysis reads, what the metadata
+describes and what the deposit carries. And everything under `output/`
+and `figures/` is disposable by design — if deleting it makes you
+nervous, something is being done by hand that should be done by code.
 
 ## The data folder
 
-Three folders, and what separates them is not tidiness: it is what gets
-published.
+`data/` is the folder that publishes. Whatever is in it is what the
+analysis reads, what `sync_metadata()` describes and what the submission
+compendium carries to the repository. A file that is not there does not
+reach the deposit. Beside it, `data/metadata/` holds the dataspice
+description of those files — the description, not data itself, and it
+travels to the deposit as its own folder.
 
-    data/raw/       the originals, exactly as they arrived. Read only, never
-                    edited, never published
-    data/csv/       the same data in an open format. THIS is what the deposit
-                    carries and what the metadata describes
-    data/metadata/  the dataspice description of the above
-
-One call keeps the second in step with the first:
+Your originals live wherever you keep them: a folder in the project, a
+shared drive, your downloads. The project does not prescribe a place,
+because it does not publish them.
+[`convert_data()`](https://danielsangarci.github.io/easypaper/reference/convert_data.md)
+brings a copy in, in a format that will still open in twenty years, and
+it **never runs by itself**:
 
 ``` r
 
-source("R/sync_data.R")
-sync_data()
+convert_data("originals/counts.xlsx")   # one workbook, one .csv per sheet
+convert_data("originals")               # a whole folder at once
+convert_data("~/Drive/plots.gpkg")      # already open: copied, not converted
 ```
 
-It converts every spreadsheet in `raw/` sheet by sheet, copies across
-whatever is already plain text, and **names whatever it could not read**
-— a `.sqlite`, a GeoPackage, a NetCDF. Those never reach the deposit
-unless you put a copy in `data/csv/` yourself, which is allowed and
-safe: the folder is not restricted to `.csv` despite its name, nothing
-there is ever deleted, and a file you place by hand travels to the
-compendium exactly as it is.
+The path is relative to the project root, or absolute. Each file takes
+one of three roads, decided by its extension alone:
 
-Two rules follow, and they are the ones worth holding onto:
+| the original | what [`convert_data()`](https://danielsangarci.github.io/easypaper/reference/convert_data.md) does |
+|----|----|
+| `.xlsx`, `.xls` | **converts** it, one `.csv` per sheet. Needs `readxl` |
+| `.sav`, `.dta`, `.sas7bdat` | **converts** it, one `.csv` per file. Needs `haven` |
+| anything already open | **copies** it across byte for byte, because converting it would destroy it rather than open it. Text and tables: `.csv` `.tsv` `.txt` `.json` `.geojson` `.xml` `.yml` `.yaml`. Containers: `.parquet` `.nc` `.h5` `.hdf5` `.sqlite` `.db` `.gpkg`. Spatial: `.shp` with its sidecars (`.shx` `.dbf` `.prj` `.cpg` `.sbn` `.sbx` `.qix`), `.kml` `.gml` `.tif` `.tiff` `.asc`. Sequences and trees: `.fasta` `.fa` `.fastq` `.fq` `.nwk` `.tre` |
+| anything else | **leaves it where it is and names it on screen** |
 
-**Read from `data/csv/`, never from `data/raw/`.** An analysis that
-reads the originals works perfectly on your machine and publishes a
-compendium with no data in it — and nothing would have told you.
+That third row is the one that matters, and it is a list you can edit:
+it lives in `.cd_open_formats`, at the top of `R/convert_data.R`
+**inside your project**. If your field uses something it has not heard
+of, add the extension there — or pass it for a single call:
 
-**`data/csv/` is not “my clean data”.** It is the same data in an open
-format: a conversion, not a transformation. Filtering, recoding and
-excluding individuals belong in the chunk that needs them, where a
-reviewer can read the decision, never as a derived file nobody can
-trace. `check_data()` reports what is sitting in there that the analysis
-never reads — it travels to the repository all the same.
+``` r
+
+convert_data("originals", also = "las")   # LiDAR point clouds, copied too
+```
+
+The last row is not a failure, it is the honest answer: a proprietary
+instrument file, an ArcGIS project, a photograph of a field notebook.
+Nothing can tell whether they belong in the paper, or what “the table”
+inside them would even be. Export them yourself and drop the result into
+`data/`. Anything you put there by hand is safe: nothing in that folder
+is ever deleted, and it travels to the compendium as it is.
+
+A workbook of one sheet keeps its own name (`counts.xlsx` →
+`counts.csv`); with several, the sheet name is added and made safe for a
+file name (`counts_adults.csv`, `counts_larvae.csv`). Everything lands
+flat: subfolders of a source folder are read but not reproduced. When
+two originals want the same name — the same file name in two subfolders,
+or two sheets whose names differ only in a character a file name cannot
+hold — one keeps it and the rest are **refused with a warning saying
+which was kept and which was not**, rather than one table quietly
+overwriting another.
+
+By default
+[`convert_data()`](https://danielsangarci.github.io/easypaper/reference/convert_data.md)
+writes only what is missing from `data/` or older than its original, so
+a file you have corrected by hand stays as it is until the original
+changes. `convert_data(path, overwrite = TRUE)` rebuilds the lot.
+
+Three rules follow, and they are the ones worth holding onto:
+
+**Read from `data/`, never from wherever the original lives.** An
+analysis that reads the original works perfectly on your machine and
+publishes a compendium with no data in it — and nothing would have told
+you.
+
+**Keep the originals, and never convert them in place.** Every
+conversion costs something: an `.xlsx` loses its formulas, an `.sav` or
+a `.dta` loses its value and variable labels — the values travel, the
+codebook does not, and
+[`convert_data()`](https://danielsangarci.github.io/easypaper/reference/convert_data.md)
+says so when it happens. Two years from now, when a number in `data/`
+looks wrong, the original is the only thing that answers. It is also why
+[`convert_data()`](https://danielsangarci.github.io/easypaper/reference/convert_data.md)
+only ever reads them.
+
+**`data/` is not “my clean data”.** What it holds is a format
+conversion, not a transformation. Filtering, recoding and excluding
+individuals belong in the chunk that needs them, where a reviewer can
+read the decision, never as a derived file nobody can trace.
+`check_data()` reports what is sitting in there that the analysis never
+reads — it travels to the repository all the same.
 
 ## Writing
 
@@ -149,12 +197,12 @@ The order of a first day, once the project exists:
     already there if you passed `authors`, with their marks in place.
 3.  Write. `_sections/2_introduction.qmd` is plain markdown: headings
     and paragraphs, nothing to declare.
-4.  Put the originals in `data/raw/` and run `sync_data()`. It converts
-    every spreadsheet sheet by sheet and copies across whatever is
-    already plain text, into `data/csv/`. Read from **there**, with the
-    path relative to the project root: `data/raw/` never travels to the
-    deposit, so an analysis that reads from it would publish a
-    compendium with no data in it.
+4.  Bring your data in with
+    `convert_data("path/to/your/original.xlsx")`. It lands in `data/`,
+    converted or copied. Read from **there**, with the path relative to
+    the project root: your originals never travel to the deposit, so an
+    analysis that reads them where they live would publish a compendium
+    with no data in it.
 5.  `render_html()` whenever you want to look at it. Seconds, not
     minutes.
 
@@ -164,7 +212,7 @@ lives inside the section that reports it:
     ```{r}
     #| label: richness-model
     #| cache: true
-    richness <- readr::read_csv(here::here("data/csv/richness.csv")) |>
+    richness <- readr::read_csv(here::here("data/richness.csv")) |>
       dplyr::filter(!is.na(S), status != "dead")
 
     m1 <- glmmTMB::glmmTMB(S ~ treatment + (1 | plot),
@@ -352,10 +400,10 @@ out. What is *not* checked for you — acknowledgements, CRediT, and
 self-citations of the kind “in our previous study (Author et al.)” — is
 listed in the `CHECKLIST.md`.
 
-The compendium publishes open formats only: the `.csv`, never the source
-`.xlsx`, and only the analysis code, not your authoring tooling. Its
-`README.txt` is written from what the folder actually holds, so it never
-needs editing.
+The compendium publishes open formats only: what is in `data/`, never
+the source `.xlsx`, and only the analysis code, not your authoring
+tooling. Its `README.txt` is written from what the folder actually
+holds, so it never needs editing.
 
 Nor does its metadata have to be typed twice. `sync_metadata()` runs on
 every render and fills in what the project already knows: the title and
@@ -411,7 +459,7 @@ check_citations()   # @keys with no entry in references/, and the reverse
 check_crossrefs()   # @fig-/@tbl- with no target, and figures nobody cites
 check_title()       # has title_page.qmd drifted from the manuscript?
 check_renv()        # is renv.lock there, and does it match what you use?
-check_data()        # .csv in data/csv/ that the analysis never reads
+check_data()        # files in data/ that the analysis never reads
 ```
 
 The second one has caught more submissions than the rest together: a
