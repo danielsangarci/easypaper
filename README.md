@@ -25,13 +25,30 @@ create_paper("~/papers/ant_chemistry",
 Then open the `.Rproj` it leaves behind and:
 
 ```r
-source("make.R")
-sync_data()            # data/raw/* -> data/csv/*, converted or copied
-render_html()          # fast, while you write
-make_all()             # .docx + .pdf + supplement, into output/
-make_submission("myrmecological-news")            # -> submission/default/
-make_submission("myrmecological-news", label = "MyrmecologicalNews")   # the real one
+source("make.R")                     # loads every command below
+sync_data()                          # data/raw/* -> data/csv/*, converted or copied
+
+# while you write
+render_html()                        # the working .html, in seconds
+preview()                            # live: reloads every time you save
+
+# the documents, into output/
+render_docx("myrmecological-news")   # the .docx, in that journal's style
+render_pdf()                         # the .pdf, for a preprint server
+render_supplementary()               # the supplement, with its own references
+export_code()                        # analysis_code.R + sessionInfo.txt
+make_all()                           # the four above, in order
+
+# what you send, into submission/
+make_submission("myrmecological-news")                                # a trial run
+make_submission("myrmecological-news", label = "MyrmecologicalNews")  # the real one
+make_preprint()                                                       # the whole deposit
 ```
+
+Every render checks first — citations with no entry, cross-references with no
+target, data files nobody reads — and records the environment it came out of.
+`list_journals()` tells you which citation styles you have; `check_data()`,
+`check_renv()` and their siblings can be called on their own.
 
 `make_all()` renders; `make_submission()` submits. The first writes documents
 to read, into `output/`. The second builds what the journal asks for — blinded,
