@@ -30,7 +30,7 @@ three roads, decided by its extension alone:
 |---|---|
 | `.xlsx`, `.xls` | **converts** it, one `.csv` per sheet (needs `readxl`) |
 | `.sav`, `.dta`, `.sas7bdat` | **converts** it, one `.csv` per file (needs `haven`) |
-| anything already open — `.csv` `.tsv` `.txt` `.json` `.geojson` `.parquet` `.nc` `.sqlite` `.gpkg` `.tif` `.fasta`, a `.shp` with its sidecars… | **copies** it byte for byte |
+| anything already open | **copies** it byte for byte. Text and tables: `.csv` `.tsv` `.txt` `.json` `.geojson` `.xml` `.yml` `.yaml`. Containers: `.parquet` `.nc` `.h5` `.hdf5` `.sqlite` `.db` `.gpkg`. Spatial: `.shp` with its sidecars (`.shx` `.dbf` `.prj` `.cpg` `.sbn` `.sbx` `.qix`), `.kml` `.gml` `.tif` `.tiff` `.asc`. Sequences and trees: `.fasta` `.fa` `.fastq` `.fq` `.nwk` `.tre` |
 | anything else | **leaves it where it is and names it on screen** |
 
 The third row is `.cd_open_formats`, at the top of `R/convert_data.R`: a list

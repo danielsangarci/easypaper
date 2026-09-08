@@ -33,15 +33,32 @@ years. It never writes anywhere else and never touches the original.
 }
 \details{
 Each file takes one of three roads, decided by its extension alone:
+\itemize{
+\item \strong{Converted} to \code{.csv}: \code{.xlsx} and \code{.xls}, one \code{.csv} per sheet (needs
+readxl); \code{.sav}, \code{.dta} and \code{.sas7bdat}, one \code{.csv} per file (needs
+haven). These are closed formats with an open equivalent faithful enough
+to publish.
+\item \strong{Copied byte for byte}, because they already are the open format and
+converting one would destroy it rather than open it:
+\itemize{
+\item text and tables: \code{.csv}, \code{.tsv}, \code{.txt}, \code{.json}, \code{.geojson}, \code{.xml},
+\code{.yml}, \code{.yaml}
+\item containers: \code{.parquet}, \code{.nc}, \code{.h5}, \code{.hdf5}, \code{.sqlite}, \code{.db},
+\code{.gpkg}
+\item spatial: \code{.shp} with its sidecars (\code{.shx}, \code{.dbf}, \code{.prj}, \code{.cpg},
+\code{.sbn}, \code{.sbx}, \code{.qix}), \code{.kml}, \code{.gml}, \code{.tif}, \code{.tiff}, \code{.asc}
+\item sequences and trees: \code{.fasta}, \code{.fa}, \code{.fastq}, \code{.fq}, \code{.nwk}, \code{.tre}
+}
+\item \strong{Named on screen and left where it is}: anything else. A proprietary
+instrument file, an ArcGIS project, a photograph of a field notebook --
+nothing here can tell whether it belongs in the paper, or what "the
+table" inside it would even be.
+}
 
-converted   \code{.xlsx} and \code{.xls}, one \code{.csv} per sheet (needs readxl);
-\code{.sav}, \code{.dta} and \code{.sas7bdat}, one \code{.csv} per file (needs
-haven)
-copied      anything already open -- plain text, \code{.json}, \code{.parquet},
-\code{.nc}, \code{.sqlite}, \code{.gpkg}, a \code{.shp} with its sidecars,
-\code{.tif}, \code{.fasta} -- byte for byte, because converting it
-would destroy it rather than open it
-named       anything else, left where it is and reported on screen
+That second list is \code{.cd_open_formats}, at the top of this file. Print it to
+see what is in it, add to it when your field uses something it has not heard
+of, or pass the extension in \code{also} for a single call. The file lives in
+your project, so the list is yours to edit.
 
 A format conversion, not a transformation: filtering, recoding and cleaning
 belong in the analysis chunk that needs them, where a reader can check them.

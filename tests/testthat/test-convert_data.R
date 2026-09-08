@@ -65,3 +65,16 @@ test_that("convert_data() will not copy a folder onto itself", {
   expect_message(convert_data("data"), "Nothing to convert")
   expect_length(list.files(file.path(p, "data")), 1L)
 })
+
+test_that("every open format the code accepts is named in the data README", {
+  # That README travels inside every project and is where someone looks up
+  # what convert_data() will copy. A format added to the vector and not to the
+  # table is a format nobody knows about.
+  txt <- paste(readLines(system.file("template", "data", "README.md",
+                                     package = "easypaper"), warn = FALSE),
+               collapse = " ")
+  missing <- .cd_open_formats[
+    !vapply(.cd_open_formats,
+            function(e) grepl(paste0(".", e), txt, fixed = TRUE), logical(1))]
+  expect_identical(missing, character(0))
+})

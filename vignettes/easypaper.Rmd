@@ -118,7 +118,7 @@ three roads, decided by its extension alone:
 |---|---|
 | `.xlsx`, `.xls` | **converts** it, one `.csv` per sheet. Needs `readxl` |
 | `.sav`, `.dta`, `.sas7bdat` | **converts** it, one `.csv` per file. Needs `haven` |
-| anything already open: `.csv` `.tsv` `.txt` `.json` `.geojson` `.xml` `.parquet` `.nc` `.h5` `.sqlite` `.gpkg` `.kml` `.gml` `.tif` `.asc` `.fasta` `.fastq` `.nwk`, and a `.shp` with all its sidecars | **copies** it across byte for byte. Converting these would destroy them, not open them |
+| anything already open | **copies** it across byte for byte, because converting it would destroy it rather than open it. Text and tables: `.csv` `.tsv` `.txt` `.json` `.geojson` `.xml` `.yml` `.yaml`. Containers: `.parquet` `.nc` `.h5` `.hdf5` `.sqlite` `.db` `.gpkg`. Spatial: `.shp` with its sidecars (`.shx` `.dbf` `.prj` `.cpg` `.sbn` `.sbx` `.qix`), `.kml` `.gml` `.tif` `.tiff` `.asc`. Sequences and trees: `.fasta` `.fa` `.fastq` `.fq` `.nwk` `.tre` |
 | anything else | **leaves it where it is and names it on screen** |
 
 That third row is the one that matters, and it is a list you can edit: it lives

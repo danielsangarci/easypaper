@@ -27,14 +27,28 @@
 #'
 #' Each file takes one of three roads, decided by its extension alone:
 #'
-#'   converted   `.xlsx` and `.xls`, one `.csv` per sheet (needs readxl);
-#'               `.sav`, `.dta` and `.sas7bdat`, one `.csv` per file (needs
-#'               haven)
-#'   copied      anything already open -- plain text, `.json`, `.parquet`,
-#'               `.nc`, `.sqlite`, `.gpkg`, a `.shp` with its sidecars,
-#'               `.tif`, `.fasta` -- byte for byte, because converting it
-#'               would destroy it rather than open it
-#'   named       anything else, left where it is and reported on screen
+#' * **Converted** to `.csv`: `.xlsx` and `.xls`, one `.csv` per sheet (needs
+#'   readxl); `.sav`, `.dta` and `.sas7bdat`, one `.csv` per file (needs
+#'   haven). These are closed formats with an open equivalent faithful enough
+#'   to publish.
+#' * **Copied byte for byte**, because they already are the open format and
+#'   converting one would destroy it rather than open it:
+#'   * text and tables: `.csv`, `.tsv`, `.txt`, `.json`, `.geojson`, `.xml`,
+#'     `.yml`, `.yaml`
+#'   * containers: `.parquet`, `.nc`, `.h5`, `.hdf5`, `.sqlite`, `.db`,
+#'     `.gpkg`
+#'   * spatial: `.shp` with its sidecars (`.shx`, `.dbf`, `.prj`, `.cpg`,
+#'     `.sbn`, `.sbx`, `.qix`), `.kml`, `.gml`, `.tif`, `.tiff`, `.asc`
+#'   * sequences and trees: `.fasta`, `.fa`, `.fastq`, `.fq`, `.nwk`, `.tre`
+#' * **Named on screen and left where it is**: anything else. A proprietary
+#'   instrument file, an ArcGIS project, a photograph of a field notebook --
+#'   nothing here can tell whether it belongs in the paper, or what "the
+#'   table" inside it would even be.
+#'
+#' That second list is `.cd_open_formats`, at the top of this file. Print it to
+#' see what is in it, add to it when your field uses something it has not heard
+#' of, or pass the extension in `also` for a single call. The file lives in
+#' your project, so the list is yours to edit.
 #'
 #' A format conversion, not a transformation: filtering, recoding and cleaning
 #' belong in the analysis chunk that needs them, where a reader can check them.
