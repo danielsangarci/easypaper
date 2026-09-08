@@ -86,6 +86,7 @@
 <p>Then open the <code>.Rproj</code> it leaves behind and:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"make.R"</span><span class="op">)</span></span>
+<span><span class="fu">sync_data</span><span class="op">(</span><span class="op">)</span>            <span class="co"># data/raw/* -&gt; data/csv/*, converted or copied</span></span>
 <span><span class="fu">render_html</span><span class="op">(</span><span class="op">)</span>          <span class="co"># fast, while you write</span></span>
 <span><span class="fu">make_all</span><span class="op">(</span><span class="op">)</span>             <span class="co"># .docx + .pdf + supplement, into output/</span></span>
 <span><span class="fu">make_submission</span><span class="op">(</span><span class="st">"myrmecological-news"</span><span class="op">)</span>            <span class="co"># -&gt; submission/default/</span></span>
@@ -118,11 +119,11 @@
 <pre><code>manuscript.qmd       The spine: title, authors, and the list of includes
 _sections/           The text, one file per section. This is where you write
 data/raw/            The originals, as they arrived. Read only
-data/processed/      The same data in open format, written by code
+data/csv/            The same data in open format, written by sync_data()
 R/setup.R            Seed, palette, table and figure helpers
 references/          The .bib you cite from
 references_styles/   One .csl per journal
-format/              The Word templates the .docx is built on
+format/              Three Word templates: manuscript, supplement, letter
 figures/  output/    Everything the render produces. Regenerable
 submission/          What make_submission() builds
 make.R               The only entry point
@@ -141,6 +142,16 @@ run.R                Every command, explained, one line at a time</code></pre>
 <h2 id="requirements">Requirements<a class="anchor" aria-label="anchor" href="#requirements"></a>
 </h2>
 <p>R &gt;= 4.1 and Quarto, which ships inside RStudio and Positron — nothing to install if you use either. Rendering the PDF also needs a LaTeX installation (<code><a href="https://rdrr.io/pkg/tinytex/man/install_tinytex.html" class="external-link">tinytex::install_tinytex()</a></code> is enough).</p>
+</div>
+<div class="section level2">
+<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
+</h2>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"easypaper"</span><span class="op">)</span></span></code></pre></div>
+<blockquote>
+<p>Sanchez-Garcia, D. (2026). easypaper: Scaffold a Reproducible Quarto Manuscript Project. R package version 0.1.0. <a href="https://github.com/danielsangarci/easypaper" class="external-link uri">https://github.com/danielsangarci/easypaper</a></p>
+</blockquote>
+<p>The BibTeX entry comes with the key <code>easypaper</code>, ready to paste into a <code>.bib</code>. GitHub’s <em>Cite this repository</em> button reads <code>CITATION.cff</code>, which carries the same details and the ORCID.</p>
 </div>
 <div class="section level2">
 <h2 id="licence">Licence<a class="anchor" aria-label="anchor" href="#licence"></a>

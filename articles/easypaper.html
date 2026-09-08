@@ -103,7 +103,7 @@ affiliations themselves live in
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"demo_paper"</span><span class="op">)</span></span>
 <span><span class="fu">easypaper</span><span class="fu">::</span><span class="fu"><a href="../reference/create_paper.html">create_paper</a></span><span class="op">(</span><span class="va">dir</span>, git <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Project created: /tmp/RtmpBVsl6H/demo_paper</span></span>
+<span><span class="co">#&gt; Project created: /tmp/RtmpajbZx8/demo_paper</span></span>
 <span><span class="co">#&gt;   1. open demo_paper.Rproj</span></span>
 <span><span class="co">#&gt;   2. source("make.R")</span></span>
 <span><span class="co">#&gt;   3. render_html()      # or see run.R for every command</span></span>
@@ -159,8 +159,10 @@ chunk runs with the working directory at the root, and
 <td>The originals, as they arrived. Read only, never edited</td>
 </tr>
 <tr class="odd">
-<td><code>data/processed/</code></td>
-<td>The same data in open format, written by code</td>
+<td><code>data/csv/</code></td>
+<td>The same data in open format, written by <code>sync_data()</code>.
+<strong>This is what gets published</strong>
+</td>
 </tr>
 <tr class="even">
 <td><code>R/setup.R</code></td>
@@ -176,7 +178,9 @@ chunk runs with the working directory at the root, and
 </tr>
 <tr class="odd">
 <td><code>format/</code></td>
-<td>The Word templates the <code>.docx</code> is built on</td>
+<td>Three Word templates: the manuscript (line-numbered, ragged right),
+the supplement and the cover letter (both justified, neither
+numbered)</td>
 </tr>
 <tr class="even">
 <td>
@@ -202,6 +206,41 @@ nervous, something is being done by hand that should be done by
 code.</p>
 </div>
 <div class="section level2">
+<h2 id="the-data-folder">The data folder<a class="anchor" aria-label="anchor" href="#the-data-folder"></a>
+</h2>
+<p>Three folders, and what separates them is not tidiness: it is what
+gets published.</p>
+<pre><code>data/raw/       the originals, exactly as they arrived. Read only, never
+                edited, never published
+data/csv/       the same data in an open format. THIS is what the deposit
+                carries and what the metadata describes
+data/metadata/  the dataspice description of the above</code></pre>
+<p>One call keeps the second in step with the first:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"R/sync_data.R"</span><span class="op">)</span></span>
+<span><span class="fu">sync_data</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>It converts every spreadsheet in <code>raw/</code> sheet by sheet,
+copies across whatever is already plain text, and <strong>names whatever
+it could not read</strong> — a <code>.sqlite</code>, a GeoPackage, a
+NetCDF. Those never reach the deposit unless you put a copy in
+<code>data/csv/</code> yourself, which is allowed and safe: the folder
+is not restricted to <code>.csv</code> despite its name, nothing there
+is ever deleted, and a file you place by hand travels to the compendium
+exactly as it is.</p>
+<p>Two rules follow, and they are the ones worth holding onto:</p>
+<p><strong>Read from <code>data/csv/</code>, never from
+<code>data/raw/</code>.</strong> An analysis that reads the originals
+works perfectly on your machine and publishes a compendium with no data
+in it — and nothing would have told you.</p>
+<p><strong><code>data/csv/</code> is not “my clean data”.</strong> It is
+the same data in an open format: a conversion, not a transformation.
+Filtering, recoding and excluding individuals belong in the chunk that
+needs them, where a reviewer can read the decision, never as a derived
+file nobody can trace. <code>check_data()</code> reports what is sitting
+in there that the analysis never reads — it travels to the repository
+all the same.</p>
+</div>
+<div class="section level2">
 <h2 id="writing">Writing<a class="anchor" aria-label="anchor" href="#writing"></a>
 </h2>
 <p>The order of a first day, once the project exists:</p>
@@ -213,8 +252,13 @@ The names are already there if you passed <code>authors</code>, with
 their marks in place.</li>
 <li>Write. <code>_sections/2_introduction.qmd</code> is plain markdown:
 headings and paragraphs, nothing to declare.</li>
-<li>Put the data in <code>data/raw/</code> and read it from a chunk,
-with the path relative to the project root.</li>
+<li>Put the originals in <code>data/raw/</code> and run
+<code>sync_data()</code>. It converts every spreadsheet sheet by sheet
+and copies across whatever is already plain text, into
+<code>data/csv/</code>. Read from <strong>there</strong>, with the path
+relative to the project root: <code>data/raw/</code> never travels to
+the deposit, so an analysis that reads from it would publish a
+compendium with no data in it.</li>
 <li>
 <code>render_html()</code> whenever you want to look at it. Seconds,
 not minutes.</li>
@@ -224,7 +268,7 @@ lives inside the section that reports it:</p>
 <pre><code>```{r}
 #| label: richness-model
 #| cache: true
-richness &lt;- readr::read_csv(here::here("data/processed/richness.csv")) |&gt;
+richness &lt;- readr::read_csv(here::here("data/csv/richness.csv")) |&gt;
   dplyr::filter(!is.na(S), status != "dead")
 
 m1 &lt;- glmmTMB::glmmTMB(S ~ treatment + (1 | plot),
@@ -251,7 +295,7 @@ times. <strong>Submitting</strong> builds the package a journal asks for
 compendium — written into <code>submission/</code>. You will do it
 twice.</p>
 <p>This section is the first job.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"make.R"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">render_html</span><span class="op">(</span><span class="op">)</span>                       <span class="co"># seconds, while you write</span></span>
@@ -431,7 +475,7 @@ point — its reference list is independent from the main text’s.</li>
 </ul>
 <p>Where the figures end up is decided when you submit, and the
 citations work either way:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">make_submission</span><span class="op">(</span><span class="st">"myrmecological-news"</span><span class="op">)</span>                        <span class="co"># own document</span></span>
 <span><span class="fu">make_submission</span><span class="op">(</span><span class="st">"myrmecological-news"</span>, suppl_figures <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span> <span class="co"># end of the main text</span></span></code></pre></div>
 </div>
@@ -503,7 +547,7 @@ included</td>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">make_submission</span><span class="op">(</span><span class="st">"myrmecological-news"</span><span class="op">)</span>                        <span class="co"># -&gt; submission/default/</span></span>
 <span><span class="fu">make_submission</span><span class="op">(</span><span class="st">"myrmecological-news"</span>, label <span class="op">=</span> <span class="st">"MyrmecologicalNews"</span><span class="op">)</span> <span class="co"># the real submission</span></span></code></pre></div>
 <table class="table">
@@ -589,6 +633,13 @@ al.)” — is listed in the <code>CHECKLIST.md</code>.</p>
 never the source <code>.xlsx</code>, and only the analysis code, not
 your authoring tooling. Its <code>README.txt</code> is written from what
 the folder actually holds, so it never needs editing.</p>
+<p>Nor does its metadata have to be typed twice.
+<code>sync_metadata()</code> runs on every render and fills in what the
+project already knows: the title and the keywords from the manuscript,
+the authors as the creators of the data, and the variable names from the
+data files themselves. It only ever adds, so the descriptions and the
+units you write by hand are never overwritten — and what no machine can
+guess, the coverage and the licence of the deposit, stays yours.</p>
 </div>
 <div class="section level2">
 <h2 id="the-preprint-deposit">The preprint deposit<a class="anchor" aria-label="anchor" href="#the-preprint-deposit"></a>
@@ -596,7 +647,7 @@ the folder actually holds, so it never needs editing.</p>
 <p>A preprint goes to two places at once — the manuscript to a server,
 the data and code to a repository — and <code>make_preprint()</code>
 builds both halves into <code>submission/bioRxiv/</code>.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">make_preprint</span><span class="op">(</span><span class="op">)</span>                       <span class="co"># -&gt; submission/bioRxiv/</span></span>
 <span><span class="fu">make_preprint</span><span class="op">(</span>label <span class="op">=</span> <span class="st">"EcoEvoRxiv"</span><span class="op">)</span>   <span class="co"># another server</span></span>
 <span><span class="fu">make_preprint</span><span class="op">(</span>label <span class="op">=</span> <span class="st">"bioRxiv_v2"</span><span class="op">)</span>   <span class="co"># the revised version</span></span></code></pre></div>
@@ -626,14 +677,34 @@ posting is a new version, not a correction.</p>
 <h2 id="the-checks">The checks<a class="anchor" aria-label="anchor" href="#the-checks"></a>
 </h2>
 <p>Every render runs them, and you can call them yourself:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">check_citations</span><span class="op">(</span><span class="op">)</span>   <span class="co"># @keys with no entry in references/, and the reverse</span></span>
 <span><span class="fu">check_crossrefs</span><span class="op">(</span><span class="op">)</span>   <span class="co"># @fig-/@tbl- with no target, and figures nobody cites</span></span>
 <span><span class="fu">check_title</span><span class="op">(</span><span class="op">)</span>       <span class="co"># has title_page.qmd drifted from the manuscript?</span></span>
-<span><span class="fu">check_renv</span><span class="op">(</span><span class="op">)</span>        <span class="co"># is renv.lock there, and does it match what you use?</span></span></code></pre></div>
+<span><span class="fu">check_renv</span><span class="op">(</span><span class="op">)</span>        <span class="co"># is renv.lock there, and does it match what you use?</span></span>
+<span><span class="fu">check_data</span><span class="op">(</span><span class="op">)</span>        <span class="co"># .csv in data/csv/ that the analysis never reads</span></span></code></pre></div>
 <p>The second one has caught more submissions than the rest together: a
 figure defined and never cited is a figure the journal will ask you
 about.</p>
+</div>
+<div class="section level2">
+<h2 id="citing-easypaper">Citing easypaper<a class="anchor" aria-label="anchor" href="#citing-easypaper"></a>
+</h2>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"easypaper"</span><span class="op">)</span></span></code></pre></div>
+<p>The BibTeX entry carries the key <code>easypaper</code>, so it drops
+into a <code>.bib</code> as it is. GitHub’s <em>Cite this
+repository</em> button reads <code>CITATION.cff</code>, which holds the
+same details and the ORCID.</p>
+<p>The paper you write cites its own tooling without your help: the
+setup chunk of <code>manuscript.qmd</code> runs
+<code><a href="https://rdrr.io/pkg/knitr/man/write_bib.html" class="external-link">knitr::write_bib()</a></code> over the packages in play — easypaper
+among them — into <code>references/packages.bib</code>, so
+<code>[@R-easypaper]</code> resolves on every render. Where to put that
+citation is a question of its own, and the master answers it in a
+commented block at the end: infrastructure is cited where you report the
+deposit, not in Methods among the packages that produced the
+results.</p>
 </div>
 <div class="section level2">
 <h2 id="where-to-read-more">Where to read more<a class="anchor" aria-label="anchor" href="#where-to-read-more"></a>

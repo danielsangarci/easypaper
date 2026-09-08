@@ -14,7 +14,7 @@ Sanchez-Garcia, D. (2026). easypaper: Scaffold a Reproducible Quarto
 Manuscript Project. R package version 0.1.0.
 https://github.com/danielsangarci/easypaper
 
-    @Manual{,
+    @Manual{easypaper,
       title = {easypaper: Scaffold a Reproducible Quarto Manuscript Project},
       author = {Daniel Sanchez-Garcia},
       year = {2026},

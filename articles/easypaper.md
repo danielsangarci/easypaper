@@ -34,7 +34,7 @@ Here is what lands on disk:
 
 dir <- file.path(tempdir(), "demo_paper")
 easypaper::create_paper(dir, git = FALSE)
-#> Project created: /tmp/RtmpBVsl6H/demo_paper
+#> Project created: /tmp/RtmpajbZx8/demo_paper
 #>   1. open demo_paper.Rproj
 #>   2. source("make.R")
 #>   3. render_html()      # or see run.R for every command
@@ -85,11 +85,11 @@ Where each thing goes, then:
 |----|----|
 | `_sections/*.qmd` | The text. This is where you write |
 | `data/raw/` | The originals, as they arrived. Read only, never edited |
-| `data/processed/` | The same data in open format, written by code |
+| `data/csv/` | The same data in open format, written by `sync_data()`. **This is what gets published** |
 | `R/setup.R` | Seed, palette, table and figure helpers |
 | `references/references.bib` | The bibliography you cite from |
 | `references_styles/*.csl` | One citation style per journal |
-| `format/` | The Word templates the `.docx` is built on |
+| `format/` | Three Word templates: the manuscript (line-numbered, ragged right), the supplement and the cover letter (both justified, neither numbered) |
 | `figures/`, `output/`, `cache/` | Produced by the render. Regenerable, and in `.gitignore` |
 | `submission/` | Built by `make_submission()`. Never edited by hand |
 
@@ -100,6 +100,46 @@ everything under `output/` and `figures/` is disposable by design — if
 deleting it makes you nervous, something is being done by hand that
 should be done by code.
 
+## The data folder
+
+Three folders, and what separates them is not tidiness: it is what gets
+published.
+
+    data/raw/       the originals, exactly as they arrived. Read only, never
+                    edited, never published
+    data/csv/       the same data in an open format. THIS is what the deposit
+                    carries and what the metadata describes
+    data/metadata/  the dataspice description of the above
+
+One call keeps the second in step with the first:
+
+``` r
+
+source("R/sync_data.R")
+sync_data()
+```
+
+It converts every spreadsheet in `raw/` sheet by sheet, copies across
+whatever is already plain text, and **names whatever it could not read**
+— a `.sqlite`, a GeoPackage, a NetCDF. Those never reach the deposit
+unless you put a copy in `data/csv/` yourself, which is allowed and
+safe: the folder is not restricted to `.csv` despite its name, nothing
+there is ever deleted, and a file you place by hand travels to the
+compendium exactly as it is.
+
+Two rules follow, and they are the ones worth holding onto:
+
+**Read from `data/csv/`, never from `data/raw/`.** An analysis that
+reads the originals works perfectly on your machine and publishes a
+compendium with no data in it — and nothing would have told you.
+
+**`data/csv/` is not “my clean data”.** It is the same data in an open
+format: a conversion, not a transformation. Filtering, recoding and
+excluding individuals belong in the chunk that needs them, where a
+reviewer can read the decision, never as a derived file nobody can
+trace. `check_data()` reports what is sitting in there that the analysis
+never reads — it travels to the repository all the same.
+
 ## Writing
 
 The order of a first day, once the project exists:
@@ -109,8 +149,12 @@ The order of a first day, once the project exists:
     already there if you passed `authors`, with their marks in place.
 3.  Write. `_sections/2_introduction.qmd` is plain markdown: headings
     and paragraphs, nothing to declare.
-4.  Put the data in `data/raw/` and read it from a chunk, with the path
-    relative to the project root.
+4.  Put the originals in `data/raw/` and run `sync_data()`. It converts
+    every spreadsheet sheet by sheet and copies across whatever is
+    already plain text, into `data/csv/`. Read from **there**, with the
+    path relative to the project root: `data/raw/` never travels to the
+    deposit, so an analysis that reads from it would publish a
+    compendium with no data in it.
 5.  `render_html()` whenever you want to look at it. Seconds, not
     minutes.
 
@@ -120,7 +164,7 @@ lives inside the section that reports it:
     ```{r}
     #| label: richness-model
     #| cache: true
-    richness <- readr::read_csv(here::here("data/processed/richness.csv")) |>
+    richness <- readr::read_csv(here::here("data/csv/richness.csv")) |>
       dplyr::filter(!is.na(S), status != "dead")
 
     m1 <- glmmTMB::glmmTMB(S ~ treatment + (1 | plot),
@@ -313,6 +357,14 @@ The compendium publishes open formats only: the `.csv`, never the source
 `README.txt` is written from what the folder actually holds, so it never
 needs editing.
 
+Nor does its metadata have to be typed twice. `sync_metadata()` runs on
+every render and fills in what the project already knows: the title and
+the keywords from the manuscript, the authors as the creators of the
+data, and the variable names from the data files themselves. It only
+ever adds, so the descriptions and the units you write by hand are never
+overwritten — and what no machine can guess, the coverage and the
+licence of the deposit, stays yours.
+
 ## The preprint deposit
 
 A preprint goes to two places at once — the manuscript to a server, the
@@ -359,11 +411,33 @@ check_citations()   # @keys with no entry in references/, and the reverse
 check_crossrefs()   # @fig-/@tbl- with no target, and figures nobody cites
 check_title()       # has title_page.qmd drifted from the manuscript?
 check_renv()        # is renv.lock there, and does it match what you use?
+check_data()        # .csv in data/csv/ that the analysis never reads
 ```
 
 The second one has caught more submissions than the rest together: a
 figure defined and never cited is a figure the journal will ask you
 about.
+
+## Citing easypaper
+
+``` r
+
+citation("easypaper")
+```
+
+The BibTeX entry carries the key `easypaper`, so it drops into a `.bib`
+as it is. GitHub’s *Cite this repository* button reads `CITATION.cff`,
+which holds the same details and the ORCID.
+
+The paper you write cites its own tooling without your help: the setup
+chunk of `manuscript.qmd` runs
+[`knitr::write_bib()`](https://rdrr.io/pkg/knitr/man/write_bib.html)
+over the packages in play — easypaper among them — into
+`references/packages.bib`, so `[@R-easypaper]` resolves on every render.
+Where to put that citation is a question of its own, and the master
+answers it in a commented block at the end: infrastructure is cited
+where you report the deposit, not in Methods among the packages that
+produced the results.
 
 ## Where to read more
 
