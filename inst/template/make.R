@@ -620,7 +620,7 @@ render_supplementary <- function(journal = "myrmecological-news", caption_style 
     # includes one fixed section, and the caller may well be asking for a
     # different one (make_submission() renders only the TEXT appendices when
     # the figures stay in the main document).
-    input <- .build_supplementary(files[k], k, n)
+    input <- .build_supplementary(files[k], k, n, fmt = output_format)
     tmps  <- c(tmps, input)
     # The wrapper is NOT in the render: list of _quarto.yml, and Quarto then
     # writes the output next to the input instead of into output-dir.

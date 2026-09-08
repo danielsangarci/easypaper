@@ -17,3 +17,13 @@ source(here::here("R/setup.R"))
 ```
 
 {{< include _sections/8_suppl_material.qmd >}}
+
+<!-- Where this document's OWN reference list goes. Without this block Quarto
+     still resolves the citations and still writes the list, but at the very
+     end and with no heading: a supplement that reaches a journal ending in
+     bare bibliographic entries. The main text has the same block. -->
+
+# References
+
+::: {#refs}
+:::

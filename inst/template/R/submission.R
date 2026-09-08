@@ -136,7 +136,7 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
 #' Wrapper for one supplementary file: supplementary.qmd with its include
 #' swapped and its title turned into "Appendix Sk". Only used when there is
 #' more than one supplementary document.
-.build_supplementary <- function(section, k, n = 1L) {
+.build_supplementary <- function(section, k, n = 1L, fmt = "docx") {
   l <- readLines(here("supplementary.qmd"), warn = FALSE)
   inc <- grep("\\{\\{< *include +_sections/8", l)
   if (!length(inc)) {
@@ -147,14 +147,33 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
   # Drop any FURTHER supplementary include: each appendix is its own document.
   # Guarded, because l[-integer(0)] returns an empty vector, not l.
   if (length(inc) > 1L) l <- l[-inc[-1]]
+
+  end <- grep("^---\\s*$", l)[2]
+  if (is.na(end)) stop("supplementary.qmd has no YAML header.", call. = FALSE)
+  yml <- yaml::read_yaml(text = paste(l[2:(end - 1L)], collapse = "\n"))
+
   # With a single supplementary document its own title stands ("Supporting
   # Information"); with several, each one is named after its appendix.
-  if (n > 1L) {
-    ttl <- grep("^title:", l)
-    if (length(ttl)) l[ttl[1]] <- sprintf('title: "Appendix S%d"', k)
+  if (n > 1L) yml$title <- sprintf("Appendix S%d", k)
+
+  # supplementary.qmd declares only the .docx it was written for. Ask it for
+  # anything else -- the .pdf of a preprint deposit, say -- and Quarto falls
+  # back on ITS defaults: KOMA-Script and lualatex, a different document class
+  # from the manuscript's and one a lean LaTeX install does not even carry.
+  # The project's own settings for that format are copied in instead, so the
+  # supplement comes out of the same press as the paper.
+  if (!fmt %in% names(yml$format)) {
+    proj <- yaml::read_yaml(here("_quarto.yml"))$format
+    if (fmt %in% names(proj)) yml$format[[fmt]] <- proj[[fmt]]
   }
+
+  # The yaml package writes logicals as yes/no (YAML 1.1); Quarto reads 1.2.
+  as_bool <- function(x) structure(ifelse(x, "true", "false"), class = "verbatim")
   dest <- here(sprintf("tmp_supplementary_S%d.qmd", k))
-  writeLines(l, dest)
+  writeLines(c("---",
+               trimws(yaml::as.yaml(yml, handlers = list(logical = as_bool)),
+                      which = "right"), "---",
+               l[(end + 1L):length(l)]), dest)
   dest
 }
 

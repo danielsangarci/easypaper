@@ -95,3 +95,12 @@ test_that("a supplementary float is found whichever way it is labelled", {
                    c("sfig-map", "sfig-model", "stbl-raw", "stbl-extra"))
   expect_true(e$.suppl_is_floats(f))
 })
+
+test_that("the project declares the formats the supplement can be asked for", {
+  # .build_supplementary() copies these into the wrapper it renders. Without
+  # them Quarto falls back on its own PDF defaults -- KOMA-Script and lualatex
+  # -- which is a different document class from the manuscript's and one a lean
+  # LaTeX install does not carry: the render dies with "scrartcl.cls not found".
+  y <- yaml::read_yaml(tpl("_quarto.yml"))
+  expect_true(all(c("docx", "pdf") %in% names(y$format)))
+})
