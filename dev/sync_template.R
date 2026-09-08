@@ -8,7 +8,11 @@
 #
 #   Rscript dev/sync_template.R "~/Mi unidad/Investigacion/RTools/quarto_project_structure"
 #
-# Afterwards: devtools::test() and devtools::check().
+# Afterwards: devtools::test() and devtools::check() -- and dev/e2e.R, which
+# is the only one of the three that renders anything. A sync brings in whatever
+# the working project has drifted into, and the drift that matters (a format
+# gone from _quarto.yml, a supplement without its references block) is
+# invisible to a check.
 # ---------------------------------------------------------------------------
 
 args <- commandArgs(trailingOnly = TRUE)
