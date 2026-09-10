@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">easypaper</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,6 +20,7 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-news" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">News</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-news"><li><h6 class="dropdown-header" data-toc-skip>Releases</h6></li>
+    <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.3">Version 0.2.3</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.2">Version 0.2.2</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.1">Version 0.2.1</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.0">Version 0.2.0</a></li>
@@ -42,27 +43,27 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.2.2" id="easypaper-022">easypaper 0.2.2<a class="anchor" aria-label="anchor" href="#easypaper-022"></a></h2>
-<p><code><a href="../reference/update_project.html">update_project()</a></code> carries all of this into a project already written, including the three Word templates. The two files it never touches are <code>R/setup.R</code> and <code>_sections/</code>, so the two table examples are the only thing to copy across by hand.</p>
+<h2 class="pkg-version" data-toc-text="0.2.3" id="easypaper-023">easypaper 0.2.3<a class="anchor" aria-label="anchor" href="#easypaper-023"></a></h2>
+<p><code><a href="../reference/update_project.html">update_project()</a></code> carries all of this into a project already written. What it never touches is <code>R/setup.R</code> and <code>_sections/</code>, so the manuscript’s own sections and the two table examples are what you copy across by hand.</p>
 <div class="section level3">
-<h3 id="placeholders-that-read-as-instructions-0-2-2">Placeholders that read as instructions<a class="anchor" aria-label="anchor" href="#placeholders-that-read-as-instructions-0-2-2"></a></h3>
+<h3 id="placeholders-that-read-as-instructions-0-2-3">Placeholders that read as instructions<a class="anchor" aria-label="anchor" href="#placeholders-that-read-as-instructions-0-2-3"></a></h3>
 <ul><li>A new project opened on <code>TITLE HERE</code>, <code>First Author name</code> and <code>keyword 1</code>. Now it opens on <strong><code>Manuscript title here</code>, <code>Author1</code>, <code>Author2</code> and <code>keyword1</code></strong>: shorter, unmistakably yours to replace, and numbered the way you will number the affiliations. <code>make.R</code> still warns while the author placeholders are in the YAML, and a test now ties its list to what the template actually ships, so the two cannot drift.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="a-title-page-with-nothing-blank-on-it-0-2-2">A title page with nothing blank on it<a class="anchor" aria-label="anchor" href="#a-title-page-with-nothing-blank-on-it-0-2-2"></a></h3>
+<h3 id="a-title-page-with-nothing-blank-on-it-0-2-3">A title page with nothing blank on it<a class="anchor" aria-label="anchor" href="#a-title-page-with-nothing-blank-on-it-0-2-3"></a></h3>
 <ul><li>The page carried six bold labels with nothing after them – running head, keywords, word count, figure and table counts, ORCID, funding – which is what a title page reaches a journal looking like when nobody fills it in. <strong>They are gone.</strong> What is left is the title, the authors, the affiliations and the sections a blinded submission moves across.</li>
 <li>
 <strong>The keywords are a section of the manuscript now</strong>, right after the abstract, so they travel in <code>main_*.docx</code> and in every render. They are still written once, in the <code>keywords:</code> of the YAML, which is also where the deposit’s metadata reads them: the section prints that list rather than repeating it.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="the-title-page-and-the-main-text-share-one-set-of-sections-0-2-2">The title page and the main text share one set of sections<a class="anchor" aria-label="anchor" href="#the-title-page-and-the-main-text-share-one-set-of-sections-0-2-2"></a></h3>
+<h3 id="the-title-page-and-the-main-text-share-one-set-of-sections-0-2-3">The title page and the main text share one set of sections<a class="anchor" aria-label="anchor" href="#the-title-page-and-the-main-text-share-one-set-of-sections-0-2-3"></a></h3>
 <ul><li>The title page listed its own fields as bold labels ending in a colon – <code>**Acknowledgements:**</code>, <code>**CRediT authorship contribution statement:**</code> – while the manuscript carried sections of the same meaning under proper headings. Two names for one thing, and a colon where a heading should be. <strong>The page now uses the manuscript’s own headings</strong>, so a submission is built out of the same sections a render shows.</li>
 <li>
 <strong>A blinded submission moves four sections onto the title page</strong> rather than repeating them: Acknowledgements, the CRediT statement, the conflict of interest statement and the data availability statement come out of <code>main_*.docx</code> and appear on <code>title_*.docx</code>, in that order, carrying the text you wrote in the manuscript. Everything else stays in the main text. With <code>blinded = FALSE</code> they stay where they were and the title page does not repeat them.</li>
 <li>Which sections these are is <code>BLINDED_SECTIONS</code>, at the top of <code>R/submission.R</code>, for the journal that draws the line somewhere else.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="a-supplement-that-says-which-paper-it-belongs-to-0-2-2">A supplement that says which paper it belongs to<a class="anchor" aria-label="anchor" href="#a-supplement-that-says-which-paper-it-belongs-to-0-2-2"></a></h3>
+<h3 id="a-supplement-that-says-which-paper-it-belongs-to-0-2-3">A supplement that says which paper it belongs to<a class="anchor" aria-label="anchor" href="#a-supplement-that-says-which-paper-it-belongs-to-0-2-3"></a></h3>
 <ul><li>The supplement opened with the manuscript’s bare title under its own. It now opens with <strong>a reference to the paper</strong>: authors, title and journal, in the shape a reference takes. That file is downloaded on its own from a journal’s site, with nothing around it to say what it supports.</li>
 <li>The authors are written the way a reference writes them: <strong><code>Lovelace, A., Turing, A.</code></strong>, family name first and given names as initials. The last word of a name is taken as the family name, so write a name with a particle you want kept the way you want it read.</li>
 <li>The journal’s name is read from its own <code>.csl</code>, so <code>"myrmecological-news"</code> reaches the page as <em>Myrmecological News</em>. A style with no title falls back to the file name.</li>
@@ -71,13 +72,16 @@
 <li>A blinded submission’s supplement drops the authors from that reference and keeps the title and the journal.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="no-date-and-a-supplement-that-says-who-wrote-it-0-2-2">No date, and a supplement that says who wrote it<a class="anchor" aria-label="anchor" href="#no-date-and-a-supplement-that-says-who-wrote-it-0-2-2"></a></h3>
+<h3 id="no-date-and-a-supplement-that-says-who-wrote-it-0-2-3">No date, and a supplement that says who wrote it<a class="anchor" aria-label="anchor" href="#no-date-and-a-supplement-that-says-who-wrote-it-0-2-3"></a></h3>
 <ul><li>A rendered manuscript no longer carries a date. It was <code>today</code>, so every render stamped the document with the day you happened to run it, which on a draft you circulate is worse than nothing: a manuscript is dated by the journal. Put <code>date: today</code> back in <code>manuscript.qmd</code> if you want one.</li>
 <li>
 <strong>The supplement now names its authors</strong>, under the title and above the affiliations, which is where a reader looks for them. It carried the affiliations and no names at all.</li>
 <li>
 <strong>And a blinded submission’s supplement carries neither.</strong> It used to travel with the affiliations and the correspondence line in it, which name you as surely as the names do: the main text was anonymised and the document beside it was not. <code>render_supplementary()</code> takes <code>blinded</code> for this, and <code>make_submission()</code> passes its own through. <code>make_preprint()</code> signs both, as it always did.</li>
 </ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.2" id="easypaper-022">easypaper 0.2.2<a class="anchor" aria-label="anchor" href="#easypaper-022"></a></h2>
 <div class="section level3">
 <h3 id="one-document-per-section-and-no-merging-0-2-2">One document per section, and no merging<a class="anchor" aria-label="anchor" href="#one-document-per-section-and-no-merging-0-2-2"></a></h3>
 <ul><li>
