@@ -36,25 +36,29 @@ set_flextable_defaults(
   font.family = "Times New Roman"
 )
 
-#' Fit a flextable to the width of the text column.
+#' Fit a flextable to the page, without stretching it.
 #'
-#' The table fills the column and the reader -- Word, LaTeX -- sizes each
-#' column from its content. That is what the .pdf already did, and what the
-#' .docx did not: the table used to be given a fixed 6 inches, while Quarto
-#' wraps every captioned table in a container 5.5 inches wide. A 6 inch table
-#' inside a 5.5 inch cell is what made the columns come out misaligned in Word
-#' and correct in the PDF, from the same code.
+#' `flextable::autofit()` gives every column the width its content needs, and
+#' that is the width the table keeps. This only steps in when the result is
+#' too wide for the page, and then scales the columns down together.
+#'
+#' It does NOT stretch a narrow table to fill the line. That was the bug: the
+#' table used to be forced to exactly 6 inches, and Quarto wraps every
+#' captioned table in a container 5.5 inches wide, so a 6 inch table went into
+#' a 5.5 inch cell and Word pushed the columns out of line. The PDF was right
+#' all along because LaTeX sizes columns from content and ignores the ask.
+#'
+#' So `flextable(x) |> autofit()` on its own is already correct, and this adds
+#' one thing to it: a table too wide for the page is brought back in.
 #'
 #' @param ft a flextable.
-#' @param pgwidth a width in inches, for the rare table that has to be a fixed
-#'   size whatever it is put inside. `NULL`, the default, fills the column.
-fit_flextable_to_page <- function(ft, pgwidth = NULL) {
+#' @param pgwidth the width in inches a table may not exceed. Defaults to the
+#'   5.5 inches of the container Quarto puts it in.
+fit_flextable_to_page <- function(ft, pgwidth = 5.5) {
   ft <- flextable::autofit(ft)
-  if (is.null(pgwidth)) {
-    # width = 1 is "all of what you are given", not one inch.
-    return(flextable::set_table_properties(ft, layout = "autofit", width = 1))
-  }
-  flextable::width(ft, width = dim(ft)$widths * pgwidth / sum(dim(ft)$widths))
+  w  <- dim(ft)$widths
+  if (sum(w) <= pgwidth) return(ft)
+  flextable::width(ft, width = w * pgwidth / sum(w))
 }
 FitFlextableToPage <- fit_flextable_to_page   # backwards-compatible alias
 

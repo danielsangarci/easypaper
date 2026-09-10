@@ -100,13 +100,21 @@
 ## Tables in the .docx match the .pdf
 
 * A table built with flextable came out misaligned in Word and correct in the
-  PDF, from the same code. `fit_flextable_to_page()` gave Word a table of
-  exactly 6 inches, and Quarto wraps every captioned table in a container 5.5
+  PDF, from the same code. `fit_flextable_to_page()` stretched every table to
+  exactly 6 inches, and Quarto wraps each captioned table in a container 5.5
   inches wide: a 6 inch table inside a 5.5 inch cell is what pushed the
-  columns out of line. **The table now fills its container** and the reader
-  sizes each column from its content, which is what LaTeX was already doing in
-  the PDF. `fit_flextable_to_page(ft, pgwidth = 6)` still forces a fixed width
-  for the rare table that needs one.
+  columns out of line. LaTeX sizes columns from their content and ignored the
+  ask, which is why only the `.docx` was wrong.
+* **A table now keeps the width `flextable::autofit()` gives it** and is never
+  stretched to fill the line, so `flextable(x) |> autofit()` and
+  `fit_flextable_to_page()` produce the same table. The helper adds one thing:
+  a table too wide for the page is scaled back to 5.5 inches instead of
+  running off it. `pgwidth` sets that ceiling.
+* The worked example in `_sections/7_tables.qmd` now shows the table a journal
+  actually asks for: no rule on top, one under the header row and one under
+  the table, the significance stars added to the `p` column as a suffix so the
+  column stays a number, and the legend of those stars as a footer line. It is
+  written as a pipeline, which is how you will extend it.
 
 ## One output folder
 
@@ -150,6 +158,10 @@
   affiliations and the correspondence line, plus the date. `title_*.docx` is
   unchanged, and `blinded = FALSE` still keeps the whole block, authors
   included.
+
+* `.gitignore` ignored `tmp_supplementary_S*.qmd` but not the `.docx` or
+  `.pdf` of the same name, so a render that failed halfway left an untracked
+  file behind in the repository. It now covers `tmp_supplementary_S*`.
 
 ## Quieter renders
 

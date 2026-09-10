@@ -227,11 +227,12 @@ test_that("the deliverable builders render the supplement exactly once", {
   expect_identical(count("render_supplementary("), 2L)
 })
 
-test_that("a flextable is fitted to its container, not to a fixed width", {
+test_that("a flextable keeps its natural width and is never stretched", {
   # Quarto wraps every captioned table in a container 5.5 inches wide, and the
-  # helper used to hand Word a table of exactly 6. A 6 inch table inside a 5.5
+  # helper used to force the table to exactly 6. A 6 inch table inside a 5.5
   # inch cell came out misaligned in the .docx and correct in the .pdf, from
-  # the same code. Filling the container is what makes the two agree.
+  # the same code. autofit() alone is the width that works; this only brings
+  # back a table too wide for the page.
   e <- new.env()
   exprs <- as.list(parse(tpl("R/setup.R"), keep.source = FALSE))
   fn <- Filter(function(x) {
@@ -240,12 +241,16 @@ test_that("a flextable is fitted to its container, not to a fixed width", {
   }, exprs)
   expect_length(fn, 1L)
   eval(fn[[1]], envir = e)
+  expect_identical(formals(e$fit_flextable_to_page)$pgwidth, 5.5)
 
-  # No width by default: the table takes whatever it is given.
-  expect_null(formals(e$fit_flextable_to_page)$pgwidth)
-  code <- gsub("[[:space:]]+", " ", paste(deparse(fn[[1]]), collapse = " "))
-  expect_match(code, 'layout = "autofit"', fixed = TRUE)
-  expect_match(code, "width = 1", fixed = TRUE)
-  # And the escape hatch for a table that must be a fixed size still works.
-  expect_match(code, "flextable::width(", fixed = TRUE)
+  skip_if_not_installed("flextable")
+  narrow <- flextable::flextable(data.frame(a = 1:2, b = c("x", "y")))
+  # What the helper returns is what autofit() returns: nothing is stretched.
+  expect_equal(dim(e$fit_flextable_to_page(narrow))$widths,
+               dim(flextable::autofit(narrow))$widths)
+
+  wide <- flextable::flextable(
+    as.data.frame(matrix(strrep("long text here ", 3), 2, 8)))
+  expect_gt(sum(dim(flextable::autofit(wide))$widths), 5.5)
+  expect_equal(sum(dim(e$fit_flextable_to_page(wide))$widths), 5.5)
 })

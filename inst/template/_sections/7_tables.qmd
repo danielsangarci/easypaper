@@ -9,15 +9,33 @@
 #| label: tbl-models
 #| include: true
 #| tbl-cap: "Legend of table 1."
-# flextable for formatted tables (bold, grouping, footnotes).
+# flextable when the table needs formatting: rules, footnotes, grouping.
+#
+# The three rules a scientific table wants are drawn here rather than left to
+# the Word template: none on top, one under the header row and one under the
+# table. `hline_top(width = 0)` is what removes the default top rule.
+#
+# fit_flextable_to_page() is autofit() plus a ceiling: the table keeps the
+# width its content needs and is only brought back in if it would run off the
+# page. Do NOT stretch a table to the width of the line -- Quarto puts it in a
+# container 5.5 inches wide, and a wider table comes out of Word misaligned.
 tab <- data.frame(
   Variable = c("Treatment", "Altitude"),
   Estimate = c(0.42, -0.13),
   SE       = c(0.11, 0.05),
-  p        = c(0.0002, 0.0141)
+  p        = c(0.002, 0.014)
 )
-tab$p <- paste0(format.pval(tab$p, digits = 2), stars_pval(tab$p))
-fit_flextable_to_page(flextable::flextable(tab))
+rule <- fp_border_default(style = "solid", color = "black", width = 1)
+
+flextable(tab) |>
+  align(part = "all", align = "left") |>
+  hline_top(border = fp_border_default(width = 0), part = "all") |>
+  hline_bottom(border = rule, part = "all") |>
+  # The stars go in the p column as a suffix, so p stays a number and is
+  # formatted rather than pasted together as text.
+  colformat_double(j = "p", digits = 3, suffix = stars_pval(tab$p)) |>
+  add_footer_lines("*p ≤ 0.05, **p ≤ 0.01, ***p ≤ 0.001") |>
+  fit_flextable_to_page()
 ```
 
 {{< pagebreak >}}
@@ -26,7 +44,9 @@ fit_flextable_to_page(flextable::flextable(tab))
 #| label: tbl-summary
 #| include: true
 #| tbl-cap: "Legend of table 2."
-# knitr::kable() is enough for simple tables and travels better across formats.
+# knitr::kable() is enough for a simple table and travels better across
+# formats, at the price of the formatting above: pandoc gives it columns of
+# equal width and the Word template's `Table` style draws its rules.
 knitr::kable(head(iris, 3))
 ```
 

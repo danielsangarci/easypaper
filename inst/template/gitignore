@@ -5,7 +5,7 @@ figures/
 # Generated at render time by .build_main_text(); deleted on exit, but left
 # behind if R is killed mid-render.
 tmp_main_text.*
-tmp_supplementary_S*.qmd
+tmp_supplementary_S*
 
 # Execution and cache
 cache/
