@@ -29,8 +29,7 @@ pandoc inside.
 brew install --cask quarto && quarto check
 ```
 
-In R: `install.packages(c("quarto", "here", "knitr", "flextable", "ragg", "magick", "zip", "renv", "qpdf"))`.
-`qpdf` is what merges the manuscript and its supplement into a single `.pdf`.
+In R: `install.packages(c("quarto", "here", "knitr", "flextable", "ragg", "magick", "zip", "renv"))`.
 And only if you are going to sync with Google Docs, `trackdown` **from
 GitHub**: the CRAN version (1.1.1) does not accept `.qmd`, and neither does the
 latest tagged release (v1.3.0) — Quarto support landed in 1.4.0, which was
@@ -374,20 +373,15 @@ the main text. Verified with a citation that appears only in the supplement:
 | `main_*.docx` from the submission | only the main text's |
 | the complete `manuscript.qmd` | both, in a single list |
 
-The first two are two independent renders, and they are what goes to the
-journal. The third necessarily merges them: it is *one single document*, and
-pandoc produces one bibliography per document. It is there to circulate the
-whole paper among co-authors and for a single-file preprint.
+Both are independent renders, and that is what goes to the journal. There is
+no third option that puts them in one file: producing it means handing both
+documents to pandoc, which rebuilds them instead of copying, and the rebuilt
+tables reach Word with their column widths gone and every heading broken over
+two lines. One document per section, always.
 
-If you want the `.docx` without the supplement outside the submission flow too:
-
-```r
-render_docx("myrmecological-news", split = TRUE)    # same in render_pdf()
-```
-
-With `split = TRUE` the citations from the main text to the supplement
-(`@sfig-map`) are replaced by their text (`Figure S1`), because their target is
-no longer in the document.
+Because the supplement leaves the main text, the citations to it (`@sfig-map`)
+are replaced by their own text (`Figure S1`): their target is no longer in the
+document.
 
 ## Submission folder
 

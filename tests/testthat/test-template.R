@@ -192,22 +192,22 @@ test_that("the blinded main text keeps the title and drops the authors", {
   expect_no_match(drop, '"title"', fixed = TRUE)
 })
 
-test_that("split = TRUE still renders the supplement, it only skips the merge", {
-  # Asking for two files and silently getting one is the kind of thing you
-  # discover on the day you submit: .render() used to render the supplement
-  # only when it was about to merge it back in, so render_docx(split = TRUE)
-  # wrote the main text alone while the documentation promised two.
-  exprs <- as.list(parse(tpl("make.R")))
-  fn <- Filter(function(x) {
-    is.call(x) && identical(as.character(x[[1]]), "<-") &&
-      identical(as.character(x[[2]]), ".render")
-  }, exprs)
-  expect_length(fn, 1L)
-  expect_true("supplement" %in% names(formals(eval(fn[[1]][[3]]))))
-
-  code <- gsub("[[:space:]]+", " ", paste(deparse(fn[[1]]), collapse = " "))
-  expect_match(code, "if (supplement)", fixed = TRUE)
-  expect_match(code, "if (!split) produced <- .merge_documents", fixed = TRUE)
+test_that("a render never merges the manuscript with its supplement", {
+  # Merging means handing both documents to pandoc, which rebuilds them and
+  # loses every column width: the tables reached Word with their headings
+  # broken across two lines. One document per section, always.
+  code <- gsub("[[:space:]]+", " ", paste(readLines(tpl("make.R"), warn = FALSE),
+                                          collapse = " "))
+  expect_no_match(code, ".merge_documents", fixed = TRUE)
+  expect_no_match(code, "split", fixed = TRUE)
+  for (fn in c("render_docx", "render_pdf")) {
+    f <- Filter(function(x) {
+      is.call(x) && identical(as.character(x[[1]]), "<-") &&
+        identical(as.character(x[[2]]), fn)
+    }, as.list(parse(tpl("make.R"), keep.source = FALSE)))
+    expect_length(f, 1L)
+    expect_false("split" %in% names(formals(eval(f[[1]][[3]]))))
+  }
 })
 
 test_that("the deliverable builders render the supplement exactly once", {
@@ -253,4 +253,31 @@ test_that("a flextable keeps its natural width and is never stretched", {
     as.data.frame(matrix(strrep("long text here ", 3), 2, 8)))
   expect_gt(sum(dim(flextable::autofit(wide))$widths), 5.5)
   expect_equal(sum(dim(e$fit_flextable_to_page(wide))$widths), 5.5)
+})
+
+test_that("the Word templates draw no rule around a table", {
+  # Quarto wraps every captioned float in a container table, and the template's
+  # `Table` style used to give it a thick rule above and below. Those are the
+  # bars that appeared around every table and figure in the .docx. Every table
+  # in the project is a flextable now and draws its own rules.
+  for (f in list.files(tpl("format"), "[.]docx$", full.names = TRUE)) {
+    con <- unz(f, "word/styles.xml")
+    xml <- paste(readLines(con, warn = FALSE), collapse = "")
+    style <- regmatches(xml, regexpr('<w:style[^>]*w:styleId="Table".*?</w:style>',
+                                     xml, perl = TRUE))
+    expect_length(style, 1L)
+    expect_no_match(style, 'w:val="single"', fixed = TRUE, info = basename(f))
+  }
+})
+
+test_that("every table in the template is a flextable", {
+  # One engine, so they all come out with the same font, the same rules and
+  # columns measured from their content. knitr::kable() hands pandoc a plain
+  # markdown table and pandoc gives it columns of equal width.
+  qmd <- list.files(tpl("_sections"), "[.]qmd$", full.names = TRUE)
+  for (f in c(qmd, tpl("manuscript.qmd"), tpl("supplementary.qmd"))) {
+    txt <- readLines(f, warn = FALSE)
+    code <- txt[!grepl("^\\s*#", txt)]
+    expect_false(any(grepl("kable(", code, fixed = TRUE)), info = basename(f))
+  }
 })

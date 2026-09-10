@@ -17,7 +17,7 @@
 # skip the citation checks and the licence synchronisation. To build for real,
 # use these functions.
 #
-# Every argument -- journal, caption_style, split, suppl_figures, label,
+# Every argument -- journal, caption_style, suppl_figures, label,
 # figure_format, blinded, snapshot -- is explained beside its command in run.R,
 # and laid out in tables in the Get started guide:
 #   https://danielsangarci.github.io/easypaper/articles/easypaper.html
@@ -603,82 +603,23 @@ export_figure_formats <- function(quiet = FALSE) {
 
 # --- Render ----------------------------------------------------------------
 
-#' Merge documents that were rendered apart, into the single file you circulate.
-#'
-#' They are rendered apart so that each carries its own reference list; this
-#' puts them back together. What that costs depends on the format, and the
-#' difference is not a detail:
-#'
-#' .pdf  -- qpdf concatenates PAGES. Nothing is reinterpreted, so what Quarto
-#'          composed arrives untouched.
-#' .docx -- pandoc REBUILDS the document: it reads each file into its own
-#'          representation and writes a new one. Text, images, tables and their
-#'          merged cells survive; direct table formatting does not, because
-#'          pandoc has nowhere to keep it. The tables then fall back on the
-#'          Word template's `Table` style, which is why that style carries the
-#'          three rules a scientific table wants -- without them the merged
-#'          tables would come out with no lines at all. Hence the warning.
-#' @noRd
-.merge_documents <- function(files, ext) {
-  files <- files[file.exists(files)]
-  if (length(files) < 2L) return(if (length(files)) files[1] else character(0))
-  dest <- here(paste0("tmp_merged.", ext))
-
-  if (ext == "pdf") {
-    if (!requireNamespace("qpdf", quietly = TRUE)) {
-      warning("qpdf is not installed, so the manuscript and the supplement ",
-              "stay as two files. install.packages(\"qpdf\") to get them ",
-              "merged.", call. = FALSE, immediate. = TRUE)
-      return(files[1])
-    }
-    qpdf::pdf_combine(input = files, output = dest)
-    return(dest)
-  }
-
-  if (ext == "docx") {
-    if (!rmarkdown::pandoc_available()) {
-      warning("pandoc was not found, so the manuscript and the supplement ",
-              "stay as two files.", call. = FALSE, immediate. = TRUE)
-      return(files[1])
-    }
-    warning("The .docx you are about to get was merged by pandoc, which ",
-            "rebuilds the document instead of copying it. Text, figures, ",
-            "tables and their merged cells survive; what a table drew for ",
-            "itself does not -- cell shading and custom borders are dropped, ",
-            "and every table takes the Word template's own style: a rule ",
-            "above, one under the header row and one below. Nothing you ",
-            "submit is ever merged, so this affects only the copy you ",
-            "circulate; pass split = TRUE for two files with every table ",
-            "exactly as flextable drew it.", call. = FALSE, immediate. = TRUE)
-    ref <- tryCatch(here(yaml::read_yaml(here("_quarto.yml"))$format$docx$`reference-doc`),
-                    error = function(e) NA_character_)
-    args <- c(shQuote(files), "-o", shQuote(dest))
-    if (!is.na(ref) && file.exists(ref)) args <- c(args, "--reference-doc", shQuote(ref))
-    st <- system2(rmarkdown::pandoc_exec(), args)
-    if (!identical(st, 0L) || !file.exists(dest)) {
-      warning("The merge failed; the two documents are left as they are.",
-              call. = FALSE, immediate. = TRUE)
-      return(files[1])
-    }
-    return(dest)
-  }
-  files[1]
-}
-
 #' Common wrapper. Returns the path of the file produced.
 #'
-#' @param split if TRUE, the main text comes out WITHOUT the supplementary
-#'   material and with its citations replaced by their text ("Figure S1").
-#'   The supplement is still rendered, as its own file or files; what `split`
-#'   decides is whether the two are then merged back into one. This is what
-#'   make_submission() uses. See R/submission.R.
+#' The main text comes out WITHOUT the supplementary material and with its
+#' citations replaced by their text ("Figure S1"); the supplement comes out
+#' beside it, as its own file or files. They are never put back together: a
+#' single .docx could only be made by handing both to pandoc, which rebuilds
+#' the document instead of copying it and, in the rebuilding, throws away the
+#' column widths -- the tables came out of Word with every heading broken
+#' across two lines. One document per section is also what a journal asks for.
+#'
 #' @param blinded if TRUE, the author block is dropped and the document opens
 #'   with the title alone (double-blind review).
 #' @param supplement FALSE leaves the supplement unrendered. Only for the
 #'   deliverable builders: make_submission() and make_preprint() render it
 #'   themselves, with their own subset of files and their own names, and would
 #'   otherwise render it twice.
-.render <- function(fmt, journal, caption_style, ext, split = FALSE,
+.render <- function(fmt, journal, caption_style, ext,
                     blinded = FALSE, suppl_figures = "separate",
                     supplement = TRUE) {
   csl <- here("references_styles", paste0(journal, ".csl"))
@@ -690,10 +631,9 @@ export_figure_formats <- function(quiet = FALSE) {
   .check_license(); sync_licenses(quiet = TRUE); sync_metadata(quiet = TRUE)
   check_citations(); check_crossrefs(); check_data()
 
-  # The supplement is rendered on its own whatever happens, because that is
-  # the only way it can carry its own reference list: one Quarto render is one
-  # citeproc pass and one bibliography. What `split` decides is whether the two
-  # documents are then merged back into a single file.
+  # The supplement is rendered on its own, which is the only way it can carry
+  # its own reference list: one Quarto render is one citeproc pass and one
+  # bibliography.
   #
   # Two exceptions take the old path, rendering manuscript.qmd whole:
   # the .html, which is the working preview and would lose its theme if pandoc
@@ -711,12 +651,8 @@ export_figure_formats <- function(quiet = FALSE) {
       # main text, so only the supplementary TEXT is rendered on its own --
       # which is where the independent reference list matters.
       keep <- if (suppl_figures == "main") .suppl_float_files() else character(0)
-      sup <- render_supplementary(journal, caption_style, output_format = fmt,
-                                  files = setdiff(.suppl_files(), keep))
-      # split only decides whether the two are put back together. Asking for
-      # two files and silently getting one is the kind of thing you discover
-      # on the day you submit.
-      if (!split) produced <- .merge_documents(c(produced, sup), ext)
+      render_supplementary(journal, caption_style, output_format = fmt,
+                           files = setdiff(.suppl_files(), keep))
     }
   } else {
     quarto::quarto_render(
@@ -745,13 +681,13 @@ export_figure_formats <- function(quiet = FALSE) {
 
 #' @param journal name of a .csl in references_styles/ (see list_journals())
 #' @param caption_style default | abbrev | nature | compact (see R/crossref_styles.R)
-#' @param split TRUE leaves the supplement out (what the journal wants); FALSE
-#'   produces the complete document, which is handier to circulate among
-#'   co-authors. With split = TRUE the bibliographies of the main text and of
-#'   the supplement are independent.
+#' The manuscript and its supplement come out as separate documents, each
+#' with its own reference list. That is what a journal asks for, and the only
+#' way the tables survive: merging them means handing both to pandoc, which
+#' rebuilds the document and loses every column width.
 render_docx <- function(journal = "myrmecological-news", caption_style = "default",
-                           split = FALSE, suppl_figures = "separate") {
-  f <- .render("docx", journal, caption_style, "docx", split = split,
+                           suppl_figures = "separate") {
+  f <- .render("docx", journal, caption_style, "docx",
                suppl_figures = suppl_figures)
   dest <- .out(paste0("manuscript_", journal, ".docx"))
   file.rename(f, dest)
@@ -761,8 +697,8 @@ render_docx <- function(journal = "myrmecological-news", caption_style = "defaul
 }
 
 render_pdf <- function(journal = "myrmecological-news", caption_style = "default",
-                            split = FALSE, suppl_figures = "separate") {
-  f <- .render("pdf", journal, caption_style, "pdf", split = split,
+                            suppl_figures = "separate") {
+  f <- .render("pdf", journal, caption_style, "pdf",
                suppl_figures = suppl_figures)
   dest <- .out("preprint.pdf")
   file.rename(f, dest)

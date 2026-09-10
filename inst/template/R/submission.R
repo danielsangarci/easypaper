@@ -702,7 +702,7 @@ make_submission <- function(journal = "myrmecological-news", label = "default",
   # 1) main text, without the supplement
   suppl_figures <- match.arg(suppl_figures, c("separate", "main"))
   # supplement = FALSE: step 3 renders it, with this label on its file names.
-  f <- .render("docx", journal, caption_style, "docx", split = TRUE,
+  f <- .render("docx", journal, caption_style, "docx",
                blinded = blinded, suppl_figures = suppl_figures,
                supplement = FALSE)
   file.rename(f, file.path(man, sprintf("main_%s.docx", label)))
@@ -849,11 +849,11 @@ make_preprint <- function(journal = "myrmecological-news", label = "bioRxiv",
   .check_quarto(); .check_license(); sync_licenses(quiet = TRUE)
   check_citations(); check_crossrefs(quiet = TRUE); check_title(quiet = TRUE)
 
-  # 1) the manuscript, as one signed PDF. split = TRUE takes the supplement
-  #    out; blinded = FALSE keeps the title block, which is the whole
+  # 1) the manuscript, as one signed PDF. The supplement comes out beside it
+  #    in step 2; blinded = FALSE keeps the title block, which is the whole
   #    difference from a submission.
   #    supplement = FALSE: step 2 renders it, with this label on its names.
-  f <- .render("pdf", journal, caption_style, "pdf", split = TRUE,
+  f <- .render("pdf", journal, caption_style, "pdf",
                blinded = FALSE, suppl_figures = suppl_figures,
                supplement = FALSE)
   file.rename(f, file.path(man, sprintf("preprint_%s.pdf", label)))

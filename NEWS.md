@@ -5,6 +5,32 @@ Everything here reaches a project already written through
 `R/setup.R`, which carries the table fix, and `_sections/`.
 Copy those two by hand, or start the project again.
 
+## One document per section, and no merging
+
+* `render_docx()` and `render_pdf()` joined the manuscript and its supplement
+  into a single file unless you passed `split = TRUE`. Making that file means
+  handing both documents to pandoc, which rebuilds them instead of copying:
+  the rebuilt tables reach Word **with their column widths gone and every
+  heading broken across two lines**. `Variable` came out as `Variab / le`.
+  **The merge is gone and so is `split`.** Each render writes one document per
+  section into `output/`, each with its own reference list, which is also the
+  shape a journal asks for. `qpdf` is no longer needed.
+
+## Every table is a flextable, and nothing draws a bar around it
+
+* The example tables used two engines, and `knitr::kable()` was the weaker of
+  the two: pandoc gives a markdown table columns of equal width without
+  measuring anything, so a long heading was broken over two lines while a
+  short one sat in acres of space. It also came out in the document's own font
+  while the flextable came out in Times New Roman. **Every table in the
+  template is a flextable now**, with the same font, the same rules and
+  columns measured from their content.
+* The three Word templates drew a thick rule above and below **every table and
+  figure**. It came from the `Table` style, which Quarto applies to the
+  container it wraps each captioned float in, so the bars had nothing to do
+  with the table inside. That style no longer draws borders; a flextable draws
+  its own.
+
 ## Tables in the .docx match the .pdf
 
 * A table built with flextable came out misaligned in Word and correct in the

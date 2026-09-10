@@ -58,19 +58,16 @@ list_journals()        # which .csl you have in references_styles/
 # --- 2. FULL RENDERS -------------------------------------------------------
 # journal       = name of a .csl, without the extension (list_journals())
 # caption_style = "default" | "abbrev" | "nature" | "compact"
-# split         = the supplement is ALWAYS rendered on its own, so that it
-#                 carries its own reference list. split decides what you get
-#                 back: FALSE merges the two into one file to circulate, TRUE
-#                 leaves them as two, both in output/: the main text and the
-#                 supplement or supplements beside it, which is what a
-#                 journal wants
 # suppl_figures = "separate" or "main": whether the supplementary figures and
 #                 tables travel with the supplement or stay at the end of the
 #                 manuscript
 #
-# Merging a .docx costs the table borders and shading (pandoc rebuilds the
-# document; qpdf, for .pdf, only concatenates pages and costs nothing). You
-# get a warning when it happens.
+# One document per section, always: the manuscript in output/ and the
+# supplement or supplements beside it, each with its own reference list. They
+# are never joined into one file. Doing that means handing both to pandoc,
+# which rebuilds the document instead of copying it and loses every column
+# width on the way -- the tables reach Word with the headings broken across
+# two lines.
 
 render_docx("myrmecological-news")                 # -> output/*.docx
 render_docx("ecology-letters", "abbrev")           # another journal, "Fig. 1."

@@ -141,7 +141,7 @@ run("render_docx()",           render_docx())
 run("render_pdf()",            render_pdf())
 run("render_supplementary()",  render_supplementary())
 run("export_code()",           export_code())
-run("render_docx(split=TRUE)", render_docx(split = TRUE))
+run("render_docx() again",     render_docx())
 run("make_all()",              make_all())
 run("make_submission()",       make_submission("myrmecological-news", label = "Test"))
 run("make_preprint()",         make_preprint())
@@ -155,10 +155,10 @@ sup  <- plain(file.path(p, "output/supporting_information.docx"))
 ok("no unresolved cross-reference in the manuscript", has(main, "\\?@") == 0)
 ok("the citation to the supplement is baked as a literal",
    has(main, "Table S1") >= 1 && has(main, "Figure S1") >= 1)
-ok("the supplement travels once, not twice",
-   has(main, "Legend of supplementary figure") == 1)
-ok("two independent reference lists in the merged file",
-   sum(grepl("^References$", main)) == 2)
+ok("the supplement does not travel in the main text",
+   has(main, "Legend of supplementary figure") == 0)
+ok("the main text carries one reference list, its own",
+   sum(grepl("^References$", main)) == 1)
 ok("the supplement has its own reference heading",
    any(grepl("^References$", sup)))
 ok("and its list is its own, not the manuscript's",
@@ -185,12 +185,15 @@ ok("and so does the title page",
    grepl("Chemical mimicry", titled(
      file.path(p, "submission/Test/manuscript/title_Test.docx")), fixed = TRUE))
 
+# The manuscript and its supplement are never joined: one document per
+# section, in output/ and in the deposit alike.
 pdfs <- function(f) tryCatch(qpdf::pdf_length(f), error = function(e) NA_integer_)
-merged <- pdfs(file.path(p, "output/preprint.pdf"))
-apart  <- pdfs(file.path(p, "submission/bioRxiv/manuscript/preprint_bioRxiv.pdf")) +
-          pdfs(list.files(file.path(p, "submission/bioRxiv/manuscript"),
-                          "supporting.*pdf", full.names = TRUE)[1])
-ok("the merged .pdf holds both halves", isTRUE(merged == apart))
+ok("the .pdf of the manuscript is the manuscript alone",
+   isTRUE(pdfs(file.path(p, "output/preprint.pdf")) ==
+          pdfs(file.path(p, "submission/bioRxiv/manuscript/preprint_bioRxiv.pdf"))))
+ok("and the supplement is a document of its own",
+   isTRUE(pdfs(list.files(file.path(p, "submission/bioRxiv/manuscript"),
+                          "supporting.*pdf", full.names = TRUE)[1]) > 0))
 
 fig <- list.files(file.path(p, "submission/Test/manuscript/figures"),
                   full.names = TRUE)

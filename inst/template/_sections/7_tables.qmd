@@ -44,10 +44,16 @@ flextable(tab) |>
 #| label: tbl-summary
 #| include: true
 #| tbl-cap: "Legend of table 2."
-# knitr::kable() is enough for a simple table and travels better across
-# formats, at the price of the formatting above: pandoc gives it columns of
-# equal width and the Word template's `Table` style draws its rules.
-knitr::kable(head(iris, 3))
+# Every table in the project is a flextable, so they all come out with the
+# same font, the same rules and columns measured from their content. The
+# reason is not taste: knitr::kable() hands pandoc a plain markdown table and
+# pandoc gives it columns of equal width, so a long heading is broken across
+# two lines while a short one sits in acres of space.
+flextable(head(iris, 3)) |>
+  align(part = "all", align = "left") |>
+  hline_top(border = fp_border_default(width = 0), part = "all") |>
+  hline_bottom(border = rule, part = "all") |>
+  fit_flextable_to_page()
 ```
 
 {{< pagebreak >}}

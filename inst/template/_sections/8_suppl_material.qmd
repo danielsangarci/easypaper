@@ -34,7 +34,12 @@ Legend of supplementary figure 1.
 ```{r}
 #| label: suppl-raw
 #| include: true
-knitr::kable(head(iris, 3))
+flextable(head(iris, 3)) |>
+  align(part = "all", align = "left") |>
+  hline_top(border = fp_border_default(width = 0), part = "all") |>
+  hline_bottom(border = fp_border_default(style = "solid", color = "black",
+                                          width = 1), part = "all") |>
+  fit_flextable_to_page()
 ```
 
 Legend of supplementary table 1.
