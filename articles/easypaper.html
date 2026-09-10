@@ -71,7 +71,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Getting started with easypaper</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/danielsangarci/easypaper/blob/v0.2.1/vignettes/easypaper.Rmd" class="external-link"><code>vignettes/easypaper.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/danielsangarci/easypaper/blob/main/vignettes/easypaper.Rmd" class="external-link"><code>vignettes/easypaper.Rmd</code></a></small>
       <div class="d-none name"><code>easypaper.Rmd</code></div>
     </div>
 
@@ -105,7 +105,7 @@ affiliations themselves live in
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"demo_paper"</span><span class="op">)</span></span>
 <span><span class="fu">easypaper</span><span class="fu">::</span><span class="fu"><a href="../reference/create_paper.html">create_paper</a></span><span class="op">(</span><span class="va">dir</span>, git <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Project created: /tmp/RtmpYYxUxv/demo_paper</span></span>
+<span><span class="co">#&gt; Project created: /tmp/Rtmpgujb1n/demo_paper</span></span>
 <span><span class="co">#&gt;   1. open demo_paper.Rproj</span></span>
 <span><span class="co">#&gt;   2. source("make.R")</span></span>
 <span><span class="co">#&gt;   3. render_html()      # or see run.R for every command</span></span>
@@ -498,18 +498,6 @@ rule, <code>"compact"</code> gives <em>F1:</em>
 </td>
 </tr>
 <tr class="odd">
-<td><code>split</code></td>
-<td><code>FALSE</code></td>
-<td>The supplement is <em>always</em> rendered on its own, which is the
-only way it can carry its own reference list. <code>split</code> decides
-what you get back: <code>FALSE</code> merges the two into the single
-file you circulate, <code>TRUE</code> leaves them as two, both in
-<code>output/</code>, the main text and the supplement or supplements
-beside it, which is what a journal wants. <code>make_submission()</code>
-always uses <code>TRUE</code>
-</td>
-</tr>
-<tr class="even">
 <td><code>suppl_figures</code></td>
 <td><code>"separate"</code></td>
 <td>Whether the supplementary figures and tables travel with the
@@ -518,18 +506,14 @@ cited from the main text</td>
 </tr>
 </tbody>
 </table>
-<p>One warning you will meet, and it is worth reading once. Merging a
-<code>.pdf</code> costs nothing: <code>qpdf</code> concatenates pages,
-so what Quarto composed arrives untouched. Merging a <code>.docx</code>
-is another matter — pandoc <em>rebuilds</em> the document rather than
-copying it. Text, figures, tables and merged cells survive; <strong>what
-a table drew for itself does not</strong>. Cell shading and custom
-borders are dropped, and the tables fall back on the Word template’s
-<code>Table</code> style, which for that reason carries the three rules
-a scientific table wants: above, under the header row, and below.
-Nothing you submit is ever merged, so this only affects the copy you
-circulate; <code>split = TRUE</code> gives you two files with every
-table exactly as flextable drew it.</p>
+<p>One thing worth reading once: <strong>the manuscript and its
+supplement are never joined into a single file</strong>. Each render
+writes one document per section, into <code>output/</code>, each with
+its own reference list. Joining them would mean handing both to pandoc,
+which rebuilds a <code>.docx</code> rather than copying it, and a
+rebuilt table loses the column widths it was given: the headings reach
+Word broken across two lines. One document per section is also the shape
+a journal asks for.</p>
 <p>Two more exist for the supplement alone:
 <code>render_supplementary()</code> takes <code>output_format</code>
 (<code>"docx"</code> by default) and <code>files</code>, a subset of the

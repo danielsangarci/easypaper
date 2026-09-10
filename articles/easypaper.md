@@ -34,7 +34,7 @@ Here is what lands on disk:
 
 dir <- file.path(tempdir(), "demo_paper")
 easypaper::create_paper(dir, git = FALSE)
-#> Project created: /tmp/RtmpYYxUxv/demo_paper
+#> Project created: /tmp/Rtmpgujb1n/demo_paper
 #>   1. open demo_paper.Rproj
 #>   2. source("make.R")
 #>   3. render_html()      # or see run.R for every command
@@ -295,20 +295,15 @@ arguments below, `render_html()` and `make_all()` take the first two;
 |----|----|----|
 | `journal` | `"myrmecological-news"` | Which `.csl` in `references_styles/` sets the citation style. `list_journals()` lists the ones you have |
 | `caption_style` | `"default"` | How a caption is written: `"default"` gives *Figure 1.*, `"abbrev"` gives *Fig. 1.*, `"nature"` gives *Figure 1* followed by a vertical rule, `"compact"` gives *F1:* |
-| `split` | `FALSE` | The supplement is *always* rendered on its own, which is the only way it can carry its own reference list. `split` decides what you get back: `FALSE` merges the two into the single file you circulate, `TRUE` leaves them as two, both in `output/`, the main text and the supplement or supplements beside it, which is what a journal wants. `make_submission()` always uses `TRUE` |
 | `suppl_figures` | `"separate"` | Whether the supplementary figures and tables travel with the supplement or stay at the end of the manuscript. Either way they are cited from the main text |
 
-One warning you will meet, and it is worth reading once. Merging a
-`.pdf` costs nothing: `qpdf` concatenates pages, so what Quarto composed
-arrives untouched. Merging a `.docx` is another matter — pandoc
-*rebuilds* the document rather than copying it. Text, figures, tables
-and merged cells survive; **what a table drew for itself does not**.
-Cell shading and custom borders are dropped, and the tables fall back on
-the Word template’s `Table` style, which for that reason carries the
-three rules a scientific table wants: above, under the header row, and
-below. Nothing you submit is ever merged, so this only affects the copy
-you circulate; `split = TRUE` gives you two files with every table
-exactly as flextable drew it.
+One thing worth reading once: **the manuscript and its supplement are
+never joined into a single file**. Each render writes one document per
+section, into `output/`, each with its own reference list. Joining them
+would mean handing both to pandoc, which rebuilds a `.docx` rather than
+copying it, and a rebuilt table loses the column widths it was given:
+the headings reach Word broken across two lines. One document per
+section is also the shape a journal asks for.
 
 Two more exist for the supplement alone: `render_supplementary()` takes
 `output_format` (`"docx"` by default) and `files`, a subset of the
