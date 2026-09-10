@@ -128,6 +128,60 @@ TEMPLATE_AUTHORS <- c("Author1", "Author2")
   names_
 }
 
+#' The journal's name as its own .csl declares it.
+#'
+#' The argument you pass around is a file name -- "myrmecological-news" --
+#' and the style itself carries the name a reader expects to see. Falls back
+#' to the file name when the style has no title.
+#' @noRd
+.journal_name <- function(journal) {
+  f <- here("references_styles", paste0(journal, ".csl"))
+  if (!file.exists(f)) return(journal)
+  x <- paste(readLines(f, warn = FALSE, encoding = "UTF-8"), collapse = " ")
+  t <- regmatches(x, regexpr("<title>[^<]*</title>", x))
+  if (!length(t)) return(journal)
+  nm <- trimws(gsub("<[^>]+>", "", t[1]))
+  if (nzchar(nm)) nm else journal
+}
+
+#' One name the way a reference writes it: "Ada Lovelace" -> "Lovelace, A."
+#'
+#' The last word is taken as the family name and the rest as given names.
+#' That is right for most, and wrong for a particle somebody wants kept --
+#' "van der Berg" comes out as "Berg, V. D.". Write such a name here the way
+#' you want it read.
+#' @noRd
+.reference_name <- function(x) {
+  parts <- strsplit(trimws(x), "[[:space:]]+")[[1]]
+  parts <- parts[nzchar(parts)]
+  if (length(parts) < 2L) return(trimws(x))
+  initials <- paste0(substr(parts[-length(parts)], 1, 1), ".", collapse = " ")
+  paste0(parts[length(parts)], ", ", initials)
+}
+
+#' The manuscript written out as a reference: authors, title, journal.
+#'
+#' It is what the supplement opens with, under its own title, so a file
+#' downloaded on its own still says which paper it belongs to. Blinded, the
+#' authors are left out and the reference is title and journal alone.
+#' @noRd
+.manuscript_reference <- function(journal, blinded = FALSE) {
+  who <- if (blinded) character(0) else
+    tryCatch(.author_names(), error = function(e) character(0))
+  ttl <- rmarkdown::yaml_front_matter(MASTER)$title
+  parts <- c(if (length(who))
+               paste(vapply(who, .reference_name, character(1)), collapse = ", "),
+             if (!is.null(ttl)) as.character(ttl)[1],
+             .journal_name(journal))
+  parts <- trimws(parts[nzchar(trimws(parts))])
+  if (!length(parts)) return(NULL)
+  # A part that already ends in a full stop does not get a second one: the
+  # author list ends in an initial, "Turing, A.".
+  ends <- grepl("[.]$", parts)
+  parts[!ends] <- paste0(parts[!ends], ".")
+  paste(parts, collapse = " ")
+}
+
 #' "A", "A & B", "A, B & C"
 .format_holders <- function(n) {
   if (length(n) == 1) return(n)
@@ -743,12 +797,10 @@ render_supplementary <- function(journal = "myrmecological-news", caption_style 
   # supplementary documents there are: a text-only appendix does not number.
   floats <- .suppl_float_files()
   n      <- length(files)
-  own    <- rmarkdown::yaml_front_matter(MASTER)
-  title  <- own$title
-  # The authors go in the title block, which puts them under the title and
-  # above the affiliations the body includes. Not when blinded: that document
-  # travels with the anonymised manuscript.
-  who    <- if (blinded) NULL else own$author
+  # Under "Supporting Information" goes a reference to the paper this belongs
+  # to -- authors, title, journal -- because the file is downloaded on its own
+  # from the journal's site, with nothing around it to say what it supports.
+  reference <- .manuscript_reference(journal, blinded = blinded)
   # The wrapper is not in the render: list, so it inherits nothing from
   # _quarto.yml -- bibliography included. Absolute paths, because
   # quarto_render() writes its metadata file in tempdir().
@@ -779,10 +831,10 @@ render_supplementary <- function(journal = "myrmecological-news", caption_style 
     quarto::quarto_render(
       input         = input,
       output_format = output_format,
-      metadata      = c(list(csl = csl, bibliography = bib, subtitle = title,
+      metadata      = c(list(csl = csl, bibliography = bib,
                              crossref = if (is.na(fk)) crossref_metadata(caption_style)
                                         else .suppl_crossref(fk, length(floats), caption_style)),
-                        if (is.null(who)) NULL else list(author = who)),
+                        if (is.null(reference)) NULL else list(subtitle = reference)),
       as_job        = FALSE
     )
     if (!file.exists(produced)) {

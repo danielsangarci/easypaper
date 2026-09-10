@@ -8,8 +8,6 @@ format:
     reference-doc: format/word_plain_paper_style_supplementary_material.docx
 ---
 
-{{< include _sections/0_authors.qmd >}}
-
 ```{r setup-suppl}
 #| include: false
 #| purl: false

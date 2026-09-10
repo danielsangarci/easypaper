@@ -45,6 +45,25 @@ to copy across by hand.
 * Which sections these are is `BLINDED_SECTIONS`, at the top of
   `R/submission.R`, for the journal that draws the line somewhere else.
 
+## A supplement that says which paper it belongs to
+
+* The supplement opened with the manuscript's bare title under its own. It now
+  opens with **a reference to the paper**: authors, title and journal, in the
+  shape a reference takes. That file is downloaded on its own from a journal's
+  site, with nothing around it to say what it supports.
+* The authors are written the way a reference writes them: **`Lovelace, A.,
+  Turing, A.`**, family name first and given names as initials. The last word
+  of a name is taken as the family name, so write a name with a particle you
+  want kept the way you want it read.
+* The journal's name is read from its own `.csl`, so `"myrmecological-news"`
+  reaches the page as *Myrmecological News*. A style with no title falls back
+  to the file name.
+* **The affiliations and the correspondence line are gone from the
+  supplement.** The reference above says whose paper it is; underneath it they
+  were an address on a document that is not a letter.
+* A blinded submission's supplement drops the authors from that reference and
+  keeps the title and the journal.
+
 ## No date, and a supplement that says who wrote it
 
 * A rendered manuscript no longer carries a date. It was `today`, so every

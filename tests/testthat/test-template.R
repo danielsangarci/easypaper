@@ -199,7 +199,8 @@ test_that("a render never merges the manuscript with its supplement", {
   code <- gsub("[[:space:]]+", " ", paste(readLines(tpl("make.R"), warn = FALSE),
                                           collapse = " "))
   expect_no_match(code, ".merge_documents", fixed = TRUE)
-  expect_no_match(code, "split", fixed = TRUE)
+  # The word on its own, so strsplit() in another helper is not a false alarm.
+  expect_no_match(code, "(?<![[:alpha:]])split", perl = TRUE)
   for (fn in c("render_docx", "render_pdf")) {
     f <- Filter(function(x) {
       is.call(x) && identical(as.character(x[[1]]), "<-") &&
@@ -315,8 +316,6 @@ test_that("the supplement names its authors, and a blinded one names nobody", {
   }, as.list(parse(tpl("R/submission.R"), keep.source = FALSE)))
   expect_length(bs, 1L)
   expect_identical(formals(eval(bs[[1]][[3]]))$blinded, FALSE)
-  expect_match(gsub("[[:space:]]+", " ", paste(deparse(bs[[1]]), collapse = " ")),
-               "0_authors", fixed = TRUE)
 })
 
 test_that("the title page names its sections the way the manuscript does", {
@@ -410,4 +409,43 @@ test_that("the placeholders say what to replace, and the code knows them", {
                       trimws(gsub("\\^[^^]*\\^", "",
                                   vapply(y$author, function(a) a$name, character(1))))))
   expect_identical(e$TEMPLATE_AUTHORS, bare)
+})
+
+test_that("the supplement opens with a reference to the paper it belongs to", {
+  # It is downloaded on its own from the journal's site, with nothing around
+  # it to say what it supports. The subtitle used to be the bare title.
+  code <- gsub("[[:space:]]+", " ", paste(vapply(
+    as.list(parse(tpl("make.R"), keep.source = FALSE)),
+    function(e) paste(deparse(e), collapse = " "), character(1)), collapse = " "))
+  expect_match(code, ".manuscript_reference(journal, blinded = blinded)",
+               fixed = TRUE)
+  expect_match(code, "list(subtitle = reference)", fixed = TRUE)
+
+  # The journal's name comes from its own style file, not from the slug.
+  e <- new.env()
+  for (x in as.list(parse(tpl("make.R"), keep.source = FALSE))) {
+    if (is.call(x) && identical(as.character(x[[1]]), "<-") &&
+        identical(as.character(x[[2]]), ".journal_name")) eval(x, envir = e)
+  }
+  e$here <- function(...) file.path(tpl(), ...)
+  expect_identical(e$.journal_name("myrmecological-news"), "Myrmecological News")
+  expect_identical(e$.journal_name("no-such-style"), "no-such-style")
+})
+
+test_that("the supplement carries no address, and names authors as a reference does", {
+  # The reference above already says whose paper it is; the affiliations and
+  # the correspondence line under it were an address nobody asked for.
+  sup <- paste(readLines(tpl("supplementary.qmd"), warn = FALSE), collapse = "\n")
+  expect_no_match(sup, "0_authors", fixed = TRUE)
+
+  e <- new.env()
+  for (x in as.list(parse(tpl("make.R"), keep.source = FALSE))) {
+    if (is.call(x) && identical(as.character(x[[1]]), "<-") &&
+        identical(as.character(x[[2]]), ".reference_name")) eval(x, envir = e)
+  }
+  expect_identical(e$.reference_name("Ada Lovelace"), "Lovelace, A.")
+  expect_identical(e$.reference_name("Daniel Sanchez-Garcia"), "Sanchez-Garcia, D.")
+  expect_identical(e$.reference_name("Ada Byron Lovelace"), "Lovelace, A. B.")
+  # One word is left as it is rather than turned into an initial of nothing.
+  expect_identical(e$.reference_name("Prince"), "Prince")
 })

@@ -145,13 +145,6 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
          call. = FALSE)
   }
   l[inc[1]] <- sprintf("{{< include _sections/%s >}}", basename(section))
-  # Blinded: the affiliations and the correspondence line identify you as
-  # surely as the names do, and this document travels with the anonymised
-  # manuscript.
-  if (blinded) {
-    a <- grep("0_authors\\.qmd", l)
-    if (length(a)) l <- l[-a]
-  }
   # Drop any FURTHER supplementary include: each appendix is its own document.
   # Guarded, because l[-integer(0)] returns an empty vector, not l.
   if (length(inc) > 1L) l <- l[-inc[-1]]
