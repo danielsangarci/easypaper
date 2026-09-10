@@ -79,7 +79,7 @@ for a citation style the template does not ship.
 ``` r
 dir <- file.path(tempdir(), "ant_chemistry")
 create_paper(dir, git = FALSE)
-#> Project created: /tmp/RtmpCiLIWw/ant_chemistry
+#> Project created: /tmp/Rtmp0KSQSc/ant_chemistry
 #>   1. open ant_chemistry.Rproj
 #>   2. source("make.R")
 #>   3. render_html()      # or see run.R for every command

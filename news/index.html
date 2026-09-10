@@ -75,7 +75,10 @@
 </ul></div>
 <div class="section level3">
 <h3 id="tables-in-the-docx-match-the-pdf-0-2-0">Tables in the .docx match the .pdf<a class="anchor" aria-label="anchor" href="#tables-in-the-docx-match-the-pdf-0-2-0"></a></h3>
-<ul><li>A table built with flextable came out misaligned in Word and correct in the PDF, from the same code. <code>fit_flextable_to_page()</code> gave Word a table of exactly 6 inches, and Quarto wraps every captioned table in a container 5.5 inches wide: a 6 inch table inside a 5.5 inch cell is what pushed the columns out of line. <strong>The table now fills its container</strong> and the reader sizes each column from its content, which is what LaTeX was already doing in the PDF. <code>fit_flextable_to_page(ft, pgwidth = 6)</code> still forces a fixed width for the rare table that needs one.</li>
+<ul><li>A table built with flextable came out misaligned in Word and correct in the PDF, from the same code. <code>fit_flextable_to_page()</code> stretched every table to exactly 6 inches, and Quarto wraps each captioned table in a container 5.5 inches wide: a 6 inch table inside a 5.5 inch cell is what pushed the columns out of line. LaTeX sizes columns from their content and ignored the ask, which is why only the <code>.docx</code> was wrong.</li>
+<li>
+<strong>A table now keeps the width <code><a href="https://davidgohel.github.io/flextable/reference/autofit.html" class="external-link">flextable::autofit()</a></code> gives it</strong> and is never stretched to fill the line, so <code>flextable(x) |&gt; autofit()</code> and <code>fit_flextable_to_page()</code> produce the same table. The helper adds one thing: a table too wide for the page is scaled back to 5.5 inches instead of running off it. <code>pgwidth</code> sets that ceiling.</li>
+<li>The worked example in <code>_sections/7_tables.qmd</code> now shows the table a journal actually asks for: no rule on top, one under the header row and one under the table, the significance stars added to the <code>p</code> column as a suffix so the column stays a number, and the legend of those stars as a footer line. It is written as a pipeline, which is how you will extend it.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="one-output-folder-0-2-0">One output folder<a class="anchor" aria-label="anchor" href="#one-output-folder-0-2-0"></a></h3>
@@ -93,8 +96,8 @@
 </ul></div>
 <div class="section level3">
 <h3 id="the-blinded-manuscript-carries-its-title-0-2-0">The blinded manuscript carries its title<a class="anchor" aria-label="anchor" href="#the-blinded-manuscript-carries-its-title-0-2-0"></a></h3>
-<ul><li>
-<code>make_submission()</code> built <code>main_*.docx</code> with the whole title block removed, so the anonymised manuscript opened straight at the Abstract. <strong>The title now stays</strong>, at the head of the document and in the same Word style the title page uses; a journal expects to see it there, and it identifies nobody. What is removed is what does identify you: the author block, the affiliations and the correspondence line, plus the date. <code>title_*.docx</code> is unchanged, and <code>blinded = FALSE</code> still keeps the whole block, authors included.</li>
+<ul><li><p><code>make_submission()</code> built <code>main_*.docx</code> with the whole title block removed, so the anonymised manuscript opened straight at the Abstract. <strong>The title now stays</strong>, at the head of the document and in the same Word style the title page uses; a journal expects to see it there, and it identifies nobody. What is removed is what does identify you: the author block, the affiliations and the correspondence line, plus the date. <code>title_*.docx</code> is unchanged, and <code>blinded = FALSE</code> still keeps the whole block, authors included.</p></li>
+<li><p><code>.gitignore</code> ignored <code>tmp_supplementary_S*.qmd</code> but not the <code>.docx</code> or <code>.pdf</code> of the same name, so a render that failed halfway left an untracked file behind in the repository. It now covers <code>tmp_supplementary_S*</code>.</p></li>
 </ul></div>
 <div class="section level3">
 <h3 id="quieter-renders-0-2-0">Quieter renders<a class="anchor" aria-label="anchor" href="#quieter-renders-0-2-0"></a></h3>
