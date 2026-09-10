@@ -101,7 +101,7 @@ write.csv(head(iris), file.path(src, "iris.csv"), row.names = FALSE)
 out <- file.path(tempdir(), "data")
 
 convert_data(src, to = out)   # copied: a .csv is already open
-#> /tmp/RtmpeGTKgC/data/ updated: 1 file(s) -- iris.csv
+#> /tmp/RtmpirHYyD/data/ updated: 1 file(s) -- iris.csv
 list.files(out)
 #> [1] "iris.csv"
 unlink(c(src, out), recursive = TRUE)

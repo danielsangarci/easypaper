@@ -1,12 +1,48 @@
 # Changelog
 
-## easypaper 0.2.1
+## easypaper 0.2.2
 
-Everything here reaches a project already written through
-[`update_project()`](https://danielsangarci.github.io/easypaper/reference/update_project.md),
-except the two files it never touches: `R/setup.R`, which carries the
-table fix, and `_sections/`. Copy those two by hand, or start the
-project again.
+[`update_project()`](https://danielsangarci.github.io/easypaper/reference/update_project.md)
+carries all of this into a project already written, including the three
+Word templates. The two files it never touches are `R/setup.R` and
+`_sections/`, so the two table examples are the only thing to copy
+across by hand.
+
+### The title page and the main text share one set of sections
+
+- The title page listed its own fields as bold labels ending in a colon
+  – `**Acknowledgements:**`,
+  `**CRediT authorship contribution statement:**` – while the manuscript
+  carried sections of the same meaning under proper headings. Two names
+  for one thing, and a colon where a heading should be. **The page now
+  uses the manuscript’s own headings**, so a submission is built out of
+  the same sections a render shows.
+- **A blinded submission moves four sections onto the title page**
+  rather than repeating them: Acknowledgements, the CRediT statement,
+  the conflict of interest statement and the data availability statement
+  come out of `main_*.docx` and appear on `title_*.docx`, in that order,
+  carrying the text you wrote in the manuscript. Everything else stays
+  in the main text. With `blinded = FALSE` they stay where they were and
+  the title page does not repeat them.
+- Which sections these are is `BLINDED_SECTIONS`, at the top of
+  `R/submission.R`, for the journal that draws the line somewhere else.
+
+### No date, and a supplement that says who wrote it
+
+- A rendered manuscript no longer carries a date. It was `today`, so
+  every render stamped the document with the day you happened to run it,
+  which on a draft you circulate is worse than nothing: a manuscript is
+  dated by the journal. Put `date: today` back in `manuscript.qmd` if
+  you want one.
+- **The supplement now names its authors**, under the title and above
+  the affiliations, which is where a reader looks for them. It carried
+  the affiliations and no names at all.
+- **And a blinded submission’s supplement carries neither.** It used to
+  travel with the affiliations and the correspondence line in it, which
+  name you as surely as the names do: the main text was anonymised and
+  the document beside it was not. `render_supplementary()` takes
+  `blinded` for this, and `make_submission()` passes its own through.
+  `make_preprint()` signs both, as it always did.
 
 ### One document per section, and no merging
 
@@ -35,6 +71,14 @@ project again.
   applies to the container it wraps each captioned float in, so the bars
   had nothing to do with the table inside. That style no longer draws
   borders; a flextable draws its own.
+
+## easypaper 0.2.1
+
+Everything here reaches a project already written through
+[`update_project()`](https://danielsangarci.github.io/easypaper/reference/update_project.md),
+except the two files it never touches: `R/setup.R`, which carries the
+table fix, and `_sections/`. Copy those two by hand, or start the
+project again.
 
 ### Tables in the .docx match the .pdf
 
