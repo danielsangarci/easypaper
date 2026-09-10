@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">easypaper</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,6 +20,7 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-news" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">News</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-news"><li><h6 class="dropdown-header" data-toc-skip>Releases</h6></li>
+    <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.2">Version 0.2.2</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.1">Version 0.2.1</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.0">Version 0.2.0</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.1.0">Version 0.1.0</a></li>
@@ -41,18 +42,22 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.2.1" id="easypaper-021">easypaper 0.2.1<a class="anchor" aria-label="anchor" href="#easypaper-021"></a></h2>
-<p>Everything here reaches a project already written through <code><a href="../reference/update_project.html">update_project()</a></code>, except the two files it never touches: <code>R/setup.R</code>, which carries the table fix, and <code>_sections/</code>. Copy those two by hand, or start the project again.</p>
+<h2 class="pkg-version" data-toc-text="0.2.2" id="easypaper-022">easypaper 0.2.2<a class="anchor" aria-label="anchor" href="#easypaper-022"></a></h2>
+<p><code><a href="../reference/update_project.html">update_project()</a></code> carries all of this into a project already written, including the three Word templates. The two files it never touches are <code>R/setup.R</code> and <code>_sections/</code>, so the two table examples are the only thing to copy across by hand.</p>
 <div class="section level3">
-<h3 id="one-document-per-section-and-no-merging-0-2-1">One document per section, and no merging<a class="anchor" aria-label="anchor" href="#one-document-per-section-and-no-merging-0-2-1"></a></h3>
+<h3 id="one-document-per-section-and-no-merging-0-2-2">One document per section, and no merging<a class="anchor" aria-label="anchor" href="#one-document-per-section-and-no-merging-0-2-2"></a></h3>
 <ul><li>
 <code>render_docx()</code> and <code>render_pdf()</code> joined the manuscript and its supplement into a single file unless you passed <code>split = TRUE</code>. Making that file means handing both documents to pandoc, which rebuilds them instead of copying: the rebuilt tables reach Word <strong>with their column widths gone and every heading broken across two lines</strong>. <code>Variable</code> came out as <code>Variab / le</code>. <strong>The merge is gone and so is <code>split</code>.</strong> Each render writes one document per section into <code>output/</code>, each with its own reference list, which is also the shape a journal asks for. <code>qpdf</code> is no longer needed.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="every-table-is-a-flextable-and-nothing-draws-a-bar-around-it-0-2-1">Every table is a flextable, and nothing draws a bar around it<a class="anchor" aria-label="anchor" href="#every-table-is-a-flextable-and-nothing-draws-a-bar-around-it-0-2-1"></a></h3>
+<h3 id="every-table-is-a-flextable-and-nothing-draws-a-bar-around-it-0-2-2">Every table is a flextable, and nothing draws a bar around it<a class="anchor" aria-label="anchor" href="#every-table-is-a-flextable-and-nothing-draws-a-bar-around-it-0-2-2"></a></h3>
 <ul><li>The example tables used two engines, and <code><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">knitr::kable()</a></code> was the weaker of the two: pandoc gives a markdown table columns of equal width without measuring anything, so a long heading was broken over two lines while a short one sat in acres of space. It also came out in the document’s own font while the flextable came out in Times New Roman. <strong>Every table in the template is a flextable now</strong>, with the same font, the same rules and columns measured from their content.</li>
 <li>The three Word templates drew a thick rule above and below <strong>every table and figure</strong>. It came from the <code>Table</code> style, which Quarto applies to the container it wraps each captioned float in, so the bars had nothing to do with the table inside. That style no longer draws borders; a flextable draws its own.</li>
 </ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.1" id="easypaper-021">easypaper 0.2.1<a class="anchor" aria-label="anchor" href="#easypaper-021"></a></h2>
+<p>Everything here reaches a project already written through <code><a href="../reference/update_project.html">update_project()</a></code>, except the two files it never touches: <code>R/setup.R</code>, which carries the table fix, and <code>_sections/</code>. Copy those two by hand, or start the project again.</p>
 <div class="section level3">
 <h3 id="tables-in-the-docx-match-the-pdf-0-2-1">Tables in the .docx match the .pdf<a class="anchor" aria-label="anchor" href="#tables-in-the-docx-match-the-pdf-0-2-1"></a></h3>
 <ul><li>A table built with flextable came out misaligned in Word and correct in the PDF, from the same code. <code>fit_flextable_to_page()</code> stretched every table to exactly 6 inches, and Quarto wraps each captioned table in a container 5.5 inches wide: a 6 inch table inside a 5.5 inch cell is what pushed the columns out of line. LaTeX sizes columns from their content and ignored the ask, which is why only the <code>.docx</code> was wrong.</li>
