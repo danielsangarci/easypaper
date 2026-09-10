@@ -1,3 +1,93 @@
+# easypaper 0.2.1
+
+Everything here reaches a project already written through
+`update_project()`, except the two files it never touches:
+`R/setup.R`, which carries the table fix, and `_sections/`.
+Copy those two by hand, or start the project again.
+
+## Tables in the .docx match the .pdf
+
+* A table built with flextable came out misaligned in Word and correct in the
+  PDF, from the same code. `fit_flextable_to_page()` stretched every table to
+  exactly 6 inches, and Quarto wraps each captioned table in a container 5.5
+  inches wide: a 6 inch table inside a 5.5 inch cell is what pushed the
+  columns out of line. LaTeX sizes columns from their content and ignored the
+  ask, which is why only the `.docx` was wrong.
+* **A table now keeps the width `flextable::autofit()` gives it** and is never
+  stretched to fill the line, so `flextable(x) |> autofit()` and
+  `fit_flextable_to_page()` produce the same table. The helper adds one thing:
+  a table too wide for the page is scaled back to 5.5 inches instead of
+  running off it. `pgwidth` sets that ceiling.
+* The worked example in `_sections/7_tables.qmd` now shows the table a journal
+  actually asks for: no rule on top, one under the header row and one under
+  the table, the significance stars added to the `p` column as a suffix so the
+  column stays a number, and the legend of those stars as a footer line. It is
+  written as a pipeline, which is how you will extend it.
+
+## One output folder
+
+* A render used to sort its results into `output/journal/`,
+  `output/preprint/` and `output/supplementary/`. **Everything now lands flat
+  in `output/`**: the journal `.docx`, the preprint `.pdf`, the supplement or
+  supplements, `analysis_code.R`, `sessionInfo.txt` and the copy of
+  `renv.lock`. One folder, because you open it to find a document, not to
+  navigate. `submission/` is untouched: what a journal or a repository
+  receives is still laid out the way each of them asks for.
+* A render no longer fails when `output/` is missing. The folders were created
+  once, when `make.R` was sourced, and every render then trusted them to still
+  be there -- so deleting `output/`, which the project's own README calls safe,
+  broke the next render in an open session, and did it with a message about a
+  temporary file instead of a missing folder. The folder is now created at the
+  moment of writing.
+* `update_project()` names the old subfolders when a project still has them.
+  It never deletes anything; everything under `output/` is regenerable.
+
+## split = TRUE writes the supplement too
+
+* `render_docx(split = TRUE)` and `render_pdf(split = TRUE)` wrote the main
+  text alone. The supplement was rendered only when it was about to be merged
+  back in, so asking for the two files a journal wants gave you one, in
+  silence, while `run.R` and the guide both promised two. **The supplement is
+  now rendered either way**, one document per `_sections/8*suppl*.qmd`, into
+  `output/supplementary/`; `split` decides only whether the two are then put
+  back together. With `suppl_figures = "main"` the floats stay in the main
+  text and only the supplementary *text* comes out on its own, as before.
+* `make_submission()` and `make_preprint()` render the supplement themselves,
+  with their own subset of files and their own labelled names, so they now
+  pass `supplement = FALSE` and still render it exactly once.
+
+## The blinded manuscript carries its title
+
+* `make_submission()` built `main_*.docx` with the whole title block removed,
+  so the anonymised manuscript opened straight at the Abstract. **The title
+  now stays**, at the head of the document and in the same Word style the
+  title page uses; a journal expects to see it there, and it identifies
+  nobody. What is removed is what does identify you: the author block, the
+  affiliations and the correspondence line, plus the date. `title_*.docx` is
+  unchanged, and `blinded = FALSE` still keeps the whole block, authors
+  included.
+
+## Quieter renders
+
+* A render no longer prints `incomplete final line found by readTableHeader`.
+  `dataspice::create_spice()` writes its scaffold without a final newline, and
+  `sync_metadata()` read it with `read.csv()`, which warned about that on
+  every render until the file had been written back once. The four metadata
+  files are now read through a helper that muffles exactly that warning and no
+  other; your own data files are read as before, because a malformed line in
+  one of those is worth hearing about.
+* A first render no longer dumps renv's whole resolved library, a hundred
+  lines of it, over the log. `.record_env()` wrapped the snapshot in
+  `suppressMessages()`, but renv prints straight to the console rather than
+  through `message()`, so nothing was ever caught. Both snapshot sites now set
+  renv's own switch for it. The lockfile is written exactly as before, and the
+  one line that says so is still printed.
+
+## Fixed
+* `.gitignore` ignored `tmp_supplementary_S*.qmd` but not the `.docx` or
+  `.pdf` of the same name, so a render that failed halfway left an untracked
+  file behind in the repository. It now covers `tmp_supplementary_S*`.
+
 # easypaper 0.2.0
 
 ## One data folder
@@ -96,88 +186,6 @@
   or haven is reported once per call instead of once per file, and two names
   that differ only in case count as a collision, because the deposit has to
   unpack on a file system that cannot tell them apart.
-
-## Tables in the .docx match the .pdf
-
-* A table built with flextable came out misaligned in Word and correct in the
-  PDF, from the same code. `fit_flextable_to_page()` stretched every table to
-  exactly 6 inches, and Quarto wraps each captioned table in a container 5.5
-  inches wide: a 6 inch table inside a 5.5 inch cell is what pushed the
-  columns out of line. LaTeX sizes columns from their content and ignored the
-  ask, which is why only the `.docx` was wrong.
-* **A table now keeps the width `flextable::autofit()` gives it** and is never
-  stretched to fill the line, so `flextable(x) |> autofit()` and
-  `fit_flextable_to_page()` produce the same table. The helper adds one thing:
-  a table too wide for the page is scaled back to 5.5 inches instead of
-  running off it. `pgwidth` sets that ceiling.
-* The worked example in `_sections/7_tables.qmd` now shows the table a journal
-  actually asks for: no rule on top, one under the header row and one under
-  the table, the significance stars added to the `p` column as a suffix so the
-  column stays a number, and the legend of those stars as a footer line. It is
-  written as a pipeline, which is how you will extend it.
-
-## One output folder
-
-* A render used to sort its results into `output/journal/`,
-  `output/preprint/` and `output/supplementary/`. **Everything now lands flat
-  in `output/`**: the journal `.docx`, the preprint `.pdf`, the supplement or
-  supplements, `analysis_code.R`, `sessionInfo.txt` and the copy of
-  `renv.lock`. One folder, because you open it to find a document, not to
-  navigate. `submission/` is untouched: what a journal or a repository
-  receives is still laid out the way each of them asks for.
-* A render no longer fails when `output/` is missing. The folders were created
-  once, when `make.R` was sourced, and every render then trusted them to still
-  be there -- so deleting `output/`, which the project's own README calls safe,
-  broke the next render in an open session, and did it with a message about a
-  temporary file instead of a missing folder. The folder is now created at the
-  moment of writing.
-* `update_project()` names the old subfolders when a project still has them.
-  It never deletes anything; everything under `output/` is regenerable.
-
-## split = TRUE writes the supplement too
-
-* `render_docx(split = TRUE)` and `render_pdf(split = TRUE)` wrote the main
-  text alone. The supplement was rendered only when it was about to be merged
-  back in, so asking for the two files a journal wants gave you one, in
-  silence, while `run.R` and the guide both promised two. **The supplement is
-  now rendered either way**, one document per `_sections/8*suppl*.qmd`, into
-  `output/supplementary/`; `split` decides only whether the two are then put
-  back together. With `suppl_figures = "main"` the floats stay in the main
-  text and only the supplementary *text* comes out on its own, as before.
-* `make_submission()` and `make_preprint()` render the supplement themselves,
-  with their own subset of files and their own labelled names, so they now
-  pass `supplement = FALSE` and still render it exactly once.
-
-## The blinded manuscript carries its title
-
-* `make_submission()` built `main_*.docx` with the whole title block removed,
-  so the anonymised manuscript opened straight at the Abstract. **The title
-  now stays**, at the head of the document and in the same Word style the
-  title page uses; a journal expects to see it there, and it identifies
-  nobody. What is removed is what does identify you: the author block, the
-  affiliations and the correspondence line, plus the date. `title_*.docx` is
-  unchanged, and `blinded = FALSE` still keeps the whole block, authors
-  included.
-
-* `.gitignore` ignored `tmp_supplementary_S*.qmd` but not the `.docx` or
-  `.pdf` of the same name, so a render that failed halfway left an untracked
-  file behind in the repository. It now covers `tmp_supplementary_S*`.
-
-## Quieter renders
-
-* A render no longer prints `incomplete final line found by readTableHeader`.
-  `dataspice::create_spice()` writes its scaffold without a final newline, and
-  `sync_metadata()` read it with `read.csv()`, which warned about that on
-  every render until the file had been written back once. The four metadata
-  files are now read through a helper that muffles exactly that warning and no
-  other; your own data files are read as before, because a malformed line in
-  one of those is worth hearing about.
-* A first render no longer dumps renv's whole resolved library, a hundred
-  lines of it, over the log. `.record_env()` wrapped the snapshot in
-  `suppressMessages()`, but renv prints straight to the console rather than
-  through `message()`, so nothing was ever caught. Both snapshot sites now set
-  renv's own switch for it. The lockfile is written exactly as before, and the
-  one line that says so is still printed.
 
 ## Fixed
 
