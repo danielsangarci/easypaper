@@ -108,7 +108,7 @@ clean_cache <- function() {
 
 # --- Authors: the manuscript YAML is the single source of truth ------------
 
-TEMPLATE_AUTHORS <- c("First Author name", "Second Author name")
+TEMPLATE_AUTHORS <- c("Author1", "Author2")
 
 #' Read the author names from the YAML of manuscript.qmd.
 .author_names <- function() {

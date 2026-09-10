@@ -42,7 +42,7 @@ test_that("the RStudio wizard's strings are accepted", {
   # Every widget arrives as a string; an empty box arrives as "".
   create_paper(p, title = "", authors = "Ada Lovelace, Alan Turing")
   y <- rmarkdown::yaml_front_matter(file.path(p, "manuscript.qmd"))
-  expect_identical(y$title, "TITLE HERE")      # empty means "leave it alone"
+  expect_identical(y$title, "Manuscript title here")   # empty: leave it alone
   expect_length(y$author, 2L)
   expect_match(y$author[[2]]$name, "^Alan Turing")
 })

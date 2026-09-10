@@ -32,7 +32,7 @@ Reproducible Quarto manuscript**, with fields for the title and the authors.
 
 The title and the authors are optional; without them the YAML keeps its
 placeholders, and `make.R` warns you about them until you replace them. The
-affiliation marks are embedded in the names (`First Author^1,\*^`) because
+affiliation marks are embedded in the names (`Author1^1,\*^`) because
 Quarto rebuilds the author line of a `.docx` and drops any structured
 affiliation — the affiliations themselves live in `_sections/0_authors.qmd`.
 

@@ -362,3 +362,52 @@ test_that("a blinded submission moves the identifying sections, and only those",
   expect_match(code, ".drop_sections(txt, BLINDED_SECTIONS)", fixed = TRUE)
   expect_match(code, ".build_title_page(blinded = blinded)", fixed = TRUE)
 })
+
+test_that("the keywords are a section of the manuscript, written once", {
+  # They used to be an empty `**Keywords:**` label on the title page while the
+  # YAML carried the real ones, which is two places to keep in step. The
+  # section prints what the YAML holds, and that is what the deposit's
+  # metadata reads too.
+  ms <- readLines(tpl("manuscript.qmd"), warn = FALSE)
+  expect_true(any(trimws(ms) == "# Keywords"))
+  expect_true(any(grepl("yaml_front_matter(knitr::current_input())$keywords",
+                        ms, fixed = TRUE)))
+  expect_false(is.null(rmarkdown::yaml_front_matter(tpl("manuscript.qmd"))$keywords))
+  # And it is not one of the sections a blinded submission moves away.
+  expect_false(any(trimws(readLines(tpl("title_page.qmd"), warn = FALSE)) ==
+                     "# Keywords"))
+})
+
+test_that("the title page carries no leftover empty fields", {
+  # Running head, word counts, ORCID and funding were bold labels with nothing
+  # after them, on a page nobody fills in: they reached the journal blank.
+  tp <- paste(readLines(tpl("title_page.qmd"), warn = FALSE), collapse = "\n")
+  for (f in c("Running head", "Word count", "Supplementary items",
+              "ORCID", "Funding", "Keywords")) {
+    expect_no_match(tp, f, fixed = TRUE, info = f)
+  }
+})
+
+test_that("the placeholders say what to replace, and the code knows them", {
+  # A new project opens on its own placeholders, so they have to read as
+  # instructions rather than as somebody else's paper.
+  y <- rmarkdown::yaml_front_matter(tpl("manuscript.qmd"))
+  expect_identical(y$title, "Manuscript title here")
+  expect_identical(vapply(y$author, function(a) a$name, character(1)),
+                   c("Author1^1,\\*^", "Author2^2^"))
+  expect_identical(unlist(y$keywords), c("keyword1", "keyword2", "keyword3"))
+  expect_identical(rmarkdown::yaml_front_matter(tpl("title_page.qmd"))$title,
+                   y$title)
+
+  # make.R warns while they are still there, so its list has to match: the
+  # names with their affiliation marks stripped.
+  e <- new.env()
+  for (x in as.list(parse(tpl("make.R"), keep.source = FALSE))) {
+    if (is.call(x) && identical(as.character(x[[1]]), "<-") &&
+        identical(as.character(x[[2]]), "TEMPLATE_AUTHORS")) eval(x, envir = e)
+  }
+  bare <- trimws(gsub("[\\\\*,]+$", "",
+                      trimws(gsub("\\^[^^]*\\^", "",
+                                  vapply(y$author, function(a) a$name, character(1))))))
+  expect_identical(e$TEMPLATE_AUTHORS, bare)
+})

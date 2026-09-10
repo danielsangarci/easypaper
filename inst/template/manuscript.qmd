@@ -1,5 +1,5 @@
 ---
-title: "TITLE HERE"
+title: "Manuscript title here"
 # Affiliation marks go INSIDE the name, and the affiliations themselves in the
 # body right below. Why: Quarto rebuilds the author line of the title block on
 # its own, and any Lua filter that tries to build it loses the superscripts and
@@ -8,9 +8,9 @@ title: "TITLE HERE"
 # in .docx, .pdf and .html.
 # The copyright holders in LICENSE-CODE and in the README come from this block.
 author:
-  - name: "First Author name^1,\\*^"
-  - name: "Second Author name^2^"
-keywords: [keyword 1, keyword 2, keyword 3]
+  - name: "Author1^1,\\*^"
+  - name: "Author2^2^"
+keywords: [keyword1, keyword2, keyword3]
 # No date: a manuscript is dated by the journal, not by the day you happened
 # to render it, and a date on a draft you circulate only ever misleads. Add
 # `date: today` and `date-format: long` back here if you want one; a blinded
@@ -41,6 +41,14 @@ source(here::here("R/setup.R"))
 # Abstract
 
 {{< include _sections/1_abstract.qmd >}}
+
+# Keywords
+
+<!-- Written once, in the `keywords:` of the YAML above: that is also what the
+     deposit's metadata reads, so the two can never disagree. The line below
+     just prints them. -->
+
+`r paste(rmarkdown::yaml_front_matter(knitr::current_input())$keywords, collapse = ", ")`
 
 # Introduction
 

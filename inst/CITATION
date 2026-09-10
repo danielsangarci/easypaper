@@ -1,7 +1,9 @@
 # The year is the one this version was released, not today's: a citation has
 # to keep pointing at the same thing. Bump it here when you tag a new release.
 year <- "2026"
-vers <- sprintf("R package version %s", utils::packageVersion("easypaper"))
+# meta$Version, not packageVersion(): R CMD check reads this file with the
+# package NOT installed, and packageVersion() then fails.
+vers <- sprintf("R package version %s", meta$Version)
 url  <- "https://github.com/danielsangarci/easypaper"
 
 citHeader("To cite easypaper in publications, use:")
