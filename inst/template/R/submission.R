@@ -136,7 +136,8 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
 #' Wrapper for one supplementary file: supplementary.qmd with its include
 #' swapped and its title turned into "Appendix Sk". Only used when there is
 #' more than one supplementary document.
-.build_supplementary <- function(section, k, n = 1L, fmt = "docx") {
+.build_supplementary <- function(section, k, n = 1L, fmt = "docx",
+                                 blinded = FALSE) {
   l <- readLines(here("supplementary.qmd"), warn = FALSE)
   inc <- grep("\\{\\{< *include +_sections/8", l)
   if (!length(inc)) {
@@ -144,6 +145,13 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
          call. = FALSE)
   }
   l[inc[1]] <- sprintf("{{< include _sections/%s >}}", basename(section))
+  # Blinded: the affiliations and the correspondence line identify you as
+  # surely as the names do, and this document travels with the anonymised
+  # manuscript.
+  if (blinded) {
+    a <- grep("0_authors\\.qmd", l)
+    if (length(a)) l <- l[-a]
+  }
   # Drop any FURTHER supplementary include: each appendix is its own document.
   # Guarded, because l[-integer(0)] returns an empty vector, not l.
   if (length(inc) > 1L) l <- l[-inc[-1]]
@@ -178,6 +186,51 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
 }
 
 
+#' The sections a double-blind submission keeps off the main text.
+#'
+#' They travel on the title page instead. Their headings are the ones
+#' manuscript.qmd uses, and their text is written there, once: nothing is
+#' duplicated, it is moved. Edit this vector, and the matching headings in
+#' title_page.qmd, if your journal draws the line somewhere else.
+BLINDED_SECTIONS <- c("Acknowledgements",
+                      "CRediT authorship contribution statement",
+                      "Conflict of Interest Statement",
+                      "Data availability statement")
+
+#' One top-level section: its heading and everything down to the next one.
+#' character(0) when that heading is not there.
+#' @noRd
+.section_block <- function(l, heading) {
+  i <- which(trimws(l) == paste("#", heading))
+  if (!length(i)) return(character(0))
+  i <- i[1]
+  j <- i + 1L
+  while (j <= length(l) && !grepl("^# ", l[j])) j <- j + 1L
+  # The blank lines before the next heading belong to neither section.
+  while (j - 1L > i && !nzchar(trimws(l[j - 1L]))) j <- j - 1L
+  l[seq.int(i, j - 1L)]
+}
+
+#' Those sections, gone, and the blank lines they left behind with them.
+#' Recomputed each time, because every removal shifts the lines under it.
+#' @noRd
+.drop_sections <- function(l, headings) {
+  for (h in headings) {
+    n <- length(.section_block(l, h))
+    if (!n) next
+    i <- which(trimws(l) == paste("#", h))[1]
+    j <- i + n
+    while (j <= length(l) && !nzchar(trimws(l[j]))) j <- j + 1L
+    l <- l[-seq.int(i, j - 1L)]
+    # One blank line stays where the section was, so whatever followed it
+    # still begins a block of its own.
+    if (i > 1L && i <= length(l) && nzchar(trimws(l[i - 1L]))) {
+      l <- append(l, "", after = i - 1L)
+    }
+  }
+  l
+}
+
 #' Self-contained document holding the main text WITHOUT the supplement.
 #'
 #' @param blinded TRUE removes what identifies you -- the authors, the
@@ -202,6 +255,10 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
   if (blinded) {
     a <- grep("0_authors\\.qmd", txt)
     if (length(a)) txt <- txt[-a]
+    # Acknowledgements, CRediT, the conflict statement and the data
+    # availability statement. They are not deleted: .build_title_page() puts
+    # them on the title page.
+    txt <- .drop_sections(txt, BLINDED_SECTIONS)
   }
 
   # 1) decide what supplementary content stays in this document.
@@ -585,12 +642,27 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
 #' directly would therefore keep whatever title that file happens to hold,
 #' silently disagreeing with the manuscript. A copy with the line rewritten
 #' from the master avoids it.
-.build_title_page <- function() {
+#' @param blinded TRUE fills the identifying sections of the page with the
+#'   text written in the manuscript, which the main text has just lost. FALSE
+#'   drops those headings from the page instead: the sections stay in the main
+#'   text and a title page that repeated them would only invite them to drift.
+.build_title_page <- function(blinded = TRUE) {
   l   <- readLines(here("title_page.qmd"), warn = FALSE)
   own <- rmarkdown::yaml_front_matter(MASTER)
   i   <- grep("^title:", l)
   if (length(i) && !is.null(own$title)) {
     l[i[1]] <- sprintf('title: "%s"', gsub('"', '\\\\"', own$title))
+  }
+  if (blinded) {
+    master <- readLines(MASTER, warn = FALSE)
+    for (h in BLINDED_SECTIONS) {
+      blk <- .section_block(master, h)
+      k   <- which(trimws(l) == paste("#", h))
+      if (!length(blk) || !length(k)) next
+      l <- append(l[-k[1]], blk, after = k[1] - 1L)
+    }
+  } else {
+    l <- .drop_sections(l, BLINDED_SECTIONS)
   }
   dest <- here("tmp_title_page.qmd")
   writeLines(l, dest)
@@ -709,7 +781,7 @@ make_submission <- function(journal = "myrmecological-news", label = "default",
 
   # 2) title page, with title and authors taken from the manuscript
   own <- rmarkdown::yaml_front_matter(MASTER)
-  tp  <- .build_title_page()
+  tp  <- .build_title_page(blinded = blinded)
   on.exit(unlink(c(tp, sub("[.]qmd$", ".docx", tp))), add = TRUE)
   quarto::quarto_render(tp, output_format = "docx",
                         metadata = list(author = own$author), as_job = FALSE)
@@ -724,7 +796,8 @@ make_submission <- function(journal = "myrmecological-news", label = "default",
   all_suppl <- .suppl_files()
   to_render <- if (suppl_figures == "main") setdiff(all_suppl, .suppl_float_files(all_suppl))
                else all_suppl
-  sup <- render_supplementary(journal, caption_style, files = to_render)
+  sup <- render_supplementary(journal, caption_style, files = to_render,
+                              blinded = blinded)
   for (i in seq_along(sup)) {
     nm <- if (length(sup) == 1L) sprintf("supporting_information_%s.docx", label)
           else sprintf("supporting_information_%s_%s.docx",
@@ -863,8 +936,9 @@ make_preprint <- function(journal = "myrmecological-news", label = "bioRxiv",
   to_render <- if (suppl_figures == "main") {
                  setdiff(all_suppl, .suppl_float_files(all_suppl))
                } else all_suppl
+  # A preprint is signed, so its supplement carries the authors too.
   sup <- render_supplementary(journal, caption_style, output_format = "pdf",
-                              files = to_render)
+                              files = to_render, blinded = FALSE)
   for (i in seq_along(sup)) {
     nm <- if (length(sup) == 1L) sprintf("supporting_information_%s.pdf", label)
           else sprintf("supporting_information_%s_%s.pdf",

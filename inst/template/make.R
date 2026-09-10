@@ -652,7 +652,8 @@ export_figure_formats <- function(quiet = FALSE) {
       # which is where the independent reference list matters.
       keep <- if (suppl_figures == "main") .suppl_float_files() else character(0)
       render_supplementary(journal, caption_style, output_format = fmt,
-                           files = setdiff(.suppl_files(), keep))
+                           files = setdiff(.suppl_files(), keep),
+                           blinded = blinded)
     }
   } else {
     quarto::quarto_render(
@@ -720,8 +721,12 @@ render_html <- function(journal = "myrmecological-news", caption_style = "defaul
 #' @param files supplementary documents to render. By default every
 #'   _sections/8*suppl*.qmd; make_submission() passes a subset when the figures
 #'   are staying in the main document.
+#' @param blinded TRUE drops the authors and the affiliations, for the
+#'   supplement that travels with a double-blind submission. FALSE, the
+#'   default, names the authors under the title, above the affiliations.
 render_supplementary <- function(journal = "myrmecological-news", caption_style = "default",
-                                 output_format = "docx", files = NULL) {
+                                 output_format = "docx", files = NULL,
+                                 blinded = FALSE) {
   csl <- here("references_styles", paste0(journal, ".csl"))
   if (!file.exists(csl)) {
     stop("There is no CSL called '", journal, "'. Available: ",
@@ -738,7 +743,12 @@ render_supplementary <- function(journal = "myrmecological-news", caption_style 
   # supplementary documents there are: a text-only appendix does not number.
   floats <- .suppl_float_files()
   n      <- length(files)
-  title  <- rmarkdown::yaml_front_matter(MASTER)$title
+  own    <- rmarkdown::yaml_front_matter(MASTER)
+  title  <- own$title
+  # The authors go in the title block, which puts them under the title and
+  # above the affiliations the body includes. Not when blinded: that document
+  # travels with the anonymised manuscript.
+  who    <- if (blinded) NULL else own$author
   # The wrapper is not in the render: list, so it inherits nothing from
   # _quarto.yml -- bibliography included. Absolute paths, because
   # quarto_render() writes its metadata file in tempdir().
@@ -757,7 +767,8 @@ render_supplementary <- function(journal = "myrmecological-news", caption_style 
     # includes one fixed section, and the caller may well be asking for a
     # different one (make_submission() renders only the TEXT appendices when
     # the figures stay in the main document).
-    input <- .build_supplementary(files[k], k, n, fmt = output_format)
+    input <- .build_supplementary(files[k], k, n, fmt = output_format,
+                                  blinded = blinded)
     tmps  <- c(tmps, input)
     # The wrapper is NOT in the render: list of _quarto.yml, and Quarto then
     # writes the output next to the input instead of into output-dir.
@@ -768,9 +779,10 @@ render_supplementary <- function(journal = "myrmecological-news", caption_style 
     quarto::quarto_render(
       input         = input,
       output_format = output_format,
-      metadata      = list(csl = csl, bibliography = bib, subtitle = title,
-                           crossref = if (is.na(fk)) crossref_metadata(caption_style)
-                                      else .suppl_crossref(fk, length(floats), caption_style)),
+      metadata      = c(list(csl = csl, bibliography = bib, subtitle = title,
+                             crossref = if (is.na(fk)) crossref_metadata(caption_style)
+                                        else .suppl_crossref(fk, length(floats), caption_style)),
+                        if (is.null(who)) NULL else list(author = who)),
       as_job        = FALSE
     )
     if (!file.exists(produced)) {

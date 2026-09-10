@@ -11,8 +11,10 @@ author:
   - name: "First Author name^1,\\*^"
   - name: "Second Author name^2^"
 keywords: [keyword 1, keyword 2, keyword 3]
-date: today
-date-format: long
+# No date: a manuscript is dated by the journal, not by the day you happened
+# to render it, and a date on a draft you circulate only ever misleads. Add
+# `date: today` and `date-format: long` back here if you want one; a blinded
+# main text drops it either way.
 ---
 
 {{< include _sections/0_authors.qmd >}}

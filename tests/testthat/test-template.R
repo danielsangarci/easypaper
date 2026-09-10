@@ -281,3 +281,84 @@ test_that("every table in the template is a flextable", {
     expect_false(any(grepl("kable(", code, fixed = TRUE)), info = basename(f))
   }
 })
+
+test_that("no render carries a date", {
+  # A manuscript is dated by the journal, not by the day you rendered it, and
+  # a date on a draft you circulate only misleads.
+  y <- rmarkdown::yaml_front_matter(tpl("manuscript.qmd"))
+  expect_null(y$date)
+  expect_null(y[["date-format"]])
+})
+
+test_that("the supplement names its authors, and a blinded one names nobody", {
+  # The authors go in the title block, which puts them under the title and
+  # above the affiliations the body includes. The blinded supplement travels
+  # with the anonymised manuscript, so it carries neither: the affiliations
+  # identify you as surely as the names, and they used to travel.
+  fn <- Filter(function(x) {
+    is.call(x) && identical(as.character(x[[1]]), "<-") &&
+      identical(as.character(x[[2]]), "render_supplementary")
+  }, as.list(parse(tpl("make.R"), keep.source = FALSE)))
+  expect_length(fn, 1L)
+  expect_identical(formals(eval(fn[[1]][[3]]))$blinded, FALSE)
+
+  code <- gsub("[[:space:]]+", " ", paste(vapply(
+    as.list(parse(tpl("R/submission.R"), keep.source = FALSE)),
+    function(e) paste(deparse(e), collapse = " "), character(1)), collapse = " "))
+  # make_submission() passes its own blinding through to the supplement.
+  expect_match(code, "blinded = blinded", fixed = TRUE)
+
+  # And the wrapper drops the affiliations when blinded.
+  bs <- Filter(function(x) {
+    is.call(x) && identical(as.character(x[[1]]), "<-") &&
+      identical(as.character(x[[2]]), ".build_supplementary")
+  }, as.list(parse(tpl("R/submission.R"), keep.source = FALSE)))
+  expect_length(bs, 1L)
+  expect_identical(formals(eval(bs[[1]][[3]]))$blinded, FALSE)
+  expect_match(gsub("[[:space:]]+", " ", paste(deparse(bs[[1]]), collapse = " ")),
+               "0_authors", fixed = TRUE)
+})
+
+test_that("the title page names its sections the way the manuscript does", {
+  # They used to be bold labels ending in a colon, with names of their own,
+  # and the manuscript had sections of the same meaning under other headings.
+  # One set of names, written once.
+  tp <- readLines(tpl("title_page.qmd"), warn = FALSE)
+  ms <- readLines(tpl("manuscript.qmd"), warn = FALSE)
+  e <- new.env()
+  for (x in as.list(parse(tpl("R/submission.R"), keep.source = FALSE))) {
+    if (is.call(x) && identical(as.character(x[[1]]), "<-") &&
+        as.character(x[[2]]) %in% c("BLINDED_SECTIONS", ".section_block",
+                                    ".drop_sections")) eval(x, envir = e)
+  }
+  expect_length(e$BLINDED_SECTIONS, 4L)
+  for (h in e$BLINDED_SECTIONS) {
+    expect_true(any(trimws(tp) == paste("#", h)), info = h)
+    expect_true(any(trimws(ms) == paste("#", h)), info = h)
+  }
+  # No heading on that page ends in a colon.
+  expect_false(any(grepl("^#.*:\\s*$", tp)))
+})
+
+test_that("a blinded submission moves the identifying sections, and only those", {
+  e <- new.env()
+  for (x in as.list(parse(tpl("R/submission.R"), keep.source = FALSE))) {
+    if (is.call(x) && identical(as.character(x[[1]]), "<-") &&
+        as.character(x[[2]]) %in% c("BLINDED_SECTIONS", ".section_block",
+                                    ".drop_sections")) eval(x, envir = e)
+  }
+  l <- c("# One", "text one", "", "# Two", "text two", "", "# Three", "t3")
+  expect_identical(e$.section_block(l, "Two"), c("# Two", "text two"))
+  expect_identical(e$.section_block(l, "Nowhere"), character(0))
+  expect_identical(e$.drop_sections(l, "Two"),
+                   c("# One", "text one", "", "# Three", "t3"))
+
+  # The title page lists them in the order they come out in.
+  expect_identical(e$BLINDED_SECTIONS[4], "Data availability statement")
+
+  code <- gsub("[[:space:]]+", " ", paste(vapply(
+    as.list(parse(tpl("R/submission.R"), keep.source = FALSE)),
+    function(x) paste(deparse(x), collapse = " "), character(1)), collapse = " "))
+  expect_match(code, ".drop_sections(txt, BLINDED_SECTIONS)", fixed = TRUE)
+  expect_match(code, ".build_title_page(blinded = blinded)", fixed = TRUE)
+})

@@ -23,10 +23,19 @@ format:
 
 **Funding:**
 
-**Acknowledgements:**
+<!-- The sections below are the ones a double-blind submission keeps off the
+     main text, so they travel HERE and are taken out of main_*.docx. They
+     carry the same headings as in manuscript.qmd, and their text is written
+     there, once: make_submission() moves it across. With blinded = FALSE they
+     stay in the main text and this page does not repeat them.
 
-**Conflict of interest:** The authors declare no conflict of interests.
+     The order on this page is the order they come out in. Which sections
+     these are is BLINDED_SECTIONS, at the top of R/submission.R. -->
 
-**CRediT authorship contribution statement:**
+# Acknowledgements
 
-**Data availability statement:**
+# CRediT authorship contribution statement
+
+# Conflict of Interest Statement
+
+# Data availability statement

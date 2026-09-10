@@ -5,6 +5,40 @@ including the three Word templates. The two files it never touches are
 `R/setup.R` and `_sections/`, so the two table examples are the only thing
 to copy across by hand.
 
+## The title page and the main text share one set of sections
+
+* The title page listed its own fields as bold labels ending in a colon --
+  `**Acknowledgements:**`, `**CRediT authorship contribution statement:**` --
+  while the manuscript carried sections of the same meaning under proper
+  headings. Two names for one thing, and a colon where a heading should be.
+  **The page now uses the manuscript's own headings**, so a submission is
+  built out of the same sections a render shows.
+* **A blinded submission moves four sections onto the title page** rather
+  than repeating them: Acknowledgements, the CRediT statement, the conflict of
+  interest statement and the data availability statement come out of
+  `main_*.docx` and appear on `title_*.docx`, in that order, carrying the text
+  you wrote in the manuscript. Everything else stays in the main text. With
+  `blinded = FALSE` they stay where they were and the title page does not
+  repeat them.
+* Which sections these are is `BLINDED_SECTIONS`, at the top of
+  `R/submission.R`, for the journal that draws the line somewhere else.
+
+## No date, and a supplement that says who wrote it
+
+* A rendered manuscript no longer carries a date. It was `today`, so every
+  render stamped the document with the day you happened to run it, which on a
+  draft you circulate is worse than nothing: a manuscript is dated by the
+  journal. Put `date: today` back in `manuscript.qmd` if you want one.
+* **The supplement now names its authors**, under the title and above the
+  affiliations, which is where a reader looks for them. It carried the
+  affiliations and no names at all.
+* **And a blinded submission's supplement carries neither.** It used to travel
+  with the affiliations and the correspondence line in it, which name you as
+  surely as the names do: the main text was anonymised and the document beside
+  it was not. `render_supplementary()` takes `blinded` for this, and
+  `make_submission()` passes its own through. `make_preprint()` signs both, as
+  it always did.
+
 ## One document per section, and no merging
 
 * `render_docx()` and `render_pdf()` joined the manuscript and its supplement
