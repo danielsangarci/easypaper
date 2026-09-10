@@ -34,7 +34,7 @@ Here is what lands on disk:
 
 dir <- file.path(tempdir(), "demo_paper")
 easypaper::create_paper(dir, git = FALSE)
-#> Project created: /tmp/RtmpTfCVp9/demo_paper
+#> Project created: /tmp/RtmpTEZiwp/demo_paper
 #>   1. open demo_paper.Rproj
 #>   2. source("make.R")
 #>   3. render_html()      # or see run.R for every command
@@ -253,10 +253,10 @@ make_all()                          # the four below, in order
 | Command | What comes out | Where |
 |----|----|----|
 | `render_html()` | the working `.html`, images embedded | `output/` |
-| `render_docx()` | the `.docx`, with the journal’s citation style and Word template | `output/journal/` |
-| `render_pdf()` | the `.pdf` for bioRxiv or EcoEvoRxiv | `output/preprint/` |
-| `render_supplementary()` | the supplement on its own, with its own reference list | `output/supplementary/` |
-| `export_code()` | `analysis_code.R` and `sessionInfo.txt` | `output/supplementary/` |
+| `render_docx()` | the `.docx`, with the journal’s citation style and Word template | `output/` |
+| `render_pdf()` | the `.pdf` for bioRxiv or EcoEvoRxiv | `output/` |
+| `render_supplementary()` | the supplement on its own, with its own reference list | `output/` |
+| `export_code()` | `analysis_code.R` and `sessionInfo.txt` | `output/` |
 | `preview()` | a live `.html` that reloads every time you save | — |
 | `make_all()` | the four: journal, preprint, supplement, code | `output/` |
 
@@ -295,7 +295,7 @@ arguments below, `render_html()` and `make_all()` take the first two;
 |----|----|----|
 | `journal` | `"myrmecological-news"` | Which `.csl` in `references_styles/` sets the citation style. `list_journals()` lists the ones you have |
 | `caption_style` | `"default"` | How a caption is written: `"default"` gives *Figure 1.*, `"abbrev"` gives *Fig. 1.*, `"nature"` gives *Figure 1* followed by a vertical rule, `"compact"` gives *F1:* |
-| `split` | `FALSE` | The supplement is *always* rendered on its own, which is the only way it can carry its own reference list. `split` decides what you get back: `FALSE` merges the two into the single file you circulate, `TRUE` leaves them as two, which is what a journal wants. `make_submission()` always uses `TRUE` |
+| `split` | `FALSE` | The supplement is *always* rendered on its own, which is the only way it can carry its own reference list. `split` decides what you get back: `FALSE` merges the two into the single file you circulate, `TRUE` leaves them as two, both in `output/`, the main text and the supplement or supplements beside it, which is what a journal wants. `make_submission()` always uses `TRUE` |
 | `suppl_figures` | `"separate"` | Whether the supplementary figures and tables travel with the supplement or stay at the end of the manuscript. Either way they are cited from the main text |
 
 One warning you will meet, and it is worth reading once. Merging a
@@ -374,8 +374,9 @@ What it does that a render does not:
 
 |  | `render_docx()` | `make_submission()` |
 |----|----|----|
-| Writes into | `output/journal/` | `submission/<label>/` |
+| Writes into | `output/` | `submission/<label>/` |
 | The manuscript | one file, complete | title page and main text, as two files |
+| The title | on the front | on both: the title page and the head of the main text |
 | The authors | on the front | only on the title page; the main text is built without them |
 | The supplement | inside the document | its own file, cited as *Figure S1* from the main text |
 | The figures | embedded in the document | also on their own, at 600 dpi and renumbered in order |
@@ -395,7 +396,7 @@ make_submission("myrmecological-news", label = "MyrmecologicalNews") # the real 
 | `label` | `"default"` | Names the folder inside `submission/` and every file in it. The default is deliberate: a trial run is then unmistakably a trial, and never carries the name of a journal you did not choose |
 | `caption_style` | `"default"` | As in the renders above |
 | `figure_format` | `"tiff"` | The standalone figures the journal uploads: `"tiff"`, `"png"` or `"jpg"`. TIFF unless they say otherwise — JPEG is lossy and poor for line art |
-| `blinded` | `TRUE` | Splits title page from main text the way double-blind review asks: the title block is dropped and `0_authors.qmd` is left out, so no name travels in the main text. `FALSE` when the journal wants them in |
+| `blinded` | `TRUE` | Splits title page from main text the way double-blind review asks: the main text opens with the title alone, the author block is dropped and `0_authors.qmd` is left out, so no name travels in it. `FALSE` when the journal wants them in |
 | `snapshot` | `TRUE` | Runs `renv::snapshot()` first, so the `renv.lock` that travels in the compendium describes the environment *this* submission came out of. The renders record it too, but a submission is the one you will be asked about. `FALSE` if you keep the lockfile by hand |
 | `suppl_figures` | `"separate"` | Whether the supplementary figures and tables go out on their own or at the end of the main text. Either way they are cited from the main text |
 
@@ -406,7 +407,7 @@ That builds, from what is already in the project:
       CHECKLIST.md                            what still has to be done by hand
       manuscript/
         title_default.docx                    title, authors, affiliations, counts
-        main_default.docx                     from the Abstract on, with no names
+        main_default.docx                     the title, then the Abstract on, no names
         supporting_information_*.docx
         figures/Figure_1.tiff ...             600 dpi, renumbered in order
       data_and_code/                          data, metadata, scripts, renv.lock
@@ -414,10 +415,12 @@ That builds, from what is already in the project:
 
 The split into title page and main text is what double-blind review asks
 for. The names cannot leak into the main text because it is not built
-with them: the title block is dropped and the authors section is left
-out. What is *not* checked for you — acknowledgements, CRediT, and
-self-citations of the kind “in our previous study (Author et al.)” — is
-listed in the `CHECKLIST.md`.
+with them: the author block is dropped and the authors section is left
+out. The title does travel, at the head of the document, because that is
+what a journal expects to see on an anonymised manuscript. What is *not*
+checked for you — acknowledgements, CRediT, and self-citations of the
+kind “in our previous study (Author et al.)” — is listed in the
+`CHECKLIST.md`.
 
 The compendium publishes open formats only: what is in `data/`, never
 the source `.xlsx`, and only the analysis code, not your authoring

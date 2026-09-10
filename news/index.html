@@ -20,6 +20,7 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-news" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">News</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-news"><li><h6 class="dropdown-header" data-toc-skip>Releases</h6></li>
+    <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.0">Version 0.2.0</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.1.0">Version 0.1.0</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../news/index.html">Changelog</a></li>
@@ -71,6 +72,34 @@
 <code><a href="../reference/create_paper.html">create_paper()</a></code> looked for <code>title:</code> and <code>author:</code> anywhere in the file, and assumed the author block was followed by another key. A line of prose starting with <code>title:</code>, or an author list at the end of the header, would have corrupted the file. Both keys are now replaced inside the YAML fences only. The project also takes its name from the resolved path, so <code>"."</code> and a trailing slash give the <code>.Rproj</code> its real name.</li>
 <li>
 <code><a href="../reference/convert_data.html">convert_data()</a></code>: a working directory with a regex character in its name (<code>+</code>, <code>(</code>, a dot) broke the closing message. A workbook or a <code>.sav</code> that cannot be read is now named and skipped instead of aborting the batch, a copy that fails is reported instead of counted as written, a missing readxl or haven is reported once per call instead of once per file, and two names that differ only in case count as a collision, because the deposit has to unpack on a file system that cannot tell them apart.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="tables-in-the-docx-match-the-pdf-0-2-0">Tables in the .docx match the .pdf<a class="anchor" aria-label="anchor" href="#tables-in-the-docx-match-the-pdf-0-2-0"></a></h3>
+<ul><li>A table built with flextable came out misaligned in Word and correct in the PDF, from the same code. <code>fit_flextable_to_page()</code> gave Word a table of exactly 6 inches, and Quarto wraps every captioned table in a container 5.5 inches wide: a 6 inch table inside a 5.5 inch cell is what pushed the columns out of line. <strong>The table now fills its container</strong> and the reader sizes each column from its content, which is what LaTeX was already doing in the PDF. <code>fit_flextable_to_page(ft, pgwidth = 6)</code> still forces a fixed width for the rare table that needs one.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="one-output-folder-0-2-0">One output folder<a class="anchor" aria-label="anchor" href="#one-output-folder-0-2-0"></a></h3>
+<ul><li>A render used to sort its results into <code>output/journal/</code>, <code>output/preprint/</code> and <code>output/supplementary/</code>. <strong>Everything now lands flat in <code>output/</code></strong>: the journal <code>.docx</code>, the preprint <code>.pdf</code>, the supplement or supplements, <code>analysis_code.R</code>, <code>sessionInfo.txt</code> and the copy of <code>renv.lock</code>. One folder, because you open it to find a document, not to navigate. <code>submission/</code> is untouched: what a journal or a repository receives is still laid out the way each of them asks for.</li>
+<li>A render no longer fails when <code>output/</code> is missing. The folders were created once, when <code>make.R</code> was sourced, and every render then trusted them to still be there – so deleting <code>output/</code>, which the project’s own README calls safe, broke the next render in an open session, and did it with a message about a temporary file instead of a missing folder. The folder is now created at the moment of writing.</li>
+<li>
+<code><a href="../reference/update_project.html">update_project()</a></code> names the old subfolders when a project still has them. It never deletes anything; everything under <code>output/</code> is regenerable.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="split--true-writes-the-supplement-too-0-2-0">split = TRUE writes the supplement too<a class="anchor" aria-label="anchor" href="#split--true-writes-the-supplement-too-0-2-0"></a></h3>
+<ul><li>
+<code>render_docx(split = TRUE)</code> and <code>render_pdf(split = TRUE)</code> wrote the main text alone. The supplement was rendered only when it was about to be merged back in, so asking for the two files a journal wants gave you one, in silence, while <code>run.R</code> and the guide both promised two. <strong>The supplement is now rendered either way</strong>, one document per <code>_sections/8*suppl*.qmd</code>, into <code>output/supplementary/</code>; <code>split</code> decides only whether the two are then put back together. With <code>suppl_figures = "main"</code> the floats stay in the main text and only the supplementary <em>text</em> comes out on its own, as before.</li>
+<li>
+<code>make_submission()</code> and <code>make_preprint()</code> render the supplement themselves, with their own subset of files and their own labelled names, so they now pass <code>supplement = FALSE</code> and still render it exactly once.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="the-blinded-manuscript-carries-its-title-0-2-0">The blinded manuscript carries its title<a class="anchor" aria-label="anchor" href="#the-blinded-manuscript-carries-its-title-0-2-0"></a></h3>
+<ul><li>
+<code>make_submission()</code> built <code>main_*.docx</code> with the whole title block removed, so the anonymised manuscript opened straight at the Abstract. <strong>The title now stays</strong>, at the head of the document and in the same Word style the title page uses; a journal expects to see it there, and it identifies nobody. What is removed is what does identify you: the author block, the affiliations and the correspondence line, plus the date. <code>title_*.docx</code> is unchanged, and <code>blinded = FALSE</code> still keeps the whole block, authors included.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="quieter-renders-0-2-0">Quieter renders<a class="anchor" aria-label="anchor" href="#quieter-renders-0-2-0"></a></h3>
+<ul><li>A render no longer prints <code>incomplete final line found by readTableHeader</code>. <code>dataspice::create_spice()</code> writes its scaffold without a final newline, and <code>sync_metadata()</code> read it with <code><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv()</a></code>, which warned about that on every render until the file had been written back once. The four metadata files are now read through a helper that muffles exactly that warning and no other; your own data files are read as before, because a malformed line in one of those is worth hearing about.</li>
+<li>A first render no longer dumps renv’s whole resolved library, a hundred lines of it, over the log. <code>.record_env()</code> wrapped the snapshot in <code><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressMessages()</a></code>, but renv prints straight to the console rather than through <code><a href="https://rdrr.io/r/base/message.html" class="external-link">message()</a></code>, so nothing was ever caught. Both snapshot sites now set renv’s own switch for it. The lockfile is written exactly as before, and the one line that says so is still printed.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="fixed-0-2-0">Fixed<a class="anchor" aria-label="anchor" href="#fixed-0-2-0"></a></h3>
