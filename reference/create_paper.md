@@ -100,7 +100,7 @@ create_paper(dir,
              title   = "Chemical mimicry in Maculinea rebeli",
              authors = c("Ada Lovelace", "Alan Turing"),
              git     = FALSE)
-#> Project created: /tmp/RtmplIY2dj/ant_chemistry
+#> Project created: /tmp/RtmpeGTKgC/ant_chemistry
 #>   1. open ant_chemistry.Rproj
 #>   2. source("make.R")
 #>   3. render_html()      # or see run.R for every command

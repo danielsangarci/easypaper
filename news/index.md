@@ -1,12 +1,12 @@
 # Changelog
 
-## easypaper 0.2.2
+## easypaper 0.2.1
 
-[`update_project()`](https://danielsangarci.github.io/easypaper/reference/update_project.md)
-carries all of this into a project already written, including the three
-Word templates. The two files it never touches are `R/setup.R` and
-`_sections/`, so the two table examples are the only thing to copy
-across by hand.
+Everything here reaches a project already written through
+[`update_project()`](https://danielsangarci.github.io/easypaper/reference/update_project.md),
+except the two files it never touches: `R/setup.R`, which carries the
+table fix, and `_sections/`. Copy those two by hand, or start the
+project again.
 
 ### One document per section, and no merging
 
@@ -35,14 +35,6 @@ across by hand.
   applies to the container it wraps each captioned float in, so the bars
   had nothing to do with the table inside. That style no longer draws
   borders; a flextable draws its own.
-
-## easypaper 0.2.1
-
-Everything here reaches a project already written through
-[`update_project()`](https://danielsangarci.github.io/easypaper/reference/update_project.md),
-except the two files it never touches: `R/setup.R`, which carries the
-table fix, and `_sections/`. Copy those two by hand, or start the
-project again.
 
 ### Tables in the .docx match the .pdf
 
