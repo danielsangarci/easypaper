@@ -1,9 +1,8 @@
-# easypaper 0.2.2
+# easypaper 0.2.3
 
-`update_project()` carries all of this into a project already written,
-including the three Word templates. The two files it never touches are
-`R/setup.R` and `_sections/`, so the two table examples are the only thing
-to copy across by hand.
+`update_project()` carries all of this into a project already written. What
+it never touches is `R/setup.R` and `_sections/`, so the manuscript's own
+sections and the two table examples are what you copy across by hand.
 
 ## Placeholders that read as instructions
 
@@ -79,6 +78,8 @@ to copy across by hand.
   it was not. `render_supplementary()` takes `blinded` for this, and
   `make_submission()` passes its own through. `make_preprint()` signs both, as
   it always did.
+
+# easypaper 0.2.2
 
 ## One document per section, and no merging
 
