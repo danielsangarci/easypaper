@@ -36,10 +36,25 @@ set_flextable_defaults(
   font.family = "Times New Roman"
 )
 
-#' Fit a flextable to the usable page width (inches).
-fit_flextable_to_page <- function(ft, pgwidth = 6) {
+#' Fit a flextable to the width of the text column.
+#'
+#' The table fills the column and the reader -- Word, LaTeX -- sizes each
+#' column from its content. That is what the .pdf already did, and what the
+#' .docx did not: the table used to be given a fixed 6 inches, while Quarto
+#' wraps every captioned table in a container 5.5 inches wide. A 6 inch table
+#' inside a 5.5 inch cell is what made the columns come out misaligned in Word
+#' and correct in the PDF, from the same code.
+#'
+#' @param ft a flextable.
+#' @param pgwidth a width in inches, for the rare table that has to be a fixed
+#'   size whatever it is put inside. `NULL`, the default, fills the column.
+fit_flextable_to_page <- function(ft, pgwidth = NULL) {
   ft <- flextable::autofit(ft)
-  flextable::width(ft, width = dim(ft)$widths * pgwidth / flextable_dim(ft)$widths)
+  if (is.null(pgwidth)) {
+    # width = 1 is "all of what you are given", not one inch.
+    return(flextable::set_table_properties(ft, layout = "autofit", width = 1))
+  }
+  flextable::width(ft, width = dim(ft)$widths * pgwidth / sum(dim(ft)$widths))
 }
 FitFlextableToPage <- fit_flextable_to_page   # backwards-compatible alias
 

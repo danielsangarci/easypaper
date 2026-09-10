@@ -9,7 +9,7 @@ test_that("it writes the whole structure", {
   }
   for (d in c("_sections", "R", "format", "references", "references_styles",
               "data", "data/metadata",
-              "output/journal", "output/preprint", "output/supplementary",
+              "output",
               "figures", "cache")) {
     expect_true(dir.exists(file.path(p, d)), info = d)
   }
@@ -207,4 +207,14 @@ test_that("open = TRUE outside RStudio says so instead of doing nothing", {
             rstudioapi::isAvailable(), "running inside RStudio")
   p <- tempfile("paper")
   expect_message(create_paper(p, git = FALSE, open = TRUE), "rstudioapi")
+})
+
+test_that("output/ is one flat folder, with no subfolders", {
+  # A render writes straight into output/. The three subfolders it used to
+  # sort results into were created here, so this is where they would come back.
+  p <- tempfile("paper")
+  create_paper(p, git = FALSE)
+  expect_true(dir.exists(file.path(p, "output")))
+  expect_identical(list.dirs(file.path(p, "output"), recursive = TRUE),
+                   file.path(p, "output"))
 })

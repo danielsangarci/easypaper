@@ -148,9 +148,9 @@ run("make_preprint()",         make_preprint())
 
 # --- 3. what the documents actually say ------------------------------------
 cat("\n== the documents ==\n")
-main <- plain(file.path(p, "output/journal/manuscript_myrmecological-news.docx"))
+main <- plain(file.path(p, "output/manuscript_myrmecological-news.docx"))
 sub  <- plain(file.path(p, "submission/Test/manuscript/main_Test.docx"))
-sup  <- plain(file.path(p, "output/supplementary/supporting_information.docx"))
+sup  <- plain(file.path(p, "output/supporting_information.docx"))
 
 ok("no unresolved cross-reference in the manuscript", has(main, "\\?@") == 0)
 ok("the citation to the supplement is baked as a literal",
@@ -167,9 +167,26 @@ ok("the inline R result was computed", has(main, "beta = ") == 1)
 ok("the blinded main text carries no author name",
    has(sub, "\\bAda\\b") == 0 && has(sub, "\\bAlan\\b") == 0)
 ok("the blinded main text carries no supplement", has(sub, "Legend of supplementary") == 0)
+# The title is the one part of the title block that stays: a journal expects it
+# at the head of the anonymised manuscript. It only shows up with --standalone,
+# because pandoc reads a .docx title into metadata rather than into the body --
+# which is why the plain() above cannot see it, and why this needs its own read.
+titled <- function(f) {
+  out <- tempfile(fileext = ".txt")
+  system2(rmarkdown::pandoc_exec(),
+          c(shQuote(f), "-s", "-t", "plain", "-o", shQuote(out)))
+  txt <- readLines(out, warn = FALSE)
+  head(txt[nzchar(trimws(txt))], 1)
+}
+ok("the blinded main text opens with the title",
+   grepl("Chemical mimicry", titled(
+     file.path(p, "submission/Test/manuscript/main_Test.docx")), fixed = TRUE))
+ok("and so does the title page",
+   grepl("Chemical mimicry", titled(
+     file.path(p, "submission/Test/manuscript/title_Test.docx")), fixed = TRUE))
 
 pdfs <- function(f) tryCatch(qpdf::pdf_length(f), error = function(e) NA_integer_)
-merged <- pdfs(file.path(p, "output/preprint/preprint.pdf"))
+merged <- pdfs(file.path(p, "output/preprint.pdf"))
 apart  <- pdfs(file.path(p, "submission/bioRxiv/manuscript/preprint_bioRxiv.pdf")) +
           pdfs(list.files(file.path(p, "submission/bioRxiv/manuscript"),
                           "supporting.*pdf", full.names = TRUE)[1])
@@ -204,7 +221,7 @@ just <- function(f) {
 ok("the manuscript is not justified",
    !just(file.path(p, "submission/Test/manuscript/main_Test.docx")))
 ok("the supplement is justified",
-   just(file.path(p, "output/supplementary/supporting_information.docx")))
+   just(file.path(p, "output/supporting_information.docx")))
 ok("the cover letter is justified",
    just(file.path(p, "submission/Test/cover_letter_Test.docx")))
 

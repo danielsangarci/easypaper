@@ -36,9 +36,26 @@ OUTPUT    <- here("output")          # = project: output-dir in _quarto.yml
 # output/, figures/ and cache/ are in .gitignore, so they do not exist after a
 # clone. They are created here so make_all() works on a freshly cloned copy of
 # the template.
-for (d in c("output/journal", "output/preprint", "output/supplementary",
-            "figures", "cache")) {
+for (d in c("output", "figures", "cache")) {
   dir.create(here(d), recursive = TRUE, showWarnings = FALSE)
+}
+
+#' A path inside output/, with the folder created if it is not there.
+#'
+#' Everything a render produces lands flat in output/: the .docx, the .pdf,
+#' the supplement, the code. One folder, because you open it to find a
+#' document, not to navigate.
+#'
+#' The directory is created here, at the moment of writing, and not only when
+#' make.R is sourced. output/ is regenerable and .gitignored, so it is absent
+#' after a clone and the README calls deleting it safe -- and a render that
+#' trusted a folder made at load time failed, in a session that was still
+#' open, with a message about a temporary file rather than a missing folder.
+#' @noRd
+.out <- function(...) {
+  p <- here("output", ...)
+  dir.create(dirname(p), recursive = TRUE, showWarnings = FALSE)
+  p
 }
 
 # --- Utilities -------------------------------------------------------------
@@ -208,6 +225,25 @@ check_data <- function(quiet = FALSE) {
   invisible(!length(missing))
 }
 
+#' Read one of the deposit's metadata .csv files.
+#'
+#' dataspice writes its scaffold without a final newline, and read.csv warns
+#' about that on every render until the file has been written back once. The
+#' warning says nothing about the data, which reads correctly, so it is
+#' muffled -- and only that one: any other warning the read raises still
+#' reaches you. Your own data files are read elsewhere and are not touched by
+#' this, because a malformed line in one of those is worth hearing about.
+#' @noRd
+.read_meta <- function(f, ...) {
+  withCallingHandlers(
+    utils::read.csv(f, ...),
+    warning = function(w) {
+      if (grepl("incomplete final line", conditionMessage(w), fixed = TRUE)) {
+        invokeRestart("muffleWarning")
+      }
+    })
+}
+
 #' Fill in what the deposit's metadata can know by itself.
 #'
 #' dataspice describes the data deposit with four .csv files, and three of
@@ -239,7 +275,7 @@ sync_metadata <- function(quiet = FALSE) {
 
   # --- biblio: the title and the keywords are in the manuscript --------------
   f <- file.path(md, "biblio.csv")
-  b <- utils::read.csv(f, colClasses = "character")
+  b <- .read_meta(f, colClasses = "character")
   if (!nrow(b)) b[1, ] <- NA_character_
   blank <- function(x) is.na(x) || !nzchar(trimws(x))
   put <- function(d, col, value) {
@@ -258,7 +294,7 @@ sync_metadata <- function(quiet = FALSE) {
   # dataspice keeps one `name` field, not a given/family pair: the name goes in
   # whole, exactly as the manuscript writes it.
   f  <- file.path(md, "creators.csv")
-  cr <- utils::read.csv(f, colClasses = "character")
+  cr <- .read_meta(f, colClasses = "character")
   who <- tryCatch(.author_names(), error = function(e) character(0))
   added <- 0L
   for (nm in who) {
@@ -279,14 +315,14 @@ sync_metadata <- function(quiet = FALSE) {
   # something to describe.
   csvs <- list.files(here("data"), "\\.csv$", full.names = TRUE)
   if (length(csvs)) {
-    before <- nrow(utils::read.csv(file.path(md, "attributes.csv"),
-                                   colClasses = "character"))
+    before <- nrow(.read_meta(file.path(md, "attributes.csv"),
+                              colClasses = "character"))
     suppressMessages(dataspice::prep_attributes(
       data_path = csvs, attributes_path = file.path(md, "attributes.csv")))
     suppressMessages(dataspice::prep_access(
       data_path = csvs, access_path = file.path(md, "access.csv")))
-    n <- nrow(utils::read.csv(file.path(md, "attributes.csv"),
-                              colClasses = "character")) - before
+    n <- nrow(.read_meta(file.path(md, "attributes.csv"),
+                         colClasses = "character")) - before
     if (n > 0) done <- c(done, sprintf("%d variable(s)", n))
   }
 
@@ -448,6 +484,12 @@ check_citations <- function() {
 #' @noRd
 .record_env <- function() {
   if (!requireNamespace("renv", quietly = TRUE)) return(invisible(NA))
+  # renv prints its report straight to the console rather than through
+  # message(), so suppressMessages() below does not reach it: a first render
+  # otherwise dumps the whole resolved library, a hundred lines of it, over
+  # the render log. This is renv's own switch for that.
+  old <- options(renv.verbose = FALSE)
+  on.exit(options(old), add = TRUE)
   lock <- here("renv.lock")
   before <- if (file.exists(lock)) unname(tools::md5sum(lock)) else NA_character_
   pkgs <- tryCatch(.analysis_packages(), error = function(e) character(0))
@@ -483,7 +525,7 @@ check_citations <- function() {
 check_renv <- function(quiet = FALSE) {
   if (!requireNamespace("renv", quietly = TRUE)) {
     if (!quiet) message("renv is not installed: the versions are only recorded ",
-                        "in output/supplementary/sessionInfo.txt.")
+                        "in output/sessionInfo.txt.")
     return(invisible(NA))
   }
   if (!file.exists(here("renv.lock"))) {
@@ -627,11 +669,18 @@ export_figure_formats <- function(quiet = FALSE) {
 #'
 #' @param split if TRUE, the main text comes out WITHOUT the supplementary
 #'   material and with its citations replaced by their text ("Figure S1").
-#'   This is what make_submission() uses. See R/submission.R.
-#' @param blinded if TRUE, the title block is dropped and the document starts
-#'   at the Abstract (double-blind review).
+#'   The supplement is still rendered, as its own file or files; what `split`
+#'   decides is whether the two are then merged back into one. This is what
+#'   make_submission() uses. See R/submission.R.
+#' @param blinded if TRUE, the author block is dropped and the document opens
+#'   with the title alone (double-blind review).
+#' @param supplement FALSE leaves the supplement unrendered. Only for the
+#'   deliverable builders: make_submission() and make_preprint() render it
+#'   themselves, with their own subset of files and their own names, and would
+#'   otherwise render it twice.
 .render <- function(fmt, journal, caption_style, ext, split = FALSE,
-                    blinded = FALSE, suppl_figures = "separate") {
+                    blinded = FALSE, suppl_figures = "separate",
+                    supplement = TRUE) {
   csl <- here("references_styles", paste0(journal, ".csl"))
   if (!file.exists(csl)) {
     stop("There is no CSL called '", journal, "'. Available: ",
@@ -657,11 +706,17 @@ export_figure_formats <- function(quiet = FALSE) {
     quarto::quarto_render(input, output_format = fmt, as_job = FALSE)
     produced <- sub("\\.qmd$", paste0(".", ext), input)
 
-    if (!split) {
+    if (supplement) {
+      # With suppl_figures = "main" the floats are already at the end of the
+      # main text, so only the supplementary TEXT is rendered on its own --
+      # which is where the independent reference list matters.
       keep <- if (suppl_figures == "main") .suppl_float_files() else character(0)
       sup <- render_supplementary(journal, caption_style, output_format = fmt,
                                   files = setdiff(.suppl_files(), keep))
-      produced <- .merge_documents(c(produced, sup), ext)
+      # split only decides whether the two are put back together. Asking for
+      # two files and silently getting one is the kind of thing you discover
+      # on the day you submit.
+      if (!split) produced <- .merge_documents(c(produced, sup), ext)
     }
   } else {
     quarto::quarto_render(
@@ -698,7 +753,7 @@ render_docx <- function(journal = "myrmecological-news", caption_style = "defaul
                            split = FALSE, suppl_figures = "separate") {
   f <- .render("docx", journal, caption_style, "docx", split = split,
                suppl_figures = suppl_figures)
-  dest <- here("output/journal", paste0("manuscript_", journal, ".docx"))
+  dest <- .out(paste0("manuscript_", journal, ".docx"))
   file.rename(f, dest)
   message("Written: ", dest)
   .record_env()
@@ -709,7 +764,7 @@ render_pdf <- function(journal = "myrmecological-news", caption_style = "default
                             split = FALSE, suppl_figures = "separate") {
   f <- .render("pdf", journal, caption_style, "pdf", split = split,
                suppl_figures = suppl_figures)
-  dest <- here("output/preprint/preprint.pdf")
+  dest <- .out("preprint.pdf")
   file.rename(f, dest)
   message("Written: ", dest)
   .record_env()
@@ -785,8 +840,7 @@ render_supplementary <- function(journal = "myrmecological-news", caption_style 
     if (!file.exists(produced)) {
       stop("Quarto did not leave ", produced, ". Check the log.", call. = FALSE)
     }
-    dest <- here("output/supplementary",
-                 if (n == 1L) paste0("supporting_information.", ext)
+    dest <- .out(if (n == 1L) paste0("supporting_information.", ext)
                  else sprintf("supporting_information_%s.%s", .suppl_name(files[k]), ext))
     if (!file.rename(produced, dest)) {
       stop("Could not move ", produced, " to ", dest, call. = FALSE)
@@ -812,7 +866,7 @@ preview <- function() {
 #' Extracts the code from setup.R and from ALL sections, in order, and
 #' concatenates it into a single annotated script.
 export_code <- function() {
-  out <- here("output/supplementary/analysis_code.R")
+  out <- .out("analysis_code.R")
 
   writeLines(c(
     "# =========================================================================",
@@ -848,11 +902,9 @@ export_code <- function() {
   # R packages; the Quarto version has to be recorded by hand.
   info <- capture.output(sessionInfo())
   v <- tryCatch(as.character(quarto::quarto_version()), error = function(e) "not found")
-  writeLines(c(info, "", paste("quarto:", v)),
-             here("output/supplementary/sessionInfo.txt"))
+  writeLines(c(info, "", paste("quarto:", v)), .out("sessionInfo.txt"))
   if (file.exists(here("renv.lock"))) {
-    file.copy(here("renv.lock"), here("output/supplementary/renv.lock"),
-              overwrite = TRUE)
+    file.copy(here("renv.lock"), .out("renv.lock"), overwrite = TRUE)
   }
   message("Written: ", out)
   invisible(out)

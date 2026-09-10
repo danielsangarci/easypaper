@@ -223,8 +223,7 @@ create_paper <- function(path, title = NULL, authors = NULL,
 #' @noRd
 .make_dirs <- function(path) {
   kept <- "data/metadata"
-  dirs <- file.path(path, c(kept, "output/journal", "output/preprint",
-                            "output/supplementary", "figures", "cache"))
+  dirs <- file.path(path, c(kept, "output", "figures", "cache"))
   vapply(dirs, dir.create, logical(1), recursive = TRUE, showWarnings = FALSE)
   if (!all(dir.exists(dirs))) {
     stop("Could not create the project folders in `", path, "`.", call. = FALSE)

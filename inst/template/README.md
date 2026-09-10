@@ -46,11 +46,11 @@ then you skip the citation checks and the licence synchronisation.
 ```r
 source("make.R")
 
-render_docx("myrmecological-news")   # -> output/journal/manuscript_myrmecological-news.docx
-render_pdf()                 # -> output/preprint/preprint.pdf
-render_supplementary()       # -> output/supplementary/supporting_information.docx
+render_docx("myrmecological-news")   # -> output/manuscript_myrmecological-news.docx
+render_pdf()                 # -> output/preprint.pdf
+render_supplementary()       # -> output/supporting_information.docx
 render_html()                # -> output/manuscript.html  (fast, to check as you go)
-export_code()                # -> output/supplementary/analysis_code.R
+export_code()                # -> output/analysis_code.R
 make_all()                   # the four above -- not the .html
 
 make_submission("myrmecological-news")       # submission folder, for a journal
@@ -137,7 +137,7 @@ format/                Word templates: the manuscript (line-numbered, ragged
                        justified, neither numbered)
 references/            .bib
 references_styles/     .csl per journal
-output/                Outputs. Regenerable, in .gitignore.
+output/                Everything a render produces, flat. Regenerable, in .gitignore.
 figures/               png/ jpg/ tiff/, one copy per format. Regenerable.
 cache/                 Written by knitr. Regenerable, in .gitignore.
 ```
@@ -239,7 +239,7 @@ out of order.
   `R --vanilla -e 'source("make.R"); make_all()'`.
 - **`renv` does not capture Quarto.** It is an external binary, as pandoc used
   to be. `make.R` records its version in
-  `output/supplementary/sessionInfo.txt`; put it in the *Data Availability
+  `output/sessionInfo.txt`; put it in the *Data Availability
   Statement* too.
 - **The pandoc mismatch is gone.** Quarto ships its own, so the "RStudio 3.8.3
   vs Homebrew 3.7.0.2" trap disappears. `pandoc-crossref` is not needed either:
@@ -412,7 +412,7 @@ submission/default/
   CHECKLIST.md                              what has to be done by hand
   manuscript/
     title_default.docx                      from the title to just before the Abstract
-    main_default.docx                       from the Abstract on, with no authors
+    main_default.docx                       the title, then the Abstract on, no authors
     supporting_information_default.docx
     figures/Figure_1.tiff  Figure_2.tiff    600 dpi, LZW, in order
   data_and_code/
@@ -438,9 +438,11 @@ Five decisions worth knowing about:
 
 **The manuscript is split into title page and main text**, which is how
 journals with double-blind review ask for it. The title page carries title,
-authors, affiliations, correspondence and the counts; the main text starts
-directly at the Abstract and contains not one name or affiliation (verified).
-With `blinded = FALSE` the main text keeps its title block.
+authors, affiliations, correspondence and the counts; the main text opens with
+the title, goes on to the Abstract, and contains not one name or affiliation
+(verified). The title is on both on purpose: a journal expects it at the head
+of the anonymised manuscript, and it identifies nobody. With
+`blinded = FALSE` the main text keeps the whole title block, authors included.
 
 The cut does not touch the code: the `setup` chunk is still there, only what
 gets printed disappears. What is **not** touched, and you have to review
@@ -642,7 +644,7 @@ left to you.
       bootstrap, rarefaction, MCMC).
 - [ ] `renv::snapshot()` run and `renv.lock` committed.
 - [ ] Quarto version recorded (`quarto --version`); it appears on its own in
-      `output/supplementary/sessionInfo.txt`.
+      `output/sessionInfo.txt`.
 - [ ] `make_all()` from scratch (`clean_cache()` first) with no errors.
 - [ ] `git tag submission-1`
 - [ ] Data metadata: `source("R/create_metadata.R")`

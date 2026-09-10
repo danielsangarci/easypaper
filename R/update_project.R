@@ -274,6 +274,16 @@ update_project <- function(path = ".", dry_run = FALSE) {
         "is left where it is; delete it once nothing of yours sources it."))
     }
   }
+  # Not keyed on a version: what matters is whether the folders are there.
+  old_out <- file.path("output", c("journal", "preprint", "supplementary"))
+  old_out <- old_out[dir.exists(file.path(path, old_out))]
+  if (length(old_out)) {
+    notes <- c(notes, paste0(
+      "A render now writes straight into output/, with no subfolder, and ",
+      "this project still has ", paste0(old_out, "/", collapse = ", "),
+      ". Whatever is in them is a stale copy: everything under output/ is ",
+      "regenerable, so delete the folder and render again."))
+  }
   notes
 }
 

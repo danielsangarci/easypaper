@@ -180,8 +180,9 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
 
 #' Self-contained document holding the main text WITHOUT the supplement.
 #'
-#' @param blinded TRUE removes the title block (title, authors, affiliations and
-#'   correspondence) so the main text starts at the Abstract. That is what
+#' @param blinded TRUE removes what identifies you -- the authors, the
+#'   affiliations and the correspondence line -- and keeps the title, which
+#'   opens the main text. That is what
 #'   journals with double-blind review ask for, and the reason the title page is
 #'   generated as a separate document. Careful: the Acknowledgements and CRediT
 #'   sections are NOT touched and also identify you; review them yourself.
@@ -265,9 +266,11 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
   own <- rmarkdown::yaml_front_matter(MASTER)
   for (nm in names(own)) yml[[nm]] <- own[[nm]]
   if (blinded) {
-    # Without these fields Quarto writes no title block: the document starts
-    # straight at the Abstract.
-    for (nm in c("title", "author", "date", "date-format")) yml[[nm]] <- NULL
+    # The title stays at the head of the main text: a journal expects it on the
+    # anonymised manuscript and it names nobody. What goes is the author block,
+    # and the date with it, so what opens the document is a title and nothing
+    # else. The title page carries the same one, taken from this same YAML.
+    for (nm in c("author", "date", "date-format")) yml[[nm]] <- NULL
   }
 
   # The yaml package writes logicals as yes/no (YAML 1.1) and Quarto uses
@@ -375,8 +378,7 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
                list.files(here("R"), "^analysis.*[.]R$", full.names = TRUE))
   scripts <- scripts[file.exists(scripts)]
   file.copy(scripts, file.path(dest, "scripts"), overwrite = TRUE)
-  for (f in c("output/supplementary/analysis_code.R",
-              "output/supplementary/sessionInfo.txt")) {
+  for (f in c("output/analysis_code.R", "output/sessionInfo.txt")) {
     if (file.exists(here(f))) file.copy(here(f), file.path(dest, "scripts"),
                                         overwrite = TRUE)
   }
@@ -403,7 +405,8 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
 .spice <- function(dest, file) {
   f <- file.path(dest, "metadata", file)
   if (!file.exists(f)) return(NULL)
-  d <- tryCatch(utils::read.csv(f, stringsAsFactors = FALSE), error = function(e) NULL)
+  # .read_meta(), from make.R: the same "incomplete final line" from dataspice.
+  d <- tryCatch(.read_meta(f, stringsAsFactors = FALSE), error = function(e) NULL)
   if (is.null(d) || !nrow(d)) NULL else d
 }
 
@@ -645,7 +648,7 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
     "- [ ] `git tag submission-1`", "",
     "## Journal dependent", "",
     "- [ ] Graphical abstract / highlights.",
-    "- [ ] Double blind: the title block is already out of `main_*.docx` (it is",
+    "- [ ] Double blind: `main_*.docx` carries the title and no author (it is",
     "      generated with blinded = TRUE). But review Acknowledgements and",
     "      CRediT, which also identify you, and self-citations of the kind",
     "      \"in our previous study (Author et al.)\".",
@@ -681,8 +684,8 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
 #'   own reference list.
 #' @param blinded TRUE (the default) splits the manuscript the way journals with
 #'   double-blind review ask for: the title page runs from the title to just
-#'   before the Abstract, and the main text starts at the Abstract, with no
-#'   authors.
+#'   before the Abstract, and the main text opens with the title alone, with no
+#'   author, affiliation or correspondence line.
 make_submission <- function(journal = "myrmecological-news", label = "default",
                             caption_style = "default", figure_format = "tiff",
                             blinded = TRUE, snapshot = TRUE,
@@ -698,8 +701,10 @@ make_submission <- function(journal = "myrmecological-news", label = "default",
 
   # 1) main text, without the supplement
   suppl_figures <- match.arg(suppl_figures, c("separate", "main"))
+  # supplement = FALSE: step 3 renders it, with this label on its file names.
   f <- .render("docx", journal, caption_style, "docx", split = TRUE,
-               blinded = blinded, suppl_figures = suppl_figures)
+               blinded = blinded, suppl_figures = suppl_figures,
+               supplement = FALSE)
   file.rename(f, file.path(man, sprintf("main_%s.docx", label)))
 
   # 2) title page, with title and authors taken from the manuscript
@@ -739,6 +744,9 @@ make_submission <- function(journal = "myrmecological-news", label = "default",
               "renv.lock. install.packages(\"renv\") and rebuild.",
               call. = FALSE, immediate. = TRUE)
     } else {
+      # renv reports straight to the console, not through message().
+      old <- options(renv.verbose = FALSE)
+      on.exit(options(old), add = TRUE)
       pkgs <- .analysis_packages()
       message("renv::snapshot(): recording the environment of THIS submission (",
               length(pkgs), " direct dependencies of the analysis).")
@@ -844,8 +852,10 @@ make_preprint <- function(journal = "myrmecological-news", label = "bioRxiv",
   # 1) the manuscript, as one signed PDF. split = TRUE takes the supplement
   #    out; blinded = FALSE keeps the title block, which is the whole
   #    difference from a submission.
+  #    supplement = FALSE: step 2 renders it, with this label on its names.
   f <- .render("pdf", journal, caption_style, "pdf", split = TRUE,
-               blinded = FALSE, suppl_figures = suppl_figures)
+               blinded = FALSE, suppl_figures = suppl_figures,
+               supplement = FALSE)
   file.rename(f, file.path(man, sprintf("preprint_%s.pdf", label)))
 
   # 2) the supplement(s), also as PDF: a server takes one file per document.

@@ -61,7 +61,9 @@ list_journals()        # which .csl you have in references_styles/
 # split         = the supplement is ALWAYS rendered on its own, so that it
 #                 carries its own reference list. split decides what you get
 #                 back: FALSE merges the two into one file to circulate, TRUE
-#                 leaves them as two, which is what a journal wants
+#                 leaves them as two, both in output/: the main text and the
+#                 supplement or supplements beside it, which is what a
+#                 journal wants
 # suppl_figures = "separate" or "main": whether the supplementary figures and
 #                 tables travel with the supplement or stay at the end of the
 #                 manuscript
@@ -70,9 +72,9 @@ list_journals()        # which .csl you have in references_styles/
 # document; qpdf, for .pdf, only concatenates pages and costs nothing). You
 # get a warning when it happens.
 
-render_docx("myrmecological-news")                 # -> output/journal/*.docx
+render_docx("myrmecological-news")                 # -> output/*.docx
 render_docx("ecology-letters", "abbrev")           # another journal, "Fig. 1."
-render_pdf("myrmecological-news")                  # -> output/preprint/*.pdf
+render_pdf("myrmecological-news")                  # -> output/preprint.pdf
 render_supplementary("myrmecological-news")        # the supplement(s) on their
                                                    # own: one document per
                                                    # _sections/8*suppl*.qmd
@@ -102,8 +104,8 @@ make_all("ecology-letters", "abbrev")              # the same, another journal
 #                 mistaken for a real submission
 # figure_format = "tiff" (what journals ask for) | "png" | "jpg"
 # blinded       = TRUE splits it for double-blind review: title_*.docx from the
-#                 title to just before the Abstract, main_*.docx from the
-#                 Abstract on, with no author anywhere
+#                 title to just before the Abstract, main_*.docx opening with
+#                 the title alone and no author anywhere
 
 # suppl_figures = "separate" leaves the supplementary figures and tables in
 #                 their own document, and rewrites @sfig-map in the main text

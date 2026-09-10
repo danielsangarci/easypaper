@@ -65,5 +65,5 @@ td_download <- function(section) {
 ## pulling. That way git shows you exactly what each co-author changed.
 
 ## If you would rather have co-authors read the whole typeset paper, send them
-## the .docx from output/journal/ (or the .html from output/) and keep
+## the .docx or the .html from output/ and keep
 ## trackdown for the sections they are actively editing.

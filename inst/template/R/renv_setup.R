@@ -9,7 +9,7 @@
 # a mismatch between RStudio's pandoc and Homebrew's) and which resolves
 # cross-references natively, without pandoc-crossref.
 # Record its version: make.R writes it into
-# output/supplementary/sessionInfo.txt, and `quarto check` verifies the whole
+# output/sessionInfo.txt, and `quarto check` verifies the whole
 # installation.
 # ---------------------------------------------------------------------------
 library(renv)
