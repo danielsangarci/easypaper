@@ -45,6 +45,16 @@
 <h2 class="pkg-version" data-toc-text="0.2.2" id="easypaper-022">easypaper 0.2.2<a class="anchor" aria-label="anchor" href="#easypaper-022"></a></h2>
 <p><code><a href="../reference/update_project.html">update_project()</a></code> carries all of this into a project already written, including the three Word templates. The two files it never touches are <code>R/setup.R</code> and <code>_sections/</code>, so the two table examples are the only thing to copy across by hand.</p>
 <div class="section level3">
+<h3 id="placeholders-that-read-as-instructions-0-2-2">Placeholders that read as instructions<a class="anchor" aria-label="anchor" href="#placeholders-that-read-as-instructions-0-2-2"></a></h3>
+<ul><li>A new project opened on <code>TITLE HERE</code>, <code>First Author name</code> and <code>keyword 1</code>. Now it opens on <strong><code>Manuscript title here</code>, <code>Author1</code>, <code>Author2</code> and <code>keyword1</code></strong>: shorter, unmistakably yours to replace, and numbered the way you will number the affiliations. <code>make.R</code> still warns while the author placeholders are in the YAML, and a test now ties its list to what the template actually ships, so the two cannot drift.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="a-title-page-with-nothing-blank-on-it-0-2-2">A title page with nothing blank on it<a class="anchor" aria-label="anchor" href="#a-title-page-with-nothing-blank-on-it-0-2-2"></a></h3>
+<ul><li>The page carried six bold labels with nothing after them – running head, keywords, word count, figure and table counts, ORCID, funding – which is what a title page reaches a journal looking like when nobody fills it in. <strong>They are gone.</strong> What is left is the title, the authors, the affiliations and the sections a blinded submission moves across.</li>
+<li>
+<strong>The keywords are a section of the manuscript now</strong>, right after the abstract, so they travel in <code>main_*.docx</code> and in every render. They are still written once, in the <code>keywords:</code> of the YAML, which is also where the deposit’s metadata reads them: the section prints that list rather than repeating it.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="the-title-page-and-the-main-text-share-one-set-of-sections-0-2-2">The title page and the main text share one set of sections<a class="anchor" aria-label="anchor" href="#the-title-page-and-the-main-text-share-one-set-of-sections-0-2-2"></a></h3>
 <ul><li>The title page listed its own fields as bold labels ending in a colon – <code>**Acknowledgements:**</code>, <code>**CRediT authorship contribution statement:**</code> – while the manuscript carried sections of the same meaning under proper headings. Two names for one thing, and a colon where a heading should be. <strong>The page now uses the manuscript’s own headings</strong>, so a submission is built out of the same sections a render shows.</li>
 <li>

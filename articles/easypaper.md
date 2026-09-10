@@ -23,7 +23,7 @@ authors.
 
 The title and the authors are optional; without them the YAML keeps its
 placeholders, and `make.R` warns you about them until you replace them.
-The affiliation marks are embedded in the names (`First Author^1,\*^`)
+The affiliation marks are embedded in the names (`Author1^1,\*^`)
 because Quarto rebuilds the author line of a `.docx` and drops any
 structured affiliation — the affiliations themselves live in
 `_sections/0_authors.qmd`.
@@ -34,7 +34,7 @@ Here is what lands on disk:
 
 dir <- file.path(tempdir(), "demo_paper")
 easypaper::create_paper(dir, git = FALSE)
-#> Project created: /tmp/Rtmpjwju7e/demo_paper
+#> Project created: /tmp/RtmpY2iu6z/demo_paper
 #>   1. open demo_paper.Rproj
 #>   2. source("make.R")
 #>   3. render_html()      # or see run.R for every command

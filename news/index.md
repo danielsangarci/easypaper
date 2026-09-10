@@ -8,6 +8,30 @@ Word templates. The two files it never touches are `R/setup.R` and
 `_sections/`, so the two table examples are the only thing to copy
 across by hand.
 
+### Placeholders that read as instructions
+
+- A new project opened on `TITLE HERE`, `First Author name` and
+  `keyword 1`. Now it opens on **`Manuscript title here`, `Author1`,
+  `Author2` and `keyword1`**: shorter, unmistakably yours to replace,
+  and numbered the way you will number the affiliations. `make.R` still
+  warns while the author placeholders are in the YAML, and a test now
+  ties its list to what the template actually ships, so the two cannot
+  drift.
+
+### A title page with nothing blank on it
+
+- The page carried six bold labels with nothing after them – running
+  head, keywords, word count, figure and table counts, ORCID, funding –
+  which is what a title page reaches a journal looking like when nobody
+  fills it in. **They are gone.** What is left is the title, the
+  authors, the affiliations and the sections a blinded submission moves
+  across.
+- **The keywords are a section of the manuscript now**, right after the
+  abstract, so they travel in `main_*.docx` and in every render. They
+  are still written once, in the `keywords:` of the YAML, which is also
+  where the deposit’s metadata reads them: the section prints that list
+  rather than repeating it.
+
 ### The title page and the main text share one set of sections
 
 - The title page listed its own fields as bold labels ending in a colon
