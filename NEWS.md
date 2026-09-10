@@ -1,9 +1,9 @@
-# easypaper 0.2.1
+# easypaper 0.2.2
 
-Everything here reaches a project already written through
-`update_project()`, except the two files it never touches:
-`R/setup.R`, which carries the table fix, and `_sections/`.
-Copy those two by hand, or start the project again.
+`update_project()` carries all of this into a project already written,
+including the three Word templates. The two files it never touches are
+`R/setup.R` and `_sections/`, so the two table examples are the only thing
+to copy across by hand.
 
 ## One document per section, and no merging
 
@@ -30,6 +30,13 @@ Copy those two by hand, or start the project again.
   container it wraps each captioned float in, so the bars had nothing to do
   with the table inside. That style no longer draws borders; a flextable draws
   its own.
+
+# easypaper 0.2.1
+
+Everything here reaches a project already written through
+`update_project()`, except the two files it never touches:
+`R/setup.R`, which carries the table fix, and `_sections/`.
+Copy those two by hand, or start the project again.
 
 ## Tables in the .docx match the .pdf
 
