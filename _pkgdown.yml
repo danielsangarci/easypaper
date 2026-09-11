@@ -51,6 +51,8 @@ reference:
 
 news:
   releases:
+    - text: "Version 0.3.0"
+      href: https://github.com/danielsangarci/easypaper/releases/tag/v0.3.0
     - text: "Version 0.2.4"
       href: https://github.com/danielsangarci/easypaper/releases/tag/v0.2.4
     - text: "Version 0.2.3"

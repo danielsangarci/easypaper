@@ -20,7 +20,10 @@ test_that("_quarto.yml points at files that exist", {
   y <- yaml::read_yaml(tpl("_quarto.yml"))
 
   for (f in y$project$render) expect_true(file.exists(tpl(f)), info = f)
-  expect_true(file.exists(tpl(y$csl)), info = y$csl)
+  # The journal is declared by the manuscript now, not by the project.
+  expect_null(y$csl)
+  csl <- rmarkdown::yaml_front_matter(tpl("manuscript.qmd"))$csl
+  expect_true(file.exists(tpl(csl)), info = csl)
   for (b in unlist(y$bibliography)) expect_true(file.exists(tpl(b)), info = b)
 
   ref <- y$format$docx$`reference-doc`
@@ -500,4 +503,84 @@ test_that("a figure paragraph is not indented", {
   expect_match(code, 'w:ind w:firstLine=', fixed = TRUE)
   # It goes before w:jc, which is the order the schema wants.
   expect_match(code, "(<w:jc [^>]*/>)", fixed = TRUE)
+})
+
+test_that("the cover letter is addressed to the journal, not to the label", {
+  # The label names the folder and the files -- "default" for a trial run --
+  # and a letter offering a manuscript to the editor of *default* is not a
+  # letter anyone can send. Both were being fed the same argument.
+  code <- gsub("[[:space:]]+", " ", paste(vapply(
+    as.list(parse(tpl("R/submission.R"), keep.source = FALSE)),
+    function(e) paste(deparse(e), collapse = " "), character(1)), collapse = " "))
+  expect_match(code, "jname <- .journal_name(journal)", fixed = TRUE)
+  expect_match(code, ".write_cover_letter(file.path(root,", fixed = TRUE)
+  # The label still names the file; only the text inside changed.
+  expect_match(code, 'sprintf("cover_letter_%s.docx", label)', fixed = TRUE)
+  expect_no_match(code, ".write_checklist(file.path(root, \"CHECKLIST.md\"), label, label)",
+                  fixed = TRUE)
+})
+
+test_that("the label is built from the journal unless you give one", {
+  # Naming the .csl should name everything: the folder, the file suffixes.
+  e <- new.env()
+  for (x in as.list(parse(tpl("R/submission.R"), keep.source = FALSE))) {
+    if (is.call(x) && identical(as.character(x[[1]]), "<-") &&
+        as.character(x[[2]]) %in% c(".label_from", "make_submission")) {
+      eval(x, envir = e)
+    }
+  }
+  expect_identical(e$.label_from("Ecology Letters"), "EcologyLetters")
+  expect_identical(e$.label_from("Myrmecological News"), "MyrmecologicalNews")
+  # Anything that is not a letter or a digit goes: this becomes a path.
+  expect_identical(e$.label_from("PLOS ONE (new)"), "PLOSONEnew")
+  expect_identical(e$.label_from("///"), "submission")
+
+  # No label given means "work it out", not "call it default".
+  expect_null(formals(e$make_submission)$label)
+  code <- gsub("[[:space:]]+", " ",
+               paste(deparse(body(e$make_submission)), collapse = " "))
+  expect_match(code, "label <- .label_from(jname)", fixed = TRUE)
+  expect_no_match(code, 'label <- "default"', fixed = TRUE)
+})
+
+test_that("the journal comes from the project unless a call names one", {
+  # _quarto.yml declares a `csl:`, which is where the manuscript says where it
+  # is going. The functions used to ignore it and carry a default of their own,
+  # so the RStudio Render button and make_submission() could produce two
+  # different journals from the same project without saying so.
+  exprs <- as.list(parse(tpl("make.R"), keep.source = FALSE))
+  named <- function(fn) Filter(function(x) {
+    is.call(x) && identical(as.character(x[[1]]), "<-") &&
+      identical(as.character(x[[2]]), fn)
+  }, exprs)
+  e <- new.env(); eval(named(".resolve_journal")[[1]], envir = e)
+
+  # A journal named in the call wins, and nothing else is read.
+  expect_identical(e$.resolve_journal("ecology-letters"), "ecology-letters")
+
+  # Otherwise the manuscript's own, from its YAML.
+  e$here <- function(...) tpl(...)
+  e$MASTER <- tpl("manuscript.qmd")
+  declared <- rmarkdown::yaml_front_matter(tpl("manuscript.qmd"))$csl
+  expect_false(is.null(declared))
+  expect_identical(e$.resolve_journal(NULL),
+                   sub("[.]csl$", "", basename(declared)))
+  # And the .csl it names is one the template actually ships.
+  expect_true(file.exists(tpl(declared)))
+
+  # Every entry point defaults to NULL and resolves.
+  for (fn in c("render_docx", "render_pdf", "render_html",
+               "render_supplementary", "make_all")) {
+    f <- named(fn)
+    expect_length(f, 1L)
+    expect_null(formals(eval(f[[1]][[3]]))$journal, info = fn)
+    expect_match(paste(deparse(f[[1]]), collapse = " "),
+                 "journal <- .resolve_journal(journal)", fixed = TRUE, info = fn)
+  }
+  sub <- gsub("[[:space:]]+", " ", paste(vapply(
+    as.list(parse(tpl("R/submission.R"), keep.source = FALSE)),
+    function(x) paste(deparse(x), collapse = " "), character(1)), collapse = " "))
+  expect_identical(
+    length(regmatches(sub, gregexpr("journal <- .resolve_journal(journal)",
+                                    sub, fixed = TRUE))[[1]]), 2L)
 })

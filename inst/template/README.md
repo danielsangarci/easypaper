@@ -391,23 +391,24 @@ sibling is `make_preprint()`, further down: same machinery, one signed `.pdf`
 instead of a blinded pair of Word files.
 
 ```r
-make_submission("myrmecological-news")                             # -> submission/default/
-make_submission("myrmecological-news", label = "MyrmecologicalNews")   # the real one
+make_submission("myrmecological-news")                  # -> submission/MyrmecologicalNews/
+make_submission("myrmecological-news", label = "Journal1")    # your own name
 ```
 
-`label` names the folder and every file inside it. It defaults to `"default"`,
-so a trial run lands in `submission/default/` and is unmistakably a trial:
-without an explicit label nothing ever carries the name of a journal you did
-not choose. Pass the real name when you actually submit.
+`label` names the folder and every file inside it. Left alone it is built from
+the journal's own name with the spaces taken out, so
+`make_submission("ecology-letters")` lands in `submission/EcologyLetters/` and
+naming the `.csl` names everything. Pass your own for a second version of the
+same submission, or for a trial you want to keep apart.
 
 ```
-submission/default/
-  cover_letter_default.docx                 template; NOT overwritten if it exists
+submission/MyrmecologicalNews/
+  cover_letter_MyrmecologicalNews.docx                 template; NOT overwritten if it exists
   CHECKLIST.md                              what has to be done by hand
   manuscript/
-    title_default.docx                      from the title to just before the Abstract
-    main_default.docx                       the title, then the Abstract on, no authors
-    supporting_information_default.docx
+    title_MyrmecologicalNews.docx                      from the title to just before the Abstract
+    main_MyrmecologicalNews.docx                       the title, then the Abstract on, no authors
+    supporting_information_MyrmecologicalNews.docx
     figures/Figure_1.tiff  Figure_2.tiff    600 dpi, LZW, in order
   data_and_code/
     data/                                   open formats only; no .xlsx

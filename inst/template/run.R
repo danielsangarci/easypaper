@@ -56,7 +56,11 @@ list_journals()        # which .csl you have in references_styles/
 
 
 # --- 2. FULL RENDERS -------------------------------------------------------
-# journal       = name of a .csl, without the extension (list_journals())
+# journal       = name of a .csl, without the extension (list_journals()).
+#                 Leave it out and the manuscript's own is used: the `csl:`
+#                 line of its YAML, beside the title and the authors, which is
+#                 where it says which journal it is going to. Naming one here
+#                 wins, for that call
 # caption_style = "default" | "abbrev" | "nature" | "compact"
 # suppl_figures = "separate" or "main": whether the supplementary figures and
 #                 tables travel with the supplement or stay at the end of the
@@ -69,13 +73,13 @@ list_journals()        # which .csl you have in references_styles/
 # width on the way -- the tables reach Word with the headings broken across
 # two lines.
 
-render_docx("myrmecological-news")                 # -> output/*.docx
+render_docx()                                      # -> output/*.docx
 render_docx("ecology-letters", "abbrev")           # another journal, "Fig. 1."
-render_pdf("myrmecological-news")                  # -> output/preprint.pdf
-render_supplementary("myrmecological-news")        # the supplement(s) on their
+render_pdf()                                       # -> output/preprint.pdf
+render_supplementary()                             # the supplement(s) on their
                                                    # own: one document per
                                                    # _sections/8*suppl*.qmd
-render_html("myrmecological-news", "nature")       # "Figure 1 | caption"
+render_html(caption_style = "nature")              # "Figure 1 | caption"
 
 make_all()                                         # docx + pdf + supplement
 make_all("ecology-letters", "abbrev")              # the same, another journal
@@ -96,9 +100,10 @@ make_all("ecology-letters", "abbrev")              # the same, another journal
 # version came out of, and labels every file it writes. That does not belong
 # in a command you run after fixing a typo.
 #
-# label         = name of the folder inside submission/ and the suffix of every
-#                 file in it. Defaults to "default" so a trial run cannot be
-#                 mistaken for a real submission
+# label         = names the folder inside submission/ and the suffix of every
+#                 file in it. Left alone it comes from the journal itself:
+#                 "ecology-letters" gives submission/EcologyLetters/. Pass your
+#                 own for a second version, or for a trial you want apart
 # figure_format = "tiff" (what journals ask for) | "png" | "jpg"
 # blinded       = TRUE splits it for double-blind review: title_*.docx from the
 #                 title to just before the Abstract, main_*.docx opening with
@@ -111,14 +116,12 @@ make_all("ecology-letters", "abbrev")              # the same, another journal
 #                 Supplementary TEXT (an extended Methods) always goes out on
 #                 its own, with its own reference list -- see the README
 
-make_submission()                                  # trial -> submission/default/
-make_submission("myrmecological-news", suppl_figures = "main")
-                                                   # ^ floats in the main text
-make_submission("myrmecological-news", label = "MyrmecologicalNews")
-                                                   # ^ the real submission
-make_submission("myrmecological-news", label = "MyrmecologicalNews", snapshot = FALSE)
+make_submission()                                  # -> submission/MyrmecologicalNews/
+make_submission(suppl_figures = "main")            # ^ floats in the main text
+make_submission(label = "Journal1")                # ^ your own name for it
+make_submission(snapshot = FALSE)
                                                    # ^ do NOT touch renv.lock
-make_submission("ecology-letters", label = "EcologyLetters",
+make_submission("ecology-letters",
                 figure_format = "png", blinded = FALSE)
 
 

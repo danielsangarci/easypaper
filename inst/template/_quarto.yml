@@ -52,7 +52,10 @@ knitr:
 bibliography:
   - references/references.bib
   - references/packages.bib
-csl: references_styles/myrmecological-news.csl
+# The journal now lives in the YAML of manuscript.qmd, beside the title and
+# the authors. A `csl:` here still works and is read as a fallback, but the
+# manuscript wins -- which is Quarto's own order, the document over the
+# project.
 
 # --- Figure and table numbering -------------------------------------------
 # Replaces R/captions.R and captioner. make.R overwrites this whole block

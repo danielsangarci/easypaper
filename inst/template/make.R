@@ -65,6 +65,37 @@ list_journals <- function() {
   sub("\\.csl$", "", basename(list.files(here("references_styles"), "\\.csl$")))
 }
 
+#' Which journal to use: the one you asked for, or the project's own.
+#'
+#' The manuscript declares a `csl:` in its YAML, beside its title and its
+#' authors, and that is where it says which journal it is going to. Naming
+#' `journal` in a call overrides it, for that call only. `_quarto.yml` is read
+#' as a fallback, which is where older projects declared it.
+#'
+#' The order is Quarto's own: the document beats the project.
+#'
+#' Before this they could disagree without saying so: a render from the RStudio
+#' button used the .csl in _quarto.yml while make_submission() used a default
+#' of its own, so the same project produced two different journals depending on
+#' how you asked.
+#' @noRd
+.resolve_journal <- function(journal = NULL) {
+  if (!is.null(journal) && nzchar(journal)) return(journal)
+  csl <- tryCatch(rmarkdown::yaml_front_matter(MASTER)$csl,
+                  error = function(e) NULL)
+  if (is.null(csl) || !length(csl) || !nzchar(as.character(csl)[1])) {
+    csl <- tryCatch(yaml::read_yaml(here("_quarto.yml"))$csl,
+                    error = function(e) NULL)
+  }
+  if (is.null(csl) || !length(csl) || !nzchar(as.character(csl)[1])) {
+    stop("No journal named, and neither ", basename(MASTER), " nor ",
+         "_quarto.yml has a `csl:` line to take one from. Either add it to ",
+         "the manuscript's YAML, or name one here. Available: ",
+         paste(list_journals(), collapse = ", "), call. = FALSE)
+  }
+  sub("\\.csl$", "", basename(as.character(csl)[1]))
+}
+
 #' The text files of the manuscript, in the order the master includes them.
 #' Read from the {{< include >}} lines of manuscript.qmd rather than from file
 #' names, so the number in the prefix can keep meaning the section of the paper
@@ -829,14 +860,18 @@ export_figure_formats <- function(quiet = FALSE) {
   produced
 }
 
-#' @param journal name of a .csl in references_styles/ (see list_journals())
+#' @param journal name of a .csl in references_styles/, without the extension
+#'   (see list_journals()). NULL, the default, takes the one the manuscript
+#'   declares in its own `csl:` line, beside its title and its authors. Naming
+#'   one here overrides that for this call only, and changes no file.
 #' @param caption_style default | abbrev | nature | compact (see R/crossref_styles.R)
 #' The manuscript and its supplement come out as separate documents, each
 #' with its own reference list. That is what a journal asks for, and the only
 #' way the tables survive: merging them means handing both to pandoc, which
 #' rebuilds the document and loses every column width.
-render_docx <- function(journal = "myrmecological-news", caption_style = "default",
+render_docx <- function(journal = NULL, caption_style = "default",
                            suppl_figures = "separate") {
+  journal <- .resolve_journal(journal)
   f <- .render("docx", journal, caption_style, "docx",
                suppl_figures = suppl_figures)
   dest <- .out(paste0("manuscript_", journal, ".docx"))
@@ -846,8 +881,9 @@ render_docx <- function(journal = "myrmecological-news", caption_style = "defaul
   invisible(dest)
 }
 
-render_pdf <- function(journal = "myrmecological-news", caption_style = "default",
+render_pdf <- function(journal = NULL, caption_style = "default",
                             suppl_figures = "separate") {
+  journal <- .resolve_journal(journal)
   f <- .render("pdf", journal, caption_style, "pdf",
                suppl_figures = suppl_figures)
   dest <- .out("preprint.pdf")
@@ -858,7 +894,8 @@ render_pdf <- function(journal = "myrmecological-news", caption_style = "default
 }
 
 #' Working HTML: much faster than the .docx for checking results as you go.
-render_html <- function(journal = "myrmecological-news", caption_style = "default") {
+render_html <- function(journal = NULL, caption_style = "default") {
+  journal <- .resolve_journal(journal)
   f <- .render("html", journal, caption_style, "html")
   message("Written: ", f)
   invisible(f)
@@ -873,9 +910,10 @@ render_html <- function(journal = "myrmecological-news", caption_style = "defaul
 #' @param blinded TRUE drops the authors and the affiliations, for the
 #'   supplement that travels with a double-blind submission. FALSE, the
 #'   default, names the authors under the title, above the affiliations.
-render_supplementary <- function(journal = "myrmecological-news", caption_style = "default",
+render_supplementary <- function(journal = NULL, caption_style = "default",
                                  output_format = "docx", files = NULL,
                                  blinded = FALSE) {
+  journal <- .resolve_journal(journal)
   csl <- here("references_styles", paste0(journal, ".csl"))
   if (!file.exists(csl)) {
     stop("There is no CSL called '", journal, "'. Available: ",
@@ -1008,7 +1046,8 @@ export_code <- function() {
 
 # --- Everything ------------------------------------------------------------
 
-make_all <- function(journal = "myrmecological-news", caption_style = "default") {
+make_all <- function(journal = NULL, caption_style = "default") {
+  journal <- .resolve_journal(journal)
   render_docx(journal, caption_style)
   render_pdf(journal, caption_style)
   render_supplementary(journal, caption_style)

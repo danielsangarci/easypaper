@@ -11,6 +11,11 @@ author:
   - name: "Author1^1,\\*^"
   - name: "Author2^2^"
 keywords: [keyword1, keyword2, keyword3]
+# The journal this manuscript is going to: a .csl in references_styles/.
+# Every command reads it from here, so you name it once. list_journals() shows
+# what you have, and easypaper::add_journal("plos-one") fetches another.
+# Naming one in a call -- render_docx("ecology-letters") -- wins for that call.
+csl: references_styles/myrmecological-news.csl
 # No date: a manuscript is dated by the journal, not by the day you happened
 # to render it, and a date on a draft you circulate only ever misleads. Add
 # `date: today` and `date-format: long` back here if you want one; a blinded

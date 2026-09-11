@@ -179,6 +179,14 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
 }
 
 
+#' A journal's name as a file name: letters and digits, nothing else.
+#' "Ecology Letters" -> "EcologyLetters".
+#' @noRd
+.label_from <- function(x) {
+  s <- gsub("[^A-Za-z0-9]", "", x)
+  if (nzchar(s)) s else "submission"
+}
+
 #' The sections a double-blind submission keeps off the main text.
 #'
 #' They travel on the title page instead. Their headings are the ones
@@ -310,11 +318,14 @@ BLINDED_SECTIONS <- c("Acknowledgements",
   #    list of _quarto.yml, so it does not inherit the project configuration.
   yml <- yaml::read_yaml(here("_quarto.yml"))
   yml$project <- NULL
-  yml$csl <- here("references_styles", paste0(journal, ".csl"))
   yml$crossref <- crossref_metadata(caption_style)
   yml$format <- yml$format[fmt]
   own <- rmarkdown::yaml_front_matter(MASTER)
   for (nm in names(own)) yml[[nm]] <- own[[nm]]
+  # After the manuscript's own YAML, never before: the manuscript declares a
+  # `csl:` of its own and copying it over would undo the journal this call
+  # resolved -- the one you named, if you named one.
+  yml$csl <- here("references_styles", paste0(journal, ".csl"))
   if (blinded) {
     # The title stays at the head of the main text: a journal expects it on the
     # anonymised manuscript and it names nobody. What goes is the author block,
@@ -727,12 +738,18 @@ BLINDED_SECTIONS <- c("Acknowledgements",
 
 #' Build the complete submission folder.
 #'
-#' @param journal   name of the .csl (see list_journals())
-#' @param label     name of the folder inside submission/ and the suffix of
-#'                  every file in it. Defaults to "default": a trial run is
-#'                  then obviously a trial run, and it cannot be mistaken for
-#'                  a real submission to a journal you never chose. Pass the
-#'                  journal name when the submission is the real one.
+#' @param journal   name of the .csl, without the extension (see
+#'                  list_journals()). NULL, the default, takes the one the
+#'                  manuscript declares in its own `csl:` line, which is where
+#'                  it says where it is going. Naming one here overrides that,
+#'                  for this call only.
+#' @param label     names the folder inside submission/ and the suffix of
+#'                  every file in it. Left alone it is built from the
+#'                  journal's own name with the spaces taken out --
+#'                  "ecology-letters" gives EcologyLetters -- so naming the
+#'                  .csl names everything. Pass your own for a second version
+#'                  of the same submission, or for a trial you want to tell
+#'                  apart: label = "trial".
 #' @param figure_format one of FIG_FORMATS: "tiff", "png" or "jpg"
 #' @param snapshot TRUE (the default) runs renv::snapshot() before building the
 #'   compendium, so the renv.lock that travels in the zip describes exactly the
@@ -751,12 +768,16 @@ BLINDED_SECTIONS <- c("Acknowledgements",
 #'   double-blind review ask for: the title page runs from the title to just
 #'   before the Abstract, and the main text opens with the title alone, with no
 #'   author, affiliation or correspondence line.
-make_submission <- function(journal = "myrmecological-news", label = "default",
+make_submission <- function(journal = NULL, label = NULL,
                             caption_style = "default", figure_format = "tiff",
                             blinded = TRUE, snapshot = TRUE,
                             suppl_figures = "separate") {
   figure_format <- match.arg(figure_format, FIG_FORMATS)
-  if (is.null(label) || !nzchar(label)) label <- "default"
+  journal <- .resolve_journal(journal)
+  jname <- .journal_name(journal)
+  # No label: the journal names the folder and the files. Letters and digits
+  # only, because this becomes a path and a file name.
+  if (is.null(label) || !nzchar(label)) label <- .label_from(jname)
   root <- here("submission", label)
   man  <- file.path(root, "manuscript")
   dir.create(man, recursive = TRUE, showWarnings = FALSE)
@@ -830,9 +851,10 @@ make_submission <- function(journal = "myrmecological-news", label = "default",
   .export_data_code(dc, blinded = blinded)
   zip::zip(file.path(root, "data_and_code.zip"), basename(dc), root = root)
 
-  # 5) what is written by hand
-  .write_cover_letter(file.path(root, sprintf("cover_letter_%s.docx", label)), label)
-  .write_checklist(file.path(root, "CHECKLIST.md"), label, label)
+  # 5) what is written by hand. The journal's real name, not the label: the
+  # label is a file name and may be anything you passed.
+  .write_cover_letter(file.path(root, sprintf("cover_letter_%s.docx", label)), jname)
+  .write_checklist(file.path(root, "CHECKLIST.md"), jname, label)
   unlink(file.path(OUTPUT, "figures"), recursive = TRUE)
 
   message("\nSubmission folder ready: ", root)
@@ -893,7 +915,8 @@ make_submission <- function(journal = "myrmecological-news", label = "default",
 #' own just as hard as a submission does.
 #'
 #' @param journal the .csl the citations come out in. A preprint has no house
-#'   style, so this is only about which convention you prefer to read.
+#'   style, so this is only about which convention you prefer to read. NULL
+#'   takes the manuscript's own, from its `csl:` line.
 #' @param label names the folder inside submission/ and every file in it.
 #'   Defaults to the server you are most likely to post to; change it for
 #'   another one, or for a second version.
@@ -903,10 +926,11 @@ make_submission <- function(journal = "myrmecological-news", label = "default",
 #' @param suppl_figures "separate" leaves the supplementary figures and tables
 #'   in their own document; "main" keeps them at the end of the manuscript.
 #' @return the path of the deposit, invisibly.
-make_preprint <- function(journal = "myrmecological-news", label = "bioRxiv",
+make_preprint <- function(journal = NULL, label = "bioRxiv",
                           caption_style = "default", figure_format = "tiff",
                           snapshot = TRUE, suppl_figures = "separate") {
   figure_format <- match.arg(figure_format, FIG_FORMATS)
+  journal <- .resolve_journal(journal)
   suppl_figures <- match.arg(suppl_figures, c("separate", "main"))
   if (is.null(label) || !nzchar(label)) label <- "bioRxiv"
   root <- here("submission", label)
