@@ -3,7 +3,7 @@ pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   easypaper: easypaper.html
-last_built: 2026-09-11T11:56Z
+last_built: 2026-09-11T11:58Z
 urls:
   reference: https://danielsangarci.github.io/easypaper/reference
   article: https://danielsangarci.github.io/easypaper/articles
