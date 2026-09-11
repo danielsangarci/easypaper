@@ -657,6 +657,100 @@ export_figure_formats <- function(quiet = FALSE) {
 
 # --- Render ----------------------------------------------------------------
 
+#' Close every table cell that ends in a table, and hand Word a file it will
+#' open.
+#'
+#' Quarto wraps each captioned float in a one-cell table, and a flextable goes
+#' inside that cell. The cell then ends with a table, and the OOXML schema
+#' requires the last thing in a cell to be a paragraph. Word refuses the file:
+#' "Word found unreadable content", and what it offers to recover opens
+#' read-only. LibreOffice and Google Docs read it without complaining, which is
+#' what makes this so easy to ship without noticing.
+#'
+#' The repair is one empty paragraph before the cell closes. Nothing else in
+#' the package is touched, and a document that does not need it comes back
+#' unchanged.
+#' The width of the text on the page, in twips, read from the document's own
+#' section properties. NA when they cannot be read.
+#' @noRd
+.text_width <- function(xml) {
+  # (?s) so the dot crosses newlines: the block is written over several lines.
+  sect <- regmatches(xml, regexpr("(?s)<w:sectPr.*?</w:sectPr>", xml, perl = TRUE))
+  if (!length(sect)) return(NA_integer_)
+  attr_of <- function(tag, a) {
+    e <- regmatches(sect, regexpr(paste0("<", tag, "[^>]*>"), sect))
+    if (!length(e)) return(NA_integer_)
+    v <- regmatches(e, regexpr(paste0(a, '="[0-9]+"'), e))
+    if (!length(v)) NA_integer_ else as.integer(gsub("[^0-9]", "", v))
+  }
+  w <- attr_of("w:pgSz", "w:w")
+  l <- attr_of("w:pgMar", "w:left")
+  r <- attr_of("w:pgMar", "w:right")
+  if (anyNA(c(w, l, r)) || w - l - r <= 0) NA_integer_ else w - l - r
+}
+
+#' @noRd
+.repair_docx <- function(f) {
+  if (!file.exists(f) || !requireNamespace("zip", quietly = TRUE)) {
+    return(invisible(FALSE))
+  }
+  parts <- tryCatch(zip::zip_list(f)$filename, error = function(e) NULL)
+  if (is.null(parts) || !"word/document.xml" %in% parts) return(invisible(FALSE))
+
+  d <- file.path(tempdir(), paste0("repair_", basename(f)))
+  unlink(d, recursive = TRUE)
+  utils::unzip(f, exdir = d)
+  x <- file.path(d, "word", "document.xml")
+  xml <- readChar(x, file.size(x), useBytes = TRUE)
+
+  # </w:tbl>, then any bookmark markers, then the cell closing: the paragraph
+  # goes in just before it closes.
+  fixed <- gsub("(</w:tbl>)((?:\\s*<w:bookmark(?:Start|End)[^>]*/>)*\\s*)(</w:tc>)",
+                "\\1\\2<w:p/>\\3", xml, perl = TRUE, useBytes = TRUE)
+  n <- (nchar(fixed, type = "bytes") - nchar(xml, type = "bytes")) / nchar("<w:p/>")
+
+  # Same container, second defect. It declares 100% of the text width and then
+  # fixes its grid at pandoc's own default, 5.5 inches, whatever the page is.
+  # A figure is sized to the text width, so a 6.5-inch figure went into a
+  # 5.5-inch cell and lost an inch off its right edge. The grid is set to the
+  # width the page really has, which is what the table already claims to want.
+  w <- .text_width(fixed)
+  if (!is.na(w)) {
+    # The width goes in the middle of the replacement, never right after a
+    # backreference: "\\1" followed by a digit reads as group 19.
+    fixed <- gsub('<w:tblGrid><w:gridCol w:w="[0-9]+"( ?)/></w:tblGrid>',
+                  paste0('<w:tblGrid><w:gridCol w:w="', w, '"\\1/></w:tblGrid>'),
+                  fixed, perl = TRUE, useBytes = TRUE)
+  }
+
+  # A figure paragraph inherits the body text's first-line indent -- half an
+  # inch in this template -- and a figure is drawn as wide as the text column.
+  # The indent pushes that half inch off the right edge and Word clips it: the
+  # figure loses its right side. `w:ind` goes before `w:jc`, which is where
+  # the schema wants it.
+  fixed <- gsub(paste0("(<w:pPr>(?:(?!</w:pPr>).)*?)(<w:jc [^>]*/>)",
+                       "(</w:pPr><w:r><w:drawing>)"),
+                "\\1<w:ind w:firstLine=\"0\"/>\\2\\3", fixed, perl = TRUE)
+  fixed <- gsub(paste0("(<w:pPr>(?:(?!</w:pPr>|<w:ind ).)*?)",
+                       "(</w:pPr><w:r><w:drawing>)"),
+                "\\1<w:ind w:firstLine=\"0\"/>\\2", fixed, perl = TRUE)
+
+  if (identical(fixed, xml)) {
+    unlink(d, recursive = TRUE)
+    return(invisible(FALSE))
+  }
+  writeChar(fixed, x, eos = NULL, useBytes = TRUE)
+  # mode = "mirror" keeps the folders; "cherry-pick" would flatten them and
+  # the .docx would no longer be a .docx. The order is the package's own, so
+  # [Content_Types].xml stays first.
+  zip::zip(zipfile = f, files = parts, root = d, mode = "mirror")
+  unlink(d, recursive = TRUE)
+  message("Repaired ", basename(f), ": ", n, " table cell(s) closed with a ",
+          "paragraph, which is what Word needs to open the file.")
+  invisible(TRUE)
+}
+
+
 #' Common wrapper. Returns the path of the file produced.
 #'
 #' The main text comes out WITHOUT the supplementary material and with its
@@ -699,6 +793,7 @@ export_figure_formats <- function(quiet = FALSE) {
     on.exit(unlink(input), add = TRUE)
     quarto::quarto_render(input, output_format = fmt, as_job = FALSE)
     produced <- sub("\\.qmd$", paste0(".", ext), input)
+    if (identical(ext, "docx")) .repair_docx(produced)
 
     if (supplement) {
       # With suppl_figures = "main" the floats are already at the end of the
@@ -840,6 +935,7 @@ render_supplementary <- function(journal = "myrmecological-news", caption_style 
     if (!file.exists(produced)) {
       stop("Quarto did not leave ", produced, ". Check the log.", call. = FALSE)
     }
+    if (identical(ext, "docx")) .repair_docx(produced)
     dest <- .out(if (n == 1L) paste0("supporting_information.", ext)
                  else sprintf("supporting_information_%s.%s", .suppl_name(files[k]), ext))
     if (!file.rename(produced, dest)) {

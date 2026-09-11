@@ -778,6 +778,7 @@ make_submission <- function(journal = "myrmecological-news", label = "default",
   on.exit(unlink(c(tp, sub("[.]qmd$", ".docx", tp))), add = TRUE)
   quarto::quarto_render(tp, output_format = "docx",
                         metadata = list(author = own$author), as_job = FALSE)
+  .repair_docx(sub("[.]qmd$", ".docx", tp))
   # Not in the render: list, so Quarto leaves the output next to the input.
   file.copy(sub("[.]qmd$", ".docx", tp),
             file.path(man, sprintf("title_%s.docx", label)), overwrite = TRUE)

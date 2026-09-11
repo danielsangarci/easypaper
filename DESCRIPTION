@@ -1,6 +1,6 @@
 Package: easypaper
 Title: Scaffold a Reproducible 'Quarto' Manuscript Project
-Version: 0.2.3
+Version: 0.2.4
 Authors@R:
     person("Daniel", "Sanchez-Garcia", email = "danielsangarci@gmail.com",
            role = c("aut", "cre", "cph"),

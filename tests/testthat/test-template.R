@@ -449,3 +449,55 @@ test_that("the supplement carries no address, and names authors as a reference d
   # One word is left as it is rather than turned into an initial of nothing.
   expect_identical(e$.reference_name("Prince"), "Prince")
 })
+
+test_that("a .docx is repaired before it is handed over", {
+  # Quarto wraps each captioned float in a one-cell table and puts the
+  # flextable inside it, so the cell ends with a table. The schema requires a
+  # paragraph there, and Word refuses the file: "unreadable content", and what
+  # it recovers opens read-only. LibreOffice and Google Docs read it happily,
+  # which is what makes this easy to ship without noticing.
+  exprs <- as.list(parse(tpl("make.R"), keep.source = FALSE))
+  named <- function(fn) Filter(function(x) {
+    is.call(x) && identical(as.character(x[[1]]), "<-") &&
+      identical(as.character(x[[2]]), fn)
+  }, exprs)
+  expect_length(named(".repair_docx"), 1L)
+  expect_length(named(".text_width"), 1L)
+
+  code <- gsub("[[:space:]]+", " ", paste(vapply(exprs,
+    function(e) paste(deparse(e), collapse = " "), character(1)), collapse = " "))
+  # Every .docx a render produces goes through it: the main text and the
+  # supplement here, the title page in submission.R below.
+  expect_identical(
+    length(regmatches(code, gregexpr(".repair_docx(", code, fixed = TRUE))[[1]]),
+    2L)
+  sub <- gsub("[[:space:]]+", " ", paste(vapply(
+    as.list(parse(tpl("R/submission.R"), keep.source = FALSE)),
+    function(e) paste(deparse(e), collapse = " "), character(1)), collapse = " "))
+  expect_match(sub, ".repair_docx(", fixed = TRUE)
+
+  # The section properties are read across newlines, and the width never sits
+  # straight after a backreference: "\\1" plus a digit reads as group 19.
+  e <- new.env(); eval(named(".text_width")[[1]], envir = e)
+  xml <- paste("<w:sectPr>", "<w:pgSz w:h=\"15840\" w:w=\"12240\" />",
+               "<w:pgMar w:bottom=\"1440\" w:left=\"1440\" w:right=\"1440\" />",
+               "</w:sectPr>", sep = "\n")
+  expect_identical(e$.text_width(xml), 9360L)
+  expect_true(is.na(e$.text_width("<w:body/>")))
+})
+
+test_that("a figure paragraph is not indented", {
+  # It inherits the body text's first-line indent, half an inch, while the
+  # figure itself is drawn as wide as the text column: the indent pushed that
+  # half inch past the right margin and Word clipped the figure.
+  e <- new.env()
+  for (x in as.list(parse(tpl("make.R"), keep.source = FALSE))) {
+    if (is.call(x) && identical(as.character(x[[1]]), "<-") &&
+        identical(as.character(x[[2]]), ".repair_docx")) eval(x, envir = e)
+  }
+  code <- gsub("[[:space:]]+", " ",
+               paste(deparse(body(e$.repair_docx)), collapse = " "))
+  expect_match(code, 'w:ind w:firstLine=', fixed = TRUE)
+  # It goes before w:jc, which is the order the schema wants.
+  expect_match(code, "(<w:jc [^>]*/>)", fixed = TRUE)
+})

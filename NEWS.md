@@ -1,3 +1,35 @@
+# easypaper 0.2.4
+
+Two defects that only Word saw. `update_project()` carries the fix
+into a project already written: it refreshes `make.R`,
+`R/submission.R` and the three Word templates, which is everything
+this release touches.
+
+## Word opens the .docx
+
+* Word refused every document that had a table in it: *"Word found unreadable
+  content"*, and what it offered to recover opened read-only. LibreOffice,
+  Google Docs and Pages read the same file without a word, which is what made
+  this possible to ship unnoticed.
+* The cause is the shape Quarto gives a captioned float: a one-cell table with
+  the flextable inside it, so the cell **ends with a table**. The OOXML schema
+  requires the last thing in a cell to be a paragraph. **Every `.docx` a render
+  produces is now repaired before it is handed over**: one empty paragraph
+  before each such cell closes. A document that does not need it comes back
+  untouched.
+* That same container declared 100% of the text width and then fixed its grid
+  at pandoc's own default of 5.5 inches, whatever the page was. A figure is
+  sized to the text width, so a 6.5-inch figure went into a 5.5-inch cell. The
+  grid is now set to the width the page really has.
+* The `Table` style of the three Word templates no longer reserves a margin
+  inside each cell, which was another tenth of an inch taken off the width a
+  figure had to fit in.
+* **A figure is no longer clipped down its right edge.** The paragraph that
+  holds it inherited the body text's first-line indent, half an inch, and a
+  figure is drawn as wide as the text column: the indent pushed that half inch
+  past the right margin and Word cut it off. The repair resets the indent on
+  any paragraph that holds a figure.
+
 # easypaper 0.2.3
 
 `update_project()` carries all of this into a project already written. What
