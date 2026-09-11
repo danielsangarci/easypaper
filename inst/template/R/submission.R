@@ -157,15 +157,33 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
   # Information"); with several, each one is named after its appendix.
   if (n > 1L) yml$title <- sprintf("Appendix S%d", k)
 
+  # The wrapper is not in the render: list of _quarto.yml, so Quarto reads it
+  # as a loose file and NOTHING in the project configuration reaches it.
+  # Whatever the supplement needs from there is copied in here, by hand.
+  proj <- yaml::read_yaml(here("_quarto.yml"))
+
   # supplementary.qmd declares only the .docx it was written for. Ask it for
   # anything else -- the .pdf of a preprint deposit, say -- and Quarto falls
   # back on ITS defaults: KOMA-Script and lualatex, a different document class
   # from the manuscript's and one a lean LaTeX install does not even carry.
   # The project's own settings for that format are copied in instead, so the
   # supplement comes out of the same press as the paper.
-  if (!fmt %in% names(yml$format)) {
-    proj <- yaml::read_yaml(here("_quarto.yml"))$format
-    if (fmt %in% names(proj)) yml$format[[fmt]] <- proj[[fmt]]
+  if (!fmt %in% names(yml$format) && fmt %in% names(proj$format)) {
+    yml$format[[fmt]] <- proj$format[[fmt]]
+  }
+
+  # How the chunks are run is the other half of that press, and it was missing.
+  # Outside a project `echo` defaults to true, so the supplement came out with
+  # the R code of every chunk printed above its own figure; its figures came
+  # out at Quarto's 96 dpi instead of the 600 the project asks for, written
+  # into the temporary directory Quarto deletes after a .docx render, so
+  # figures/png/ never saw them and export_figure_formats() had nothing to
+  # convert. Both blocks are merged key by key, and anything supplementary.qmd
+  # sets for itself wins.
+  for (nm in c("execute", "knitr")) {
+    if (is.null(proj[[nm]])) next
+    own <- if (is.null(yml[[nm]])) list() else yml[[nm]]
+    yml[[nm]] <- utils::modifyList(proj[[nm]], own)
   }
 
   # The yaml package writes logicals as yes/no (YAML 1.1); Quarto reads 1.2.
@@ -797,8 +815,16 @@ make_submission <- function(journal = NULL, label = NULL,
   own <- rmarkdown::yaml_front_matter(MASTER)
   tp  <- .build_title_page(blinded = blinded)
   on.exit(unlink(c(tp, sub("[.]qmd$", ".docx", tp))), add = TRUE)
+  # The same loose file the supplement's wrapper is: not in the render: list,
+  # so how its chunks run has to travel with the call. The page carries none in
+  # the template, but a project that works its word count out on it would
+  # otherwise print the code above the title.
+  cfg <- yaml::read_yaml(here("_quarto.yml"))
   quarto::quarto_render(tp, output_format = "docx",
-                        metadata = list(author = own$author), as_job = FALSE)
+                        metadata = c(list(author = own$author),
+                                     cfg[intersect(c("execute", "knitr"),
+                                                   names(cfg))]),
+                        as_job = FALSE)
   .repair_docx(sub("[.]qmd$", ".docx", tp))
   # Not in the render: list, so Quarto leaves the output next to the input.
   file.copy(sub("[.]qmd$", ".docx", tp),

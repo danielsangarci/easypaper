@@ -584,3 +584,52 @@ test_that("the journal comes from the project unless a call names one", {
     length(regmatches(sub, gregexpr("journal <- .resolve_journal(journal)",
                                     sub, fixed = TRUE))[[1]]), 2L)
 })
+
+test_that("the supplement is rendered with the project's execution settings", {
+  # The wrapper .build_supplementary() writes is not in the render: list of
+  # _quarto.yml, so Quarto reads it as a loose file and NOTHING in the project
+  # configuration reaches it. Left to Quarto's own defaults the supplement came
+  # out with the R code of every chunk printed above its own figure, and its
+  # figures at 96 dpi inside a directory deleted after the render -- so
+  # figures/png/ never saw them either.
+  d <- file.path(tempdir(), "suppl-cfg")
+  unlink(d, recursive = TRUE)
+  dir.create(d)
+  on.exit(unlink(d, recursive = TRUE), add = TRUE)
+  file.copy(list.files(tpl(), full.names = TRUE), d, recursive = TRUE)
+
+  e <- new.env()
+  for (x in as.list(parse(file.path(d, "R/submission.R"), keep.source = FALSE))) {
+    if (is.call(x) && identical(as.character(x[[1]]), "<-") &&
+        identical(as.character(x[[2]]), ".build_supplementary")) {
+      eval(x, envir = e)
+    }
+  }
+  expect_true(is.function(e$.build_supplementary))
+  e$here <- function(...) file.path(d, ...)
+
+  f <- e$.build_supplementary(file.path(d, "_sections/8_suppl_material.qmd"),
+                              k = 1L, n = 1L, fmt = "docx")
+  yml  <- rmarkdown::yaml_front_matter(f)
+  proj <- yaml::read_yaml(file.path(d, "_quarto.yml"))
+
+  # No echo: the code belongs in the code file, not above the figure.
+  expect_false(isTRUE(yml$execute$echo))
+  expect_equal(yml$execute, proj$execute)
+  # The same press as the manuscript: 600 dpi, and written where figures/ can
+  # find them so export_figure_formats() converts them too.
+  expect_equal(yml$knitr, proj$knitr)
+  expect_identical(yml$knitr$opts_chunk$fig.path, "figures/png/")
+  # And the supplement keeps the Word template it was written for.
+  own <- rmarkdown::yaml_front_matter(file.path(d, "supplementary.qmd"))
+  expect_identical(yml$format$docx$`reference-doc`,
+                   own$format$docx$`reference-doc`)
+
+  # The title page is a loose file of the same kind, and its render carries
+  # those settings as metadata instead.
+  src <- gsub("[[:space:]]+", " ", paste(vapply(
+    as.list(parse(file.path(d, "R/submission.R"), keep.source = FALSE)),
+    function(x) paste(deparse(x), collapse = " "), character(1)), collapse = " "))
+  expect_match(src, 'quarto_render(tp, output_format = "docx"', fixed = TRUE)
+  expect_match(src, 'intersect(c("execute", "knitr"), names(cfg))', fixed = TRUE)
+})
