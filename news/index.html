@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">easypaper</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,7 +20,7 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-news" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">News</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-news"><li><h6 class="dropdown-header" data-toc-skip>Releases</h6></li>
-    <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.3.0">Version 0.3.0</a></li>
+    <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.3.1">Version 0.3.1</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.4">Version 0.2.4</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.3">Version 0.2.3</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.2">Version 0.2.2</a></li>
@@ -41,9 +41,22 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/danielsangarci/easypaper/blob/v0.3.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/danielsangarci/easypaper/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.1" id="easypaper-031">easypaper 0.3.1<a class="anchor" aria-label="anchor" href="#easypaper-031"></a></h2>
+<p>One defect, and everything it was dragging behind it. <code><a href="../reference/update_project.html">update_project()</a></code> carries the fix into a project already written: it is a change to <code>R/submission.R</code>, which is one of the files it refreshes.</p>
+<div class="section level3">
+<h3 id="the-supplement-is-rendered-the-way-the-rest-of-the-project-is-0-3-1">The supplement is rendered the way the rest of the project is<a class="anchor" aria-label="anchor" href="#the-supplement-is-rendered-the-way-the-rest-of-the-project-is-0-3-1"></a></h3>
+<ul><li>The standalone supplement came out <strong>with the R code of every chunk printed above its own figure</strong>, as if the reader had asked to see it. The manuscript never did this, which is what made it look like a quirk of the supplement.</li>
+<li>It is not. The document Quarto renders for a supplement is a wrapper written on the fly, and a wrapper is not in the <code>render:</code> list of <code>_quarto.yml</code>: Quarto reads it as a loose file and <strong>nothing in the project configuration reaches it</strong>. The bibliography and the journal were already being handed over by hand; how the chunks run was not, so the supplement fell back on Quarto’s own defaults, where <code>echo</code> is true.</li>
+<li>The <code>execute:</code> and <code>knitr:</code> blocks of <code>_quarto.yml</code> are now copied into that wrapper, so the supplement comes out of the same press as the paper. Anything <code>supplementary.qmd</code> sets for itself still wins.</li>
+<li>
+<strong>Two more things were riding on that same fault.</strong> Supplementary figures were written at Quarto’s 96 dpi instead of the 600 the project asks for, and into the temporary directory Quarto deletes after a <code>.docx</code> render – so <code>figures/png/</code> never saw them and <code>export_figure_formats()</code> had nothing to convert. They now land beside the manuscript’s own figures and get their <code>.jpg</code> and <code>.tiff</code> copies like everything else. Expect new files under <code>figures/</code> after the first render: they are the supplementary ones, and they are what a journal asks for on acceptance.</li>
+<li>The title page is a loose file of the same kind. It carries no chunks in the template, so nothing was wrong with it, but a project that works its word count out on that page would have had the same code printed above its title. Its render now carries the project’s execution settings too.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.0" id="easypaper-030">easypaper 0.3.0<a class="anchor" aria-label="anchor" href="#easypaper-030"></a></h2>
 <p><code><a href="../reference/update_project.html">update_project()</a></code> carries this into a project already written: it is a change to <code>R/submission.R</code>, which is one of the files it refreshes.</p>

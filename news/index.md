@@ -1,5 +1,43 @@
 # Changelog
 
+## easypaper 0.3.1
+
+One defect, and everything it was dragging behind it.
+[`update_project()`](https://danielsangarci.github.io/easypaper/reference/update_project.md)
+carries the fix into a project already written: it is a change to
+`R/submission.R`, which is one of the files it refreshes.
+
+### The supplement is rendered the way the rest of the project is
+
+- The standalone supplement came out **with the R code of every chunk
+  printed above its own figure**, as if the reader had asked to see it.
+  The manuscript never did this, which is what made it look like a quirk
+  of the supplement.
+- It is not. The document Quarto renders for a supplement is a wrapper
+  written on the fly, and a wrapper is not in the `render:` list of
+  `_quarto.yml`: Quarto reads it as a loose file and **nothing in the
+  project configuration reaches it**. The bibliography and the journal
+  were already being handed over by hand; how the chunks run was not, so
+  the supplement fell back on Quarto’s own defaults, where `echo` is
+  true.
+- The `execute:` and `knitr:` blocks of `_quarto.yml` are now copied
+  into that wrapper, so the supplement comes out of the same press as
+  the paper. Anything `supplementary.qmd` sets for itself still wins.
+- **Two more things were riding on that same fault.** Supplementary
+  figures were written at Quarto’s 96 dpi instead of the 600 the project
+  asks for, and into the temporary directory Quarto deletes after a
+  `.docx` render – so `figures/png/` never saw them and
+  `export_figure_formats()` had nothing to convert. They now land beside
+  the manuscript’s own figures and get their `.jpg` and `.tiff` copies
+  like everything else. Expect new files under `figures/` after the
+  first render: they are the supplementary ones, and they are what a
+  journal asks for on acceptance.
+- The title page is a loose file of the same kind. It carries no chunks
+  in the template, so nothing was wrong with it, but a project that
+  works its word count out on that page would have had the same code
+  printed above its title. Its render now carries the project’s
+  execution settings too.
+
 ## easypaper 0.3.0
 
 [`update_project()`](https://danielsangarci.github.io/easypaper/reference/update_project.md)
