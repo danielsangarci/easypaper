@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">easypaper</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,6 +20,7 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-news" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">News</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-news"><li><h6 class="dropdown-header" data-toc-skip>Releases</h6></li>
+    <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.4">Version 0.2.4</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.3">Version 0.2.3</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.2">Version 0.2.2</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.1">Version 0.2.1</a></li>
@@ -39,9 +40,22 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/danielsangarci/easypaper/blob/v0.2.3/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/danielsangarci/easypaper/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.4" id="easypaper-024">easypaper 0.2.4<a class="anchor" aria-label="anchor" href="#easypaper-024"></a></h2>
+<p>Two defects that only Word saw. <code><a href="../reference/update_project.html">update_project()</a></code> carries the fix into a project already written: it refreshes <code>make.R</code>, <code>R/submission.R</code> and the three Word templates, which is everything this release touches.</p>
+<div class="section level3">
+<h3 id="word-opens-the-docx-0-2-4">Word opens the .docx<a class="anchor" aria-label="anchor" href="#word-opens-the-docx-0-2-4"></a></h3>
+<ul><li>Word refused every document that had a table in it: <em>“Word found unreadable content”</em>, and what it offered to recover opened read-only. LibreOffice, Google Docs and Pages read the same file without a word, which is what made this possible to ship unnoticed.</li>
+<li>The cause is the shape Quarto gives a captioned float: a one-cell table with the flextable inside it, so the cell <strong>ends with a table</strong>. The OOXML schema requires the last thing in a cell to be a paragraph. <strong>Every <code>.docx</code> a render produces is now repaired before it is handed over</strong>: one empty paragraph before each such cell closes. A document that does not need it comes back untouched.</li>
+<li>That same container declared 100% of the text width and then fixed its grid at pandoc’s own default of 5.5 inches, whatever the page was. A figure is sized to the text width, so a 6.5-inch figure went into a 5.5-inch cell. The grid is now set to the width the page really has.</li>
+<li>The <code>Table</code> style of the three Word templates no longer reserves a margin inside each cell, which was another tenth of an inch taken off the width a figure had to fit in.</li>
+<li>
+<strong>A figure is no longer clipped down its right edge.</strong> The paragraph that holds it inherited the body text’s first-line indent, half an inch, and a figure is drawn as wide as the text column: the indent pushed that half inch past the right margin and Word cut it off. The repair resets the indent on any paragraph that holds a figure.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.3" id="easypaper-023">easypaper 0.2.3<a class="anchor" aria-label="anchor" href="#easypaper-023"></a></h2>
 <p><code><a href="../reference/update_project.html">update_project()</a></code> carries all of this into a project already written. What it never touches is <code>R/setup.R</code> and <code>_sections/</code>, so the manuscript’s own sections and the two table examples are what you copy across by hand.</p>
