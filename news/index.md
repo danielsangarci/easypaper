@@ -1,5 +1,60 @@
 # Changelog
 
+## easypaper 0.3.0
+
+[`update_project()`](https://danielsangarci.github.io/easypaper/reference/update_project.md)
+carries this into a project already written: it is a change to
+`R/submission.R`, which is one of the files it refreshes.
+
+### The manuscript says which journal, and the call can still override it
+
+- A `csl:` was declared in `_quarto.yml`, and **the functions ignored
+  it**, carrying a default of their own. The same project gave you two
+  different journals depending on how you asked: the RStudio Render
+  button used the `.csl` in `_quarto.yml`, `make_submission()` used
+  `"myrmecological-news"`. They agreed only until you changed one of
+  them.
+- **The journal is now declared in the manuscript’s YAML**, beside its
+  title, its authors and its keywords, which is where the rest of what
+  this paper is already lives. `journal` defaults to `NULL`, meaning
+  “the one the manuscript names”, so `render_docx()`, `make_all()` and
+  `make_submission()` all go there with no argument to repeat. A `csl:`
+  in `_quarto.yml` still works and is read as a fallback; the manuscript
+  wins, which is Quarto’s own order.
+- Naming one in a call still wins over both, for that call, and changes
+  no file: `make_submission("ecology-letters")`.
+- Neither available raises an error that lists the styles you have,
+  instead of quietly picking one.
+- It survives an update: `manuscript.qmd` and `_quarto.yml` are both
+  files
+  [`update_project()`](https://danielsangarci.github.io/easypaper/reference/update_project.md)
+  never touches.
+
+### Naming the journal names everything
+
+- `label` is what the submission folder and every file in it are called,
+  and it defaulted to `"default"`. **Left alone it is now built from the
+  journal’s own name**, spaces taken out:
+  `make_submission("ecology-letters")` lands in
+  `submission/EcologyLetters/` with `main_EcologyLetters.docx` inside
+  it. One argument, the `.csl`, now names the whole submission.
+- The argument stays, for when you want to name a submission yourself:
+  `label = "Journal1"`, `label = "Revision2"`, whatever tells the
+  folders apart. What you pass names the files and nothing else; the
+  letter and the checklist always carry the journal’s real name.
+
+### The cover letter knows which journal it is addressed to
+
+- It was handed the `label`, not the journal, so a trial run produced a
+  letter offering the manuscript *for consideration in default* and a
+  checklist headed *Submission checklist – default*. The label names the
+  folder and the files and is meant to read like that; the letter is
+  not.
+- **Both now take the journal’s own name**, read from its `.csl` the
+  same way the supplement’s reference does: `"ecology-letters"` reaches
+  the page as *Ecology Letters*. The files are still named after the
+  label.
+
 ## easypaper 0.2.4
 
 Two defects that only Word saw.

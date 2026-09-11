@@ -79,12 +79,12 @@ for a citation style the template does not ship.
 ``` r
 dir <- file.path(tempdir(), "ant_chemistry")
 create_paper(dir, git = FALSE)
-#> Project created: /tmp/RtmpRbd40Q/ant_chemistry
+#> Project created: /tmp/Rtmp7P80KF/ant_chemistry
 #>   1. open ant_chemistry.Rproj
 #>   2. source("make.R")
 #>   3. render_html()      # or see run.R for every command
 update_project(dir, dry_run = TRUE)   # written by this version: nothing to do
-#> Project written by easypaper 0.2.4; installed: 0.2.4.
+#> Project written by easypaper 0.3.0; installed: 0.3.0.
 #> Every build file already matches: nothing to update.
 unlink(dir, recursive = TRUE)
 ```

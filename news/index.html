@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">easypaper</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,6 +20,7 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-news" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">News</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-news"><li><h6 class="dropdown-header" data-toc-skip>Releases</h6></li>
+    <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.3.0">Version 0.3.0</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.4">Version 0.2.4</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.3">Version 0.2.3</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.2">Version 0.2.2</a></li>
@@ -40,9 +41,34 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/danielsangarci/easypaper/blob/v0.2.4/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/danielsangarci/easypaper/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0" id="easypaper-030">easypaper 0.3.0<a class="anchor" aria-label="anchor" href="#easypaper-030"></a></h2>
+<p><code><a href="../reference/update_project.html">update_project()</a></code> carries this into a project already written: it is a change to <code>R/submission.R</code>, which is one of the files it refreshes.</p>
+<div class="section level3">
+<h3 id="the-manuscript-says-which-journal-and-the-call-can-still-override-it-0-3-0">The manuscript says which journal, and the call can still override it<a class="anchor" aria-label="anchor" href="#the-manuscript-says-which-journal-and-the-call-can-still-override-it-0-3-0"></a></h3>
+<ul><li>A <code>csl:</code> was declared in <code>_quarto.yml</code>, and <strong>the functions ignored it</strong>, carrying a default of their own. The same project gave you two different journals depending on how you asked: the RStudio Render button used the <code>.csl</code> in <code>_quarto.yml</code>, <code>make_submission()</code> used <code>"myrmecological-news"</code>. They agreed only until you changed one of them.</li>
+<li>
+<strong>The journal is now declared in the manuscript’s YAML</strong>, beside its title, its authors and its keywords, which is where the rest of what this paper is already lives. <code>journal</code> defaults to <code>NULL</code>, meaning “the one the manuscript names”, so <code>render_docx()</code>, <code>make_all()</code> and <code>make_submission()</code> all go there with no argument to repeat. A <code>csl:</code> in <code>_quarto.yml</code> still works and is read as a fallback; the manuscript wins, which is Quarto’s own order.</li>
+<li>Naming one in a call still wins over both, for that call, and changes no file: <code>make_submission("ecology-letters")</code>.</li>
+<li>Neither available raises an error that lists the styles you have, instead of quietly picking one.</li>
+<li>It survives an update: <code>manuscript.qmd</code> and <code>_quarto.yml</code> are both files <code><a href="../reference/update_project.html">update_project()</a></code> never touches.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="naming-the-journal-names-everything-0-3-0">Naming the journal names everything<a class="anchor" aria-label="anchor" href="#naming-the-journal-names-everything-0-3-0"></a></h3>
+<ul><li>
+<code>label</code> is what the submission folder and every file in it are called, and it defaulted to <code>"default"</code>. <strong>Left alone it is now built from the journal’s own name</strong>, spaces taken out: <code>make_submission("ecology-letters")</code> lands in <code>submission/EcologyLetters/</code> with <code>main_EcologyLetters.docx</code> inside it. One argument, the <code>.csl</code>, now names the whole submission.</li>
+<li>The argument stays, for when you want to name a submission yourself: <code>label = "Journal1"</code>, <code>label = "Revision2"</code>, whatever tells the folders apart. What you pass names the files and nothing else; the letter and the checklist always carry the journal’s real name.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="the-cover-letter-knows-which-journal-it-is-addressed-to-0-3-0">The cover letter knows which journal it is addressed to<a class="anchor" aria-label="anchor" href="#the-cover-letter-knows-which-journal-it-is-addressed-to-0-3-0"></a></h3>
+<ul><li>It was handed the <code>label</code>, not the journal, so a trial run produced a letter offering the manuscript <em>for consideration in default</em> and a checklist headed <em>Submission checklist – default</em>. The label names the folder and the files and is meant to read like that; the letter is not.</li>
+<li>
+<strong>Both now take the journal’s own name</strong>, read from its <code>.csl</code> the same way the supplement’s reference does: <code>"ecology-letters"</code> reaches the page as <em>Ecology Letters</em>. The files are still named after the label.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.4" id="easypaper-024">easypaper 0.2.4<a class="anchor" aria-label="anchor" href="#easypaper-024"></a></h2>
 <p>Two defects that only Word saw. <code><a href="../reference/update_project.html">update_project()</a></code> carries the fix into a project already written: it refreshes <code>make.R</code>, <code>R/submission.R</code> and the three Word templates, which is everything this release touches.</p>
