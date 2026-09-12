@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">easypaper</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,6 +43,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-news" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">News</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-news">
 <li><h6 class="dropdown-header" data-toc-skip>Releases</h6></li>
+    <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.3.3">Version 0.3.3</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.3.2">Version 0.3.2</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.3.1">Version 0.3.1</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.3.0">Version 0.3.0</a></li>
@@ -77,7 +78,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Getting started with easypaper</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/danielsangarci/easypaper/blob/v0.3.2/vignettes/easypaper.Rmd" class="external-link"><code>vignettes/easypaper.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/danielsangarci/easypaper/blob/main/vignettes/easypaper.Rmd" class="external-link"><code>vignettes/easypaper.Rmd</code></a></small>
       <div class="d-none name"><code>easypaper.Rmd</code></div>
     </div>
 
@@ -107,11 +108,69 @@ replace them. The affiliation marks are embedded in the names
 a <code>.docx</code> and drops any structured affiliation — the
 affiliations themselves live in
 <code>_sections/0_authors.qmd</code>.</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Argument</th>
+<th>Default</th>
+<th>What it decides</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>path</code></td>
+<td>—</td>
+<td>The directory to create; <code>~</code> is expanded. Its last folder
+is the project’s name, and the <code>.Rproj</code> takes that name
+too</td>
+</tr>
+<tr class="even">
+<td><code>title</code></td>
+<td><code>NULL</code></td>
+<td>Written into the YAML of <code>manuscript.qmd</code> and
+<code>title_page.qmd</code>. Quotes and backslashes are escaped, so a
+LaTeX fragment such as <code>\textit{Formica}</code> survives. Left out,
+the placeholder stays and <code>make.R</code> warns until you replace
+it</td>
+</tr>
+<tr class="odd">
+<td><code>authors</code></td>
+<td><code>NULL</code></td>
+<td>The names in order, as a vector or one comma-separated string. The
+first is marked corresponding. Affiliations are not guessed: they go in
+<code>_sections/0_authors.qmd</code>
+</td>
+</tr>
+<tr class="even">
+<td><code>overwrite</code></td>
+<td><code>FALSE</code></td>
+<td>Whether to write into a directory that already has files in it.
+<code>FALSE</code> refuses, so an existing manuscript is never
+overwritten by a mistyped path</td>
+</tr>
+<tr class="odd">
+<td><code>git</code></td>
+<td><code>TRUE</code></td>
+<td>Starts a git repository and makes the first commit. Local and
+private; it has nothing to do with GitHub, which is a later and separate
+decision</td>
+</tr>
+<tr class="even">
+<td><code>open</code></td>
+<td><code>FALSE</code></td>
+<td>Opens the new project in RStudio. Outside an RStudio session it says
+so and creates the project anyway</td>
+</tr>
+</tbody>
+</table>
 <p>Here is what lands on disk:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"demo_paper"</span><span class="op">)</span></span>
 <span><span class="fu">easypaper</span><span class="fu">::</span><span class="fu"><a href="../reference/create_paper.html">create_paper</a></span><span class="op">(</span><span class="va">dir</span>, git <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Project created: /tmp/RtmpGloHBS/demo_paper</span></span>
+<span><span class="co">#&gt; Project created: /tmp/Rtmp8wgsDi/demo_paper</span></span>
 <span><span class="co">#&gt;   1. open demo_paper.Rproj</span></span>
 <span><span class="co">#&gt;   2. source("make.R")</span></span>
 <span><span class="co">#&gt;   3. render_html()      # or see run.R for every command</span></span>
@@ -305,10 +364,49 @@ names differ only in a character a file name cannot hold — one keeps it
 and the rest are <strong>refused with a warning saying which was kept
 and which was not</strong>, rather than one table quietly overwriting
 another.</p>
-<p>By default <code><a href="../reference/convert_data.html">convert_data()</a></code> writes only what is missing
-from <code>data/</code> or older than its original, so a file you have
-corrected by hand stays as it is until the original changes.
-<code>convert_data(path, overwrite = TRUE)</code> rebuilds the lot.</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Argument</th>
+<th>Default</th>
+<th>What it decides</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>path</code></td>
+<td>—</td>
+<td>The file or folder to read, relative to the project root or
+absolute. A folder is read whole, subfolders included. The originals are
+only ever read</td>
+</tr>
+<tr class="even">
+<td><code>to</code></td>
+<td><code>data/</code></td>
+<td>Where the results go</td>
+</tr>
+<tr class="odd">
+<td><code>overwrite</code></td>
+<td><code>FALSE</code></td>
+<td>
+<code>FALSE</code> writes only what is missing from
+<code>data/</code> or older than its original, so a file you corrected
+by hand stays as it is until the original changes. <code>TRUE</code>
+rebuilds the lot</td>
+</tr>
+<tr class="even">
+<td><code>also</code></td>
+<td>none</td>
+<td>Extensions to treat as already open for this call, with or without
+the dot. Permanently: add them to <code>.cd_open_formats</code> in the
+project’s <code>R/convert_data.R</code>
+</td>
+</tr>
+</tbody>
+</table>
 <p>Three rules follow, and they are the ones worth holding onto:</p>
 <p><strong>Read from <code>data/</code>, never from wherever the
 original lives.</strong> An analysis that reads the original works
@@ -370,7 +468,95 @@ Richness was higher in the treatment
 derived file saved in <code>data/</code>. Excluding individuals or
 recoding a factor is a scientific decision: it belongs in code a reader
 can check, not in a spreadsheet nobody can trace.
-<code>#| cache: true</code> covers the cost of recomputing it.</p>
+<code>#| cache: true</code> covers the cost of recomputing it — and
+<code>clean_cache()</code> empties that cache, which is what you run
+when the data underneath a chunk changed, because a change in
+<code>data/</code> is the one thing knitr’s cache does not notice.</p>
+</div>
+<div class="section level2">
+<h2 id="figures-and-tables">Figures and tables<a class="anchor" aria-label="anchor" href="#figures-and-tables"></a>
+</h2>
+<p>Both are chunks, and both follow the same three rules: a label
+beginning with <code>fig-</code> or <code>tbl-</code>, the legend as a
+chunk option, and <code>#| include: true</code>. That last one is not
+decoration — the project sets <code>include: false</code> for every
+chunk in <code>_quarto.yml</code>, so an analysis prints nothing and
+only a float asks to be shown.</p>
+<pre><code>```{r}
+#| label: fig-richness
+#| include: true
+#| fig-width: 7.09
+#| fig-height: 6.30
+#| fig-cap: "Richness by treatment. Supports *italics*, **bold** and $equations$."
+boxplot(S ~ treatment, data = richness)
+```</code></pre>
+<p>Cite it from the text as <code>@fig-richness</code> and Quarto writes
+<em>Figure 1</em>. The number comes from the <strong>order of
+appearance</strong> in <code>_sections/6_figures.qmd</code>: move the
+chunk and every reference in the manuscript follows.
+<code>fig-width</code> and <code>fig-height</code> are in inches, which
+is not how journals state them — <code>mm(180)</code> converts, and 180
+mm is the usual two-column width, 80–90 mm one column.</p>
+<p>A table is the same with <code>tbl-cap</code> in place of
+<code>fig-cap</code>:</p>
+<pre><code>```{r}
+#| label: tbl-models
+#| include: true
+#| tbl-cap: "Model coefficients."
+rule &lt;- fp_border_default(style = "solid", color = "black", width = 1)
+
+flextable(tab) |&gt;
+  hline_top(border = fp_border_default(width = 0), part = "all") |&gt;
+  hline_bottom(border = rule, part = "all") |&gt;
+  colformat_double(j = "p", digits = 3, suffix = stars_pval(tab$p)) |&gt;
+  fit_flextable_to_page()
+```</code></pre>
+<p>Two things there are worth the line they take. <strong>Write every
+table as a flextable</strong>: <code><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">knitr::kable()</a></code> hands pandoc
+a plain markdown table and pandoc gives every column the same width, so
+a long heading breaks across two lines while a short one sits in acres
+of space. And <strong>let Quarto write the caption</strong> —
+<code><a href="https://davidgohel.github.io/flextable/reference/set_caption.html" class="external-link">flextable::set_caption()</a></code> on top of <code>tbl-cap</code>
+prints it twice.</p>
+<p>Three helpers come from <code>R/setup.R</code>, which is yours to
+edit and which the render loads before the first line of text:</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><code>mm(180)</code></td>
+<td>millimetres to the inches <code>fig-width</code> wants</td>
+</tr>
+<tr class="even">
+<td><code>fit_flextable_to_page(ft, pgwidth = 5.5)</code></td>
+<td>
+<code>autofit()</code> plus a ceiling. The table keeps the width its
+content needs and is only scaled down if it would run off the page; it
+is never stretched to fill the line, because Quarto puts a captioned
+table in a container 5.5 inches wide and a wider one reaches Word out of
+line</td>
+</tr>
+<tr class="odd">
+<td><code>stars_pval(p)</code></td>
+<td>significance stars, as the <code>suffix</code> of
+<code>colformat_double()</code> so the p-value stays a number and is
+formatted rather than pasted together as text</td>
+</tr>
+</tbody>
+</table>
+<p>Figures are written to <code>figures/png/</code> at 600 dpi on every
+render, and <code>export_figure_formats()</code> leaves a
+<code>.jpg</code> and a <code>.tiff</code> copy beside each one — which
+is what a journal asks for on acceptance, and what
+<code>make_submission()</code> renumbers into <code>Figure_1.tiff</code>
+in the order the reader meets them.</p>
+<p>Supplementary figures and tables are the same chunks with
+<code>sfig-</code> and <code>stbl-</code> labels, in
+<code>_sections/8*suppl*.qmd</code>, on a counter of their own. They
+have a section further down.</p>
 </div>
 <div class="section level2">
 <h2 id="rendering">Rendering<a class="anchor" aria-label="anchor" href="#rendering"></a>
@@ -384,13 +570,13 @@ times. <strong>Submitting</strong> builds the package a journal asks for
 compendium — written into <code>submission/</code>. You will do it
 twice.</p>
 <p>This section is the first job.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"make.R"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">render_html</span><span class="op">(</span><span class="op">)</span>                       <span class="co"># seconds, while you write</span></span>
 <span><span class="fu">render_docx</span><span class="op">(</span><span class="op">)</span>                       <span class="co"># the .docx, in the journal manuscript.qmd names</span></span>
 <span><span class="fu">render_pdf</span><span class="op">(</span><span class="op">)</span>                        <span class="co"># the .pdf, for a preprint server</span></span>
-<span><span class="fu">make_all</span><span class="op">(</span><span class="op">)</span>                          <span class="co"># the four below, in order</span></span></code></pre></div>
+<span><span class="fu">make_all</span><span class="op">(</span><span class="op">)</span>                          <span class="co"># docx, pdf, supplement and code, in order</span></span></code></pre></div>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -526,12 +712,15 @@ which rebuilds a <code>.docx</code> rather than copying it, and a
 rebuilt table loses the column widths it was given: the headings reach
 Word broken across two lines. One document per section is also the shape
 a journal asks for.</p>
-<p>Two more exist for the supplement alone:
+<p>Three more exist for the supplement alone.
 <code>render_supplementary()</code> takes <code>output_format</code>
-(<code>"docx"</code> by default) and <code>files</code>, a subset of the
-supplementary documents — which is how <code>make_submission()</code>
-renders only the supplementary <em>text</em> when the figures are
-staying in the main document.</p>
+(<code>"docx"</code> by default, <code>"pdf"</code> for a preprint
+deposit), <code>files</code>, a subset of the supplementary documents —
+which is how <code>make_submission()</code> renders only the
+supplementary <em>text</em> when the figures are staying in the main
+document — and <code>blinded</code> (<code>FALSE</code> by default),
+which drops the authors from the supplement the way a double-blind
+submission needs.</p>
 <p><code>run.R</code>, inside the project, lists every command with each
 argument explained, ready to run one line at a time. It is the file to
 open when you cannot remember a name.</p>
@@ -542,7 +731,7 @@ open when you cannot remember a name.</p>
 <p>The template ships nine styles, all from ecology. Any other journal’s
 is one call away, and it goes where <code>render_docx()</code>
 looks:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">easypaper</span><span class="fu">::</span><span class="fu"><a href="../reference/add_journal.html">add_journal</a></span><span class="op">(</span><span class="st">"plos-one"</span><span class="op">)</span>   <span class="co"># -&gt; references_styles/plos-one.csl</span></span>
 <span><span class="fu">render_docx</span><span class="op">(</span><span class="st">"plos-one"</span><span class="op">)</span></span></code></pre></div>
 <p>The name is the one the official CSL repository uses — the file name
@@ -573,7 +762,7 @@ point — its reference list is independent from the main text’s.</li>
 </ul>
 <p>Where the figures end up is decided when you submit, and the
 citations work either way:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">make_submission</span><span class="op">(</span><span class="op">)</span>                        <span class="co"># own document</span></span>
 <span><span class="fu">make_submission</span><span class="op">(</span>suppl_figures <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span>  <span class="co"># end of the main text</span></span></code></pre></div>
 </div>
@@ -650,7 +839,7 @@ included</td>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">make_submission</span><span class="op">(</span><span class="op">)</span>                                                          <span class="co"># -&gt; submission/MyrmecologicalNews/</span></span>
 <span><span class="fu">make_submission</span><span class="op">(</span><span class="st">"myrmecological-news"</span>, label <span class="op">=</span> <span class="st">"MyrmecologicalNews_v2"</span><span class="op">)</span>    <span class="co"># a second version, kept apart</span></span></code></pre></div>
 <table class="table">
@@ -759,7 +948,7 @@ guess, the coverage and the licence of the deposit, stays yours.</p>
 <p>A preprint goes to two places at once — the manuscript to a server,
 the data and code to a repository — and <code>make_preprint()</code>
 builds both halves into <code>submission/bioRxiv/</code>.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">make_preprint</span><span class="op">(</span><span class="op">)</span>                       <span class="co"># -&gt; submission/bioRxiv/</span></span>
 <span><span class="fu">make_preprint</span><span class="op">(</span>label <span class="op">=</span> <span class="st">"EcoEvoRxiv"</span><span class="op">)</span>   <span class="co"># another server</span></span>
 <span><span class="fu">make_preprint</span><span class="op">(</span>label <span class="op">=</span> <span class="st">"bioRxiv_v2"</span><span class="op">)</span>   <span class="co"># the revised version</span></span></code></pre></div>
@@ -789,7 +978,7 @@ posting is a new version, not a correction.</p>
 <h2 id="the-checks">The checks<a class="anchor" aria-label="anchor" href="#the-checks"></a>
 </h2>
 <p>Every render runs them, and you can call them yourself:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">check_citations</span><span class="op">(</span><span class="op">)</span>   <span class="co"># @keys with no entry in references/, and the reverse</span></span>
 <span><span class="fu">check_crossrefs</span><span class="op">(</span><span class="op">)</span>   <span class="co"># @fig-/@tbl- with no target, and figures nobody cites</span></span>
 <span><span class="fu">check_title</span><span class="op">(</span><span class="op">)</span>       <span class="co"># has title_page.qmd drifted from the manuscript?</span></span>
@@ -806,7 +995,7 @@ about.</p>
 with easypaper uninstalled — and what keeps a fix in the package from
 reaching a project already written. <code><a href="../reference/update_project.html">update_project()</a></code> is the
 bridge:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">easypaper</span><span class="fu">::</span><span class="fu"><a href="../reference/update_project.html">update_project</a></span><span class="op">(</span>dry_run <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>   <span class="co"># what would change</span></span>
 <span><span class="fu">easypaper</span><span class="fu">::</span><span class="fu"><a href="../reference/update_project.html">update_project</a></span><span class="op">(</span><span class="op">)</span>                 <span class="co"># do it</span></span></code></pre></div>
 <p>It refreshes an explicit list — <code>make.R</code>,
@@ -826,7 +1015,7 @@ was updated to.</p>
 <div class="section level2">
 <h2 id="citing-easypaper">Citing easypaper<a class="anchor" aria-label="anchor" href="#citing-easypaper"></a>
 </h2>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"easypaper"</span><span class="op">)</span></span></code></pre></div>
 <p>The BibTeX entry carries the key <code>easypaper</code>, so it drops
 into a <code>.bib</code> as it is. GitHub’s <em>Cite this

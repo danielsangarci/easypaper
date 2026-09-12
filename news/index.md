@@ -1,5 +1,42 @@
 # Changelog
 
+## easypaper 0.3.3
+
+Documentation only: no code changes.
+
+### Figures and tables have a section of their own
+
+- The guide explained how to write an analysis chunk and never how to
+  write **the figure or the table that reports it** – the part everyone
+  gets wrong first. There is now a section for it: the three rules a
+  float follows (a `fig-`/`tbl-` label, the legend as a chunk option,
+  `#| include: true`), how `@fig-richness` becomes *Figure 1* and where
+  that number comes from, and the two traps – a table written with
+  [`knitr::kable()`](https://rdrr.io/pkg/knitr/man/kable.html) reaches
+  Word with every column the same width, and
+  [`flextable::set_caption()`](https://davidgohel.github.io/flextable/reference/set_caption.html)
+  on top of `tbl-cap` prints the caption twice.
+- With them, the three helpers of `R/setup.R` that nothing documented:
+  `mm()`, `fit_flextable_to_page()` and `stars_pval()`.
+
+### Every argument is written down
+
+- [`create_paper()`](https://danielsangarci.github.io/easypaper/reference/create_paper.md)
+  and
+  [`convert_data()`](https://danielsangarci.github.io/easypaper/reference/convert_data.md)
+  are the two functions you call from outside a project, and the guide
+  showed them without ever listing what they take. Both now have the
+  same argument table the renders and the submission already had:
+  `path`, `title`, `authors`, `overwrite`, `git`, `open` for one,
+  `path`, `to`, `overwrite`, `also` for the other.
+- `render_supplementary()` was described as taking two arguments of its
+  own. It takes three: `blinded` was missing.
+- `clean_cache()` was in `run.R` and in the project README and nowhere
+  in the guide, next to the one thing that makes it necessary – a cached
+  chunk does not notice that the data under it changed.
+- `make_all()` was commented as “the four below”, which pointed at a
+  list that was not below it. It says which four.
+
 ## easypaper 0.3.2
 
 Documentation only: no code changes.

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">easypaper</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,6 +20,7 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-news" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">News</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-news"><li><h6 class="dropdown-header" data-toc-skip>Releases</h6></li>
+    <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.3.3">Version 0.3.3</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.3.2">Version 0.3.2</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.3.1">Version 0.3.1</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.3.0">Version 0.3.0</a></li>
@@ -43,9 +44,29 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/danielsangarci/easypaper/blob/v0.3.2/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/danielsangarci/easypaper/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.3" id="easypaper-033">easypaper 0.3.3<a class="anchor" aria-label="anchor" href="#easypaper-033"></a></h2>
+<p>Documentation only: no code changes.</p>
+<div class="section level3">
+<h3 id="figures-and-tables-have-a-section-of-their-own-0-3-3">Figures and tables have a section of their own<a class="anchor" aria-label="anchor" href="#figures-and-tables-have-a-section-of-their-own-0-3-3"></a></h3>
+<ul><li>The guide explained how to write an analysis chunk and never how to write <strong>the figure or the table that reports it</strong> – the part everyone gets wrong first. There is now a section for it: the three rules a float follows (a <code>fig-</code>/<code>tbl-</code> label, the legend as a chunk option, <code>#| include: true</code>), how <code>@fig-richness</code> becomes <em>Figure 1</em> and where that number comes from, and the two traps – a table written with <code><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">knitr::kable()</a></code> reaches Word with every column the same width, and <code><a href="https://davidgohel.github.io/flextable/reference/set_caption.html" class="external-link">flextable::set_caption()</a></code> on top of <code>tbl-cap</code> prints the caption twice.</li>
+<li>With them, the three helpers of <code>R/setup.R</code> that nothing documented: <code>mm()</code>, <code>fit_flextable_to_page()</code> and <code>stars_pval()</code>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="every-argument-is-written-down-0-3-3">Every argument is written down<a class="anchor" aria-label="anchor" href="#every-argument-is-written-down-0-3-3"></a></h3>
+<ul><li>
+<code><a href="../reference/create_paper.html">create_paper()</a></code> and <code><a href="../reference/convert_data.html">convert_data()</a></code> are the two functions you call from outside a project, and the guide showed them without ever listing what they take. Both now have the same argument table the renders and the submission already had: <code>path</code>, <code>title</code>, <code>authors</code>, <code>overwrite</code>, <code>git</code>, <code>open</code> for one, <code>path</code>, <code>to</code>, <code>overwrite</code>, <code>also</code> for the other.</li>
+<li>
+<code>render_supplementary()</code> was described as taking two arguments of its own. It takes three: <code>blinded</code> was missing.</li>
+<li>
+<code>clean_cache()</code> was in <code>run.R</code> and in the project README and nowhere in the guide, next to the one thing that makes it necessary – a cached chunk does not notice that the data under it changed.</li>
+<li>
+<code>make_all()</code> was commented as “the four below”, which pointed at a list that was not below it. It says which four.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.2" id="easypaper-032">easypaper 0.3.2<a class="anchor" aria-label="anchor" href="#easypaper-032"></a></h2>
 <p>Documentation only: no code changes. <code><a href="../reference/update_project.html">update_project()</a></code> refreshes <code>run.R</code>, <code>make.R</code>, <code>R/submission.R</code> and the project <code>README.md</code>, which is where these corrections land in a project already written.</p>

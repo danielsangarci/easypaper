@@ -129,7 +129,12 @@ document to read on the first day.
 What every command takes — `journal`, `caption_style`, `suppl_figures`,
 `label`, `figure_format`, `blinded`, `snapshot` — is laid out with its
 default in [Get
-started](https://danielsangarci.github.io/easypaper/articles/easypaper.html).
+started](https://danielsangarci.github.io/easypaper/articles/easypaper.html),
+together with the arguments of
+[`create_paper()`](https://danielsangarci.github.io/easypaper/reference/create_paper.md)
+and
+[`convert_data()`](https://danielsangarci.github.io/easypaper/reference/convert_data.md)
+themselves, and a section on how a figure and a table are written.
 
 ## The data folder
 
@@ -219,7 +224,7 @@ citation("easypaper")
 
 > Sanchez-Garcia, D. (2026). easypaper: Scaffold a Reproducible Quarto
 > Manuscript Project with Output Ready for Co-Authors, Preprints and
-> Journals. R package version 0.3.2.
+> Journals. R package version 0.3.3.
 > <https://github.com/danielsangarci/easypaper>
 
 The BibTeX entry comes with the key `easypaper`, ready to paste into a
