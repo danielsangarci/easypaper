@@ -15,7 +15,6 @@ corrections land in a project already written.
   call alone and changes no file.
 * The package README still listed `split` among the arguments a command takes.
   It was removed in 0.2.3.
-
 * `make_submission("myrmecological-news", label = "MyrmecologicalNews")` was
   still the headline example for `label`, and since 0.3.0 **it does nothing**:
   that is exactly what the call produces on its own. Every example now passes
@@ -25,9 +24,9 @@ corrections land in a project already written.
 * `create_paper()` is shown with `title = "Manuscript title here"`, the same
   placeholder the template writes, so what you read in the example is what you
   find in `manuscript.qmd`. The example authors are `"First Author"` and
-  `"Second Author"`, and the project is `~/paper_name`, for the same
-  reason: every part of that call is now a placeholder asking to be replaced,
-  and none of it is a real paper of anybody's.
+  `"Second Author"`, and the project is `~/paper_name`, for the same reason:
+  every part of that call is now a placeholder asking to be replaced, and none
+  of it is a real paper of anybody's.
 
 # easypaper 0.3.1
 
