@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/danielsangarci/easypaper/blob/main/inst/CITATION)
+[`inst/CITATION`](https://github.com/danielsangarci/easypaper/blob/v0.3.3/inst/CITATION)
 
 Sanchez-Garcia, D. (2026). easypaper: Scaffold a Reproducible Quarto
 Manuscript Project with Output Ready for Co-Authors, Preprints and
