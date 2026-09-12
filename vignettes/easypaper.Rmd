@@ -36,6 +36,15 @@ affiliation marks are embedded in the names (`Author1^1,\*^`) because
 Quarto rebuilds the author line of a `.docx` and drops any structured
 affiliation — the affiliations themselves live in `_sections/0_authors.qmd`.
 
+| Argument | Default | What it decides |
+|---|---|---|
+| `path` | — | The directory to create; `~` is expanded. Its last folder is the project's name, and the `.Rproj` takes that name too |
+| `title` | `NULL` | Written into the YAML of `manuscript.qmd` and `title_page.qmd`. Quotes and backslashes are escaped, so a LaTeX fragment such as `\textit{Formica}` survives. Left out, the placeholder stays and `make.R` warns until you replace it |
+| `authors` | `NULL` | The names in order, as a vector or one comma-separated string. The first is marked corresponding. Affiliations are not guessed: they go in `_sections/0_authors.qmd` |
+| `overwrite` | `FALSE` | Whether to write into a directory that already has files in it. `FALSE` refuses, so an existing manuscript is never overwritten by a mistyped path |
+| `git` | `TRUE` | Starts a git repository and makes the first commit. Local and private; it has nothing to do with GitHub, which is a later and separate decision |
+| `open` | `FALSE` | Opens the new project in RStudio. Outside an RStudio session it says so and creates the project anyway |
+
 Here is what lands on disk:
 
 ```{r}
@@ -146,9 +155,12 @@ only in a character a file name cannot hold — one keeps it and the rest are
 **refused with a warning saying which was kept and which was not**, rather than
 one table quietly overwriting another.
 
-By default `convert_data()` writes only what is missing from `data/` or older
-than its original, so a file you have corrected by hand stays as it is until
-the original changes. `convert_data(path, overwrite = TRUE)` rebuilds the lot.
+| Argument | Default | What it decides |
+|---|---|---|
+| `path` | — | The file or folder to read, relative to the project root or absolute. A folder is read whole, subfolders included. The originals are only ever read |
+| `to` | `data/` | Where the results go |
+| `overwrite` | `FALSE` | `FALSE` writes only what is missing from `data/` or older than its original, so a file you corrected by hand stays as it is until the original changes. `TRUE` rebuilds the lot |
+| `also` | none | Extensions to treat as already open for this call, with or without the dot. Permanently: add them to `.cd_open_formats` in the project's `R/convert_data.R` |
 
 Three rules follow, and they are the ones worth holding onto:
 
@@ -206,7 +218,75 @@ Richness was higher in the treatment
 Cleaning happens there, from the input `.csv`, never as a derived file saved in
 `data/`. Excluding individuals or recoding a factor is a scientific decision:
 it belongs in code a reader can check, not in a spreadsheet nobody can trace.
-`#| cache: true` covers the cost of recomputing it.
+`#| cache: true` covers the cost of recomputing it — and `clean_cache()` empties
+that cache, which is what you run when the data underneath a chunk changed,
+because a change in `data/` is the one thing knitr's cache does not notice.
+
+## Figures and tables
+
+Both are chunks, and both follow the same three rules: a label beginning with
+`fig-` or `tbl-`, the legend as a chunk option, and `#| include: true`. That
+last one is not decoration — the project sets `include: false` for every chunk
+in `_quarto.yml`, so an analysis prints nothing and only a float asks to be
+shown.
+
+````
+```{r}`r ''`
+#| label: fig-richness
+#| include: true
+#| fig-width: 7.09
+#| fig-height: 6.30
+#| fig-cap: "Richness by treatment. Supports *italics*, **bold** and $equations$."
+boxplot(S ~ treatment, data = richness)
+```
+````
+
+Cite it from the text as `@fig-richness` and Quarto writes *Figure 1*. The
+number comes from the **order of appearance** in `_sections/6_figures.qmd`:
+move the chunk and every reference in the manuscript follows. `fig-width` and
+`fig-height` are in inches, which is not how journals state them — `mm(180)`
+converts, and 180 mm is the usual two-column width, 80–90 mm one column.
+
+A table is the same with `tbl-cap` in place of `fig-cap`:
+
+````
+```{r}`r ''`
+#| label: tbl-models
+#| include: true
+#| tbl-cap: "Model coefficients."
+rule <- fp_border_default(style = "solid", color = "black", width = 1)
+
+flextable(tab) |>
+  hline_top(border = fp_border_default(width = 0), part = "all") |>
+  hline_bottom(border = rule, part = "all") |>
+  colformat_double(j = "p", digits = 3, suffix = stars_pval(tab$p)) |>
+  fit_flextable_to_page()
+```
+````
+
+Two things there are worth the line they take. **Write every table as a
+flextable**: `knitr::kable()` hands pandoc a plain markdown table and pandoc
+gives every column the same width, so a long heading breaks across two lines
+while a short one sits in acres of space. And **let Quarto write the caption** —
+`flextable::set_caption()` on top of `tbl-cap` prints it twice.
+
+Three helpers come from `R/setup.R`, which is yours to edit and which the
+render loads before the first line of text:
+
+| | |
+|---|---|
+| `mm(180)` | millimetres to the inches `fig-width` wants |
+| `fit_flextable_to_page(ft, pgwidth = 5.5)` | `autofit()` plus a ceiling. The table keeps the width its content needs and is only scaled down if it would run off the page; it is never stretched to fill the line, because Quarto puts a captioned table in a container 5.5 inches wide and a wider one reaches Word out of line |
+| `stars_pval(p)` | significance stars, as the `suffix` of `colformat_double()` so the p-value stays a number and is formatted rather than pasted together as text |
+
+Figures are written to `figures/png/` at 600 dpi on every render, and
+`export_figure_formats()` leaves a `.jpg` and a `.tiff` copy beside each one —
+which is what a journal asks for on acceptance, and what `make_submission()`
+renumbers into `Figure_1.tiff` in the order the reader meets them.
+
+Supplementary figures and tables are the same chunks with `sfig-` and `stbl-`
+labels, in `_sections/8*suppl*.qmd`, on a counter of their own. They have a
+section further down.
 
 ## Rendering
 
@@ -225,7 +305,7 @@ source("make.R")
 render_html()                       # seconds, while you write
 render_docx()                       # the .docx, in the journal manuscript.qmd names
 render_pdf()                        # the .pdf, for a preprint server
-make_all()                          # the four below, in order
+make_all()                          # docx, pdf, supplement and code, in order
 ```
 
 | Command | What comes out | Where |
@@ -286,10 +366,12 @@ table loses the column widths it was given: the headings reach Word broken
 across two lines. One document per section is also the shape a journal asks
 for.
 
-Two more exist for the supplement alone: `render_supplementary()` takes
-`output_format` (`"docx"` by default) and `files`, a subset of the
-supplementary documents — which is how `make_submission()` renders only the
-supplementary *text* when the figures are staying in the main document.
+Three more exist for the supplement alone. `render_supplementary()` takes
+`output_format` (`"docx"` by default, `"pdf"` for a preprint deposit), `files`,
+a subset of the supplementary documents — which is how `make_submission()`
+renders only the supplementary *text* when the figures are staying in the main
+document — and `blinded` (`FALSE` by default), which drops the authors from the
+supplement the way a double-blind submission needs.
 
 `run.R`, inside the project, lists every command with each argument explained,
 ready to run one line at a time. It is the file to open when you cannot
