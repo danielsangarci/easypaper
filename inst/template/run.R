@@ -118,7 +118,7 @@ make_all("ecology-letters", "abbrev")              # the same, another journal
 
 make_submission()                                  # -> submission/MyrmecologicalNews/
 make_submission(suppl_figures = "main")            # ^ floats in the main text
-make_submission(label = "Journal1")                # ^ your own name for it
+make_submission(label = "MyrmecologicalNews_v2")   # ^ a second version, kept apart
 make_submission(snapshot = FALSE)
                                                    # ^ do NOT touch renv.lock
 make_submission("ecology-letters",

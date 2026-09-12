@@ -391,15 +391,17 @@ sibling is `make_preprint()`, further down: same machinery, one signed `.pdf`
 instead of a blinded pair of Word files.
 
 ```r
-make_submission("myrmecological-news")                  # -> submission/MyrmecologicalNews/
-make_submission("myrmecological-news", label = "Journal1")    # your own name
+make_submission("myrmecological-news")                                     # -> submission/MyrmecologicalNews/
+make_submission("myrmecological-news", label = "MyrmecologicalNews_v2")    # a second version, kept apart
 ```
 
 `label` names the folder and every file inside it. Left alone it is built from
 the journal's own name with the spaces taken out, so
 `make_submission("ecology-letters")` lands in `submission/EcologyLetters/` and
 naming the `.csl` names everything. Pass your own for a second version of the
-same submission, or for a trial you want to keep apart.
+same submission, or for a trial you want to keep apart:
+`label = "MyrmecologicalNews_v2"` lands in `submission/MyrmecologicalNews_v2/`,
+beside the first one and with `_v2` on every file in it.
 
 ```
 submission/MyrmecologicalNews/

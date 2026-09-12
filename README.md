@@ -18,7 +18,7 @@ remotes::install_github("danielsangarci/easypaper")
 
 library(easypaper)
 create_paper("~/papers/ant_chemistry",
-             title   = "Chemical mimicry in Maculinea rebeli",
+             title   = "Manuscript title here",
              authors = c("First Author", "Second Author"))
 ```
 
@@ -40,9 +40,9 @@ export_code()                        # analysis_code.R + sessionInfo.txt
 make_all()                           # the four above, in order
 
 # what you send, into submission/
-make_submission("myrmecological-news")                                # a trial run
-make_submission("myrmecological-news", label = "MyrmecologicalNews")  # the real one
-make_preprint()                                                       # the whole deposit
+make_submission("myrmecological-news")                                     # -> submission/MyrmecologicalNews/
+make_submission("myrmecological-news", label = "MyrmecologicalNews_v2")    # a second version, kept apart
+make_preprint()                                                            # the whole deposit
 ```
 
 Every render checks first — citations with no entry, cross-references with no
@@ -200,7 +200,7 @@ citation("easypaper")
 
 > Sanchez-Garcia, D. (2026). easypaper: Scaffold a Reproducible Quarto
 > Manuscript Project with Output Ready for Co-Authors, Preprints and
-> Journals. R package version 0.3.1.
+> Journals. R package version 0.3.2.
 > https://github.com/danielsangarci/easypaper
 
 The BibTeX entry comes with the key `easypaper`, ready to paste into a `.bib`.

@@ -9,7 +9,7 @@
 #   export_code()                       # clean .R for the supplementary material
 #   make_all()                          # the four above -- not the .html
 #
-#   make_submission("myrmecological-news")  # label = "MyrmecologicalNews" for the real thing
+#   make_submission("myrmecological-news")  # -> submission/MyrmecologicalNews/
 #   make_preprint()                     # the whole preprint deposit: signed
 #                                       # .pdf, supplement, figures, data, code
 #

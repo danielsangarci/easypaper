@@ -767,7 +767,8 @@ BLINDED_SECTIONS <- c("Acknowledgements",
 #'                  "ecology-letters" gives EcologyLetters -- so naming the
 #'                  .csl names everything. Pass your own for a second version
 #'                  of the same submission, or for a trial you want to tell
-#'                  apart: label = "trial".
+#'                  apart: label = "MyrmecologicalNews_v2" lands in
+#'                  submission/MyrmecologicalNews_v2/, beside the first one.
 #' @param figure_format one of FIG_FORMATS: "tiff", "png" or "jpg"
 #' @param snapshot TRUE (the default) runs renv::snapshot() before building the
 #'   compendium, so the renv.lock that travels in the zip describes exactly the

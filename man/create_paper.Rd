@@ -74,8 +74,8 @@ behind.
 \examples{
 dir <- file.path(tempdir(), "ant_chemistry")
 create_paper(dir,
-             title   = "Chemical mimicry in Maculinea rebeli",
-             authors = c("Ada Lovelace", "Alan Turing"),
+             title   = "Manuscript title here",
+             authors = c("First Author", "Second Author"),
              git     = FALSE)
 list.files(dir)
 unlink(dir, recursive = TRUE)
@@ -83,8 +83,8 @@ unlink(dir, recursive = TRUE)
 \dontrun{
 # A real project, with its git history started for you:
 create_paper("~/papers/ant_chemistry",
-             title   = "Chemical mimicry in Maculinea rebeli",
-             authors = c("Daniel Sanchez-Garcia", "Second Author"))
+             title   = "Manuscript title here",
+             authors = c("First Author", "Second Author"))
 }
 }
 \seealso{
