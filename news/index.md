@@ -10,6 +10,18 @@ written.
 
 ### The examples say what the arguments now do
 
+- Every example still passed the journal by hand, so **the headline
+  change of 0.3.0 was invisible in the documentation**: that `journal`
+  defaults to the `csl:` line of `manuscript.qmd`. The quick start now
+  reads `render_docx()` and `make_submission()`, with no argument, and
+  both READMEs and the guide say in so many words that every
+  `render_*()` and `make_*()` function takes the journal from the
+  manuscript, and that naming one in the call wins for that call alone
+  and changes no file.
+
+- The package README still listed `split` among the arguments a command
+  takes. It was removed in 0.2.3.
+
 - `make_submission("myrmecological-news", label = "MyrmecologicalNews")`
   was still the headline example for `label`, and since 0.3.0 **it does
   nothing**: that is exactly what the call produces on its own. Every
@@ -17,11 +29,14 @@ written.
   the argument is actually for – a second version of the same
   submission, landing in `submission/MyrmecologicalNews_v2/` beside the
   first.
+
 - [`create_paper()`](https://danielsangarci.github.io/easypaper/reference/create_paper.md)
   is shown with `title = "Manuscript title here"`, the same placeholder
   the template writes, so what you read in the example is what you find
   in `manuscript.qmd`. The example authors are `"First Author"` and
-  `"Second Author"` for the same reason.
+  `"Second Author"`, and the project is `~/paper_name`, for the same
+  reason: every part of that call is now a placeholder asking to be
+  replaced, and none of it is a real paper of anybody’s.
 
 ## easypaper 0.3.1
 

@@ -92,7 +92,7 @@ that whole structure in one call, and then gets out of the way.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/danielsangarci/easypaper" class="external-link">easypaper</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/create_paper.html">create_paper</a></span><span class="op">(</span><span class="st">"~/papers/ant_chemistry"</span>,</span>
+<span><span class="fu"><a href="../reference/create_paper.html">create_paper</a></span><span class="op">(</span><span class="st">"~/paper_name"</span>,</span>
 <span>             title   <span class="op">=</span> <span class="st">"Manuscript title here"</span>,</span>
 <span>             authors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"First Author"</span>, <span class="st">"Second Author"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>In RStudio the same thing is <strong>File &gt; New Project &gt; New
@@ -109,7 +109,7 @@ affiliations themselves live in
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"demo_paper"</span><span class="op">)</span></span>
 <span><span class="fu">easypaper</span><span class="fu">::</span><span class="fu"><a href="../reference/create_paper.html">create_paper</a></span><span class="op">(</span><span class="va">dir</span>, git <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Project created: /tmp/Rtmprnt1KO/demo_paper</span></span>
+<span><span class="co">#&gt; Project created: /tmp/RtmpkDox3Z/demo_paper</span></span>
 <span><span class="co">#&gt;   1. open demo_paper.Rproj</span></span>
 <span><span class="co">#&gt;   2. source("make.R")</span></span>
 <span><span class="co">#&gt;   3. render_html()      # or see run.R for every command</span></span>
@@ -386,7 +386,7 @@ twice.</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"make.R"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">render_html</span><span class="op">(</span><span class="op">)</span>                       <span class="co"># seconds, while you write</span></span>
-<span><span class="fu">render_docx</span><span class="op">(</span><span class="st">"myrmecological-news"</span><span class="op">)</span>  <span class="co"># the .docx, in that journal's style</span></span>
+<span><span class="fu">render_docx</span><span class="op">(</span><span class="op">)</span>                       <span class="co"># the .docx, in the journal manuscript.qmd names</span></span>
 <span><span class="fu">render_pdf</span><span class="op">(</span><span class="op">)</span>                        <span class="co"># the .pdf, for a preprint server</span></span>
 <span><span class="fu">make_all</span><span class="op">(</span><span class="op">)</span>                          <span class="co"># the four below, in order</span></span></code></pre></div>
 <table class="table">
@@ -468,11 +468,16 @@ slow down the batch. And <strong>it does not build a
 submission</strong>: that is <code>make_submission()</code>, it writes
 somewhere else entirely, and it is deliberately not part of any “do
 everything” shortcut — the reason is in <a href="#submitting">Submitting</a>.</p>
-<p>The journal is an argument, not an edit: nothing in the
-<code>.qmd</code> files changes when you send the same paper somewhere
-else. Of the four arguments below, <code>render_html()</code> and
-<code>make_all()</code> take the first two; <code>render_docx()</code>
-and <code>render_pdf()</code> take all four.</p>
+<p><strong>None of those calls names a journal, and none of them has
+to.</strong> The <code>csl:</code> line of <code>manuscript.qmd</code>
+says where the paper is going, beside its title and its authors, and
+every <code>render_*()</code> and <code>make_*()</code> function reads
+it from there. Naming one in the call wins for that call alone and
+changes no file, which is what you want to see the same paper in another
+journal’s style; to move it for good, edit that one line. Of the three
+arguments below, <code>render_html()</code> and <code>make_all()</code>
+take the first two; <code>render_docx()</code> and
+<code>render_pdf()</code> take all three.</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -567,8 +572,8 @@ point — its reference list is independent from the main text’s.</li>
 <p>Where the figures end up is decided when you submit, and the
 citations work either way:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">make_submission</span><span class="op">(</span><span class="st">"myrmecological-news"</span><span class="op">)</span>                        <span class="co"># own document</span></span>
-<span><span class="fu">make_submission</span><span class="op">(</span><span class="st">"myrmecological-news"</span>, suppl_figures <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span> <span class="co"># end of the main text</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">make_submission</span><span class="op">(</span><span class="op">)</span>                        <span class="co"># own document</span></span>
+<span><span class="fu">make_submission</span><span class="op">(</span>suppl_figures <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span>  <span class="co"># end of the main text</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="submitting">Submitting<a class="anchor" aria-label="anchor" href="#submitting"></a>
@@ -644,7 +649,7 @@ included</td>
 </tbody>
 </table>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">make_submission</span><span class="op">(</span><span class="st">"myrmecological-news"</span><span class="op">)</span>                                     <span class="co"># -&gt; submission/MyrmecologicalNews/</span></span>
+<code class="sourceCode R"><span><span class="fu">make_submission</span><span class="op">(</span><span class="op">)</span>                                                          <span class="co"># -&gt; submission/MyrmecologicalNews/</span></span>
 <span><span class="fu">make_submission</span><span class="op">(</span><span class="st">"myrmecological-news"</span>, label <span class="op">=</span> <span class="st">"MyrmecologicalNews_v2"</span><span class="op">)</span>    <span class="co"># a second version, kept apart</span></span></code></pre></div>
 <table class="table">
 <colgroup>

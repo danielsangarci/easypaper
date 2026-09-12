@@ -12,7 +12,7 @@ structure in one call, and then gets out of the way.
 
 library(easypaper)
 
-create_paper("~/papers/ant_chemistry",
+create_paper("~/paper_name",
              title   = "Manuscript title here",
              authors = c("First Author", "Second Author"))
 ```
@@ -34,7 +34,7 @@ Here is what lands on disk:
 
 dir <- file.path(tempdir(), "demo_paper")
 easypaper::create_paper(dir, git = FALSE)
-#> Project created: /tmp/Rtmprnt1KO/demo_paper
+#> Project created: /tmp/RtmpkDox3Z/demo_paper
 #>   1. open demo_paper.Rproj
 #>   2. source("make.R")
 #>   3. render_html()      # or see run.R for every command
@@ -245,7 +245,7 @@ This section is the first job.
 source("make.R")
 
 render_html()                       # seconds, while you write
-render_docx("myrmecological-news")  # the .docx, in that journal's style
+render_docx()                       # the .docx, in the journal manuscript.qmd names
 render_pdf()                        # the .pdf, for a preprint server
 make_all()                          # the four below, in order
 ```
@@ -286,10 +286,14 @@ submission**: that is `make_submission()`, it writes somewhere else
 entirely, and it is deliberately not part of any “do everything”
 shortcut — the reason is in [Submitting](#submitting).
 
-The journal is an argument, not an edit: nothing in the `.qmd` files
-changes when you send the same paper somewhere else. Of the four
-arguments below, `render_html()` and `make_all()` take the first two;
-`render_docx()` and `render_pdf()` take all four.
+**None of those calls names a journal, and none of them has to.** The
+`csl:` line of `manuscript.qmd` says where the paper is going, beside
+its title and its authors, and every `render_*()` and `make_*()`
+function reads it from there. Naming one in the call wins for that call
+alone and changes no file, which is what you want to see the same paper
+in another journal’s style; to move it for good, edit that one line. Of
+the three arguments below, `render_html()` and `make_all()` take the
+first two; `render_docx()` and `render_pdf()` take all three.
 
 | Argument | Default | What it decides |
 |----|----|----|
@@ -351,8 +355,8 @@ work either way:
 
 ``` r
 
-make_submission("myrmecological-news")                        # own document
-make_submission("myrmecological-news", suppl_figures = "main") # end of the main text
+make_submission()                        # own document
+make_submission(suppl_figures = "main")  # end of the main text
 ```
 
 ## Submitting
@@ -381,7 +385,7 @@ What it does that a render does not:
 
 ``` r
 
-make_submission("myrmecological-news")                                     # -> submission/MyrmecologicalNews/
+make_submission()                                                          # -> submission/MyrmecologicalNews/
 make_submission("myrmecological-news", label = "MyrmecologicalNews_v2")    # a second version, kept apart
 ```
 

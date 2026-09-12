@@ -95,28 +95,28 @@ for a tour of what the project can do.
 ## Examples
 
 ``` r
-dir <- file.path(tempdir(), "ant_chemistry")
+dir <- file.path(tempdir(), "paper_name")
 create_paper(dir,
              title   = "Manuscript title here",
              authors = c("First Author", "Second Author"),
              git     = FALSE)
-#> Project created: /tmp/RtmpTrOWs6/ant_chemistry
-#>   1. open ant_chemistry.Rproj
+#> Project created: /tmp/RtmpYOsPPm/paper_name
+#>   1. open paper_name.Rproj
 #>   2. source("make.R")
 #>   3. render_html()      # or see run.R for every command
 list.files(dir)
-#>  [1] "LICENSE"             "LICENSE-CODE"        "R"                  
-#>  [4] "README.md"           "_quarto.yml"         "_sections"          
-#>  [7] "ant_chemistry.Rproj" "cache"               "data"               
-#> [10] "figures"             "format"              "make.R"             
-#> [13] "manuscript.qmd"      "output"              "references"         
-#> [16] "references_styles"   "run.R"               "supplementary.qmd"  
-#> [19] "title_page.qmd"     
+#>  [1] "LICENSE"           "LICENSE-CODE"      "R"                
+#>  [4] "README.md"         "_quarto.yml"       "_sections"        
+#>  [7] "cache"             "data"              "figures"          
+#> [10] "format"            "make.R"            "manuscript.qmd"   
+#> [13] "output"            "paper_name.Rproj"  "references"       
+#> [16] "references_styles" "run.R"             "supplementary.qmd"
+#> [19] "title_page.qmd"   
 unlink(dir, recursive = TRUE)
 
 if (FALSE) { # \dontrun{
 # A real project, with its git history started for you:
-create_paper("~/papers/ant_chemistry",
+create_paper("~/paper_name",
              title   = "Manuscript title here",
              authors = c("First Author", "Second Author"))
 } # }
