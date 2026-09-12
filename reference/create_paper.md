@@ -97,10 +97,10 @@ for a tour of what the project can do.
 ``` r
 dir <- file.path(tempdir(), "ant_chemistry")
 create_paper(dir,
-             title   = "Chemical mimicry in Maculinea rebeli",
-             authors = c("Ada Lovelace", "Alan Turing"),
+             title   = "Manuscript title here",
+             authors = c("First Author", "Second Author"),
              git     = FALSE)
-#> Project created: /tmp/RtmpZ7XO25/ant_chemistry
+#> Project created: /tmp/RtmpTrOWs6/ant_chemistry
 #>   1. open ant_chemistry.Rproj
 #>   2. source("make.R")
 #>   3. render_html()      # or see run.R for every command
@@ -117,7 +117,7 @@ unlink(dir, recursive = TRUE)
 if (FALSE) { # \dontrun{
 # A real project, with its git history started for you:
 create_paper("~/papers/ant_chemistry",
-             title   = "Chemical mimicry in Maculinea rebeli",
-             authors = c("Daniel Sanchez-Garcia", "Second Author"))
+             title   = "Manuscript title here",
+             authors = c("First Author", "Second Author"))
 } # }
 ```

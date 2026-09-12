@@ -1,5 +1,28 @@
 # Changelog
 
+## easypaper 0.3.2
+
+Documentation only: no code changes.
+[`update_project()`](https://danielsangarci.github.io/easypaper/reference/update_project.md)
+refreshes `run.R`, `make.R`, `R/submission.R` and the project
+`README.md`, which is where these corrections land in a project already
+written.
+
+### The examples say what the arguments now do
+
+- `make_submission("myrmecological-news", label = "MyrmecologicalNews")`
+  was still the headline example for `label`, and since 0.3.0 **it does
+  nothing**: that is exactly what the call produces on its own. Every
+  example now passes `label = "MyrmecologicalNews_v2"`, which is what
+  the argument is actually for – a second version of the same
+  submission, landing in `submission/MyrmecologicalNews_v2/` beside the
+  first.
+- [`create_paper()`](https://danielsangarci.github.io/easypaper/reference/create_paper.md)
+  is shown with `title = "Manuscript title here"`, the same placeholder
+  the template writes, so what you read in the example is what you find
+  in `manuscript.qmd`. The example authors are `"First Author"` and
+  `"Second Author"` for the same reason.
+
 ## easypaper 0.3.1
 
 One defect, and everything it was dragging behind it.

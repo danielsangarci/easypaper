@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">easypaper</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,7 +20,7 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-news" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">News</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-news"><li><h6 class="dropdown-header" data-toc-skip>Releases</h6></li>
-    <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.3.1">Version 0.3.1</a></li>
+    <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.3.2">Version 0.3.2</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.4">Version 0.2.4</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.3">Version 0.2.3</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.2">Version 0.2.2</a></li>
@@ -44,6 +44,17 @@
       <small>Source: <a href="https://github.com/danielsangarci/easypaper/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.2" id="easypaper-032">easypaper 0.3.2<a class="anchor" aria-label="anchor" href="#easypaper-032"></a></h2>
+<p>Documentation only: no code changes. <code><a href="../reference/update_project.html">update_project()</a></code> refreshes <code>run.R</code>, <code>make.R</code>, <code>R/submission.R</code> and the project <code>README.md</code>, which is where these corrections land in a project already written.</p>
+<div class="section level3">
+<h3 id="the-examples-say-what-the-arguments-now-do-0-3-2">The examples say what the arguments now do<a class="anchor" aria-label="anchor" href="#the-examples-say-what-the-arguments-now-do-0-3-2"></a></h3>
+<ul><li>
+<code>make_submission("myrmecological-news", label = "MyrmecologicalNews")</code> was still the headline example for <code>label</code>, and since 0.3.0 <strong>it does nothing</strong>: that is exactly what the call produces on its own. Every example now passes <code>label = "MyrmecologicalNews_v2"</code>, which is what the argument is actually for – a second version of the same submission, landing in <code>submission/MyrmecologicalNews_v2/</code> beside the first.</li>
+<li>
+<code><a href="../reference/create_paper.html">create_paper()</a></code> is shown with <code>title = "Manuscript title here"</code>, the same placeholder the template writes, so what you read in the example is what you find in <code>manuscript.qmd</code>. The example authors are <code>"First Author"</code> and <code>"Second Author"</code> for the same reason.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.1" id="easypaper-031">easypaper 0.3.1<a class="anchor" aria-label="anchor" href="#easypaper-031"></a></h2>
 <p>One defect, and everything it was dragging behind it. <code><a href="../reference/update_project.html">update_project()</a></code> carries the fix into a project already written: it is a change to <code>R/submission.R</code>, which is one of the files it refreshes.</p>

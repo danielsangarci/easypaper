@@ -13,8 +13,8 @@ structure in one call, and then gets out of the way.
 library(easypaper)
 
 create_paper("~/papers/ant_chemistry",
-             title   = "Chemical mimicry in Maculinea rebeli",
-             authors = c("Daniel Sanchez-Garcia", "Second Author"))
+             title   = "Manuscript title here",
+             authors = c("First Author", "Second Author"))
 ```
 
 In RStudio the same thing is **File \> New Project \> New Directory \>
@@ -34,7 +34,7 @@ Here is what lands on disk:
 
 dir <- file.path(tempdir(), "demo_paper")
 easypaper::create_paper(dir, git = FALSE)
-#> Project created: /tmp/Rtmp0gB3Uv/demo_paper
+#> Project created: /tmp/Rtmprnt1KO/demo_paper
 #>   1. open demo_paper.Rproj
 #>   2. source("make.R")
 #>   3. render_html()      # or see run.R for every command
@@ -381,14 +381,14 @@ What it does that a render does not:
 
 ``` r
 
-make_submission("myrmecological-news")            # -> submission/MyrmecologicalNews/
-make_submission("myrmecological-news", label = "Journal1")   # your own name for it
+make_submission("myrmecological-news")                                     # -> submission/MyrmecologicalNews/
+make_submission("myrmecological-news", label = "MyrmecologicalNews_v2")    # a second version, kept apart
 ```
 
 | Argument | Default | What it decides |
 |----|----|----|
 | `journal` | the manuscript’s own | The `.csl` the citations come out in, from `manuscript.qmd` unless you name one |
-| `label` | the journal’s name | Names the folder inside `submission/` and every file in it. Left alone it is the journal’s own name with the spaces taken out, so `"ecology-letters"` lands in `submission/EcologyLetters/`. Pass your own for a second version, or for a trial you want to keep apart |
+| `label` | the journal’s name | Names the folder inside `submission/` and every file in it. Left alone it is the journal’s own name with the spaces taken out, so `"ecology-letters"` lands in `submission/EcologyLetters/`. Pass your own for a second version, or for a trial you want to keep apart: `label = "MyrmecologicalNews_v2"` lands in `submission/MyrmecologicalNews_v2/`, beside the first one |
 | `caption_style` | `"default"` | As in the renders above |
 | `figure_format` | `"tiff"` | The standalone figures the journal uploads: `"tiff"`, `"png"` or `"jpg"`. TIFF unless they say otherwise — JPEG is lossy and poor for line art |
 | `blinded` | `TRUE` | Splits title page from main text the way double-blind review asks: the main text opens with the title alone, the author block is dropped and `0_authors.qmd` is left out, so no name travels in it. `FALSE` when the journal wants them in |

@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="index.html">easypaper</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,7 +48,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-news" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">News</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-news">
 <li><h6 class="dropdown-header" data-toc-skip>Releases</h6></li>
-    <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.3.1">Version 0.3.1</a></li>
+    <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.3.2">Version 0.3.2</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.4">Version 0.2.4</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.3">Version 0.2.3</a></li>
     <li><a class="external-link dropdown-item" href="https://github.com/danielsangarci/easypaper/releases/tag/v0.2.2">Version 0.2.2</a></li>
@@ -87,7 +87,7 @@
 <span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/danielsangarci/easypaper" class="external-link">easypaper</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/create_paper.html">create_paper</a></span><span class="op">(</span><span class="st">"~/papers/ant_chemistry"</span>,</span>
-<span>             title   <span class="op">=</span> <span class="st">"Chemical mimicry in Maculinea rebeli"</span>,</span>
+<span>             title   <span class="op">=</span> <span class="st">"Manuscript title here"</span>,</span>
 <span>             authors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"First Author"</span>, <span class="st">"Second Author"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Then open the <code>.Rproj</code> it leaves behind and:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -106,9 +106,9 @@
 <span><span class="fu">make_all</span><span class="op">(</span><span class="op">)</span>                           <span class="co"># the four above, in order</span></span>
 <span></span>
 <span><span class="co"># what you send, into submission/</span></span>
-<span><span class="fu">make_submission</span><span class="op">(</span><span class="st">"myrmecological-news"</span><span class="op">)</span>                                <span class="co"># a trial run</span></span>
-<span><span class="fu">make_submission</span><span class="op">(</span><span class="st">"myrmecological-news"</span>, label <span class="op">=</span> <span class="st">"MyrmecologicalNews"</span><span class="op">)</span>  <span class="co"># the real one</span></span>
-<span><span class="fu">make_preprint</span><span class="op">(</span><span class="op">)</span>                                                       <span class="co"># the whole deposit</span></span></code></pre></div>
+<span><span class="fu">make_submission</span><span class="op">(</span><span class="st">"myrmecological-news"</span><span class="op">)</span>                                     <span class="co"># -&gt; submission/MyrmecologicalNews/</span></span>
+<span><span class="fu">make_submission</span><span class="op">(</span><span class="st">"myrmecological-news"</span>, label <span class="op">=</span> <span class="st">"MyrmecologicalNews_v2"</span><span class="op">)</span>    <span class="co"># a second version, kept apart</span></span>
+<span><span class="fu">make_preprint</span><span class="op">(</span><span class="op">)</span>                                                            <span class="co"># the whole deposit</span></span></code></pre></div>
 <p>Every render checks first — citations with no entry, cross-references with no target, data files nobody reads — and records the environment it came out of. <code>list_journals()</code> tells you which citation styles you have, and <code>easypaper::add_journal("plos-one")</code> fetches one the template does not ship; <code>check_data()</code>, <code>check_renv()</code> and their siblings can be called on their own.</p>
 <p><code>make_all()</code> renders; <code>make_submission()</code> submits. The first writes documents to read, into <code>output/</code>. The second builds what the journal asks for — blinded, split in two, figures apart, compendium included — into <code>submission/</code>, and is not part of <code>make_all()</code>.</p>
 <p><code>run.R</code>, inside the new project, lists every command with its arguments explained, ready to run one line at a time.</p>
@@ -217,7 +217,7 @@ run.R                Every command, explained, one line at a time</code></pre>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"easypaper"</span><span class="op">)</span></span></code></pre></div>
 <blockquote>
-<p>Sanchez-Garcia, D. (2026). easypaper: Scaffold a Reproducible Quarto Manuscript Project with Output Ready for Co-Authors, Preprints and Journals. R package version 0.3.1. <a href="https://github.com/danielsangarci/easypaper" class="external-link uri">https://github.com/danielsangarci/easypaper</a></p>
+<p>Sanchez-Garcia, D. (2026). easypaper: Scaffold a Reproducible Quarto Manuscript Project with Output Ready for Co-Authors, Preprints and Journals. R package version 0.3.2. <a href="https://github.com/danielsangarci/easypaper" class="external-link uri">https://github.com/danielsangarci/easypaper</a></p>
 </blockquote>
 <p>The BibTeX entry comes with the key <code>easypaper</code>, ready to paste into a <code>.bib</code>. GitHub’s <em>Cite this repository</em> button reads <code>CITATION.cff</code>, which carries the same details and the ORCID.</p>
 </div>
