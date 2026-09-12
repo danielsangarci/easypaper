@@ -50,7 +50,7 @@
 #'   [add_journal()] for a citation style the template does not ship.
 #' @export
 #' @examples
-#' dir <- file.path(tempdir(), "ant_chemistry")
+#' dir <- file.path(tempdir(), "paper_name")
 #' create_paper(dir, git = FALSE)
 #' update_project(dir, dry_run = TRUE)   # written by this version: nothing to do
 #' unlink(dir, recursive = TRUE)

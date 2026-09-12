@@ -53,7 +53,7 @@
 #'   folder, and `vignette("easypaper")` for a tour of what the project can do.
 #'
 #' @examples
-#' dir <- file.path(tempdir(), "ant_chemistry")
+#' dir <- file.path(tempdir(), "paper_name")
 #' create_paper(dir,
 #'              title   = "Manuscript title here",
 #'              authors = c("First Author", "Second Author"),
@@ -63,7 +63,7 @@
 #'
 #' \dontrun{
 #' # A real project, with its git history started for you:
-#' create_paper("~/papers/ant_chemistry",
+#' create_paper("~/paper_name",
 #'              title   = "Manuscript title here",
 #'              authors = c("First Author", "Second Author"))
 #' }

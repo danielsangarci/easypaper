@@ -72,7 +72,7 @@ stops with a message naming the argument and leaves no half-made project
 behind.
 }
 \examples{
-dir <- file.path(tempdir(), "ant_chemistry")
+dir <- file.path(tempdir(), "paper_name")
 create_paper(dir,
              title   = "Manuscript title here",
              authors = c("First Author", "Second Author"),
@@ -82,7 +82,7 @@ unlink(dir, recursive = TRUE)
 
 \dontrun{
 # A real project, with its git history started for you:
-create_paper("~/papers/ant_chemistry",
+create_paper("~/paper_name",
              title   = "Manuscript title here",
              authors = c("First Author", "Second Author"))
 }

@@ -45,21 +45,26 @@ then you skip the citation checks and the licence synchronisation.
 ```r
 source("make.R")
 
-render_docx("myrmecological-news")   # -> output/manuscript_myrmecological-news.docx
+render_docx()                # -> output/manuscript_myrmecological-news.docx
 render_pdf()                 # -> output/preprint.pdf
 render_supplementary()       # -> output/supporting_information.docx
 render_html()                # -> output/manuscript.html  (fast, to check as you go)
 export_code()                # -> output/analysis_code.R
 make_all()                   # the four above -- not the .html
 
-make_submission("myrmecological-news")       # submission folder, for a journal
-make_preprint()                              # deposit folder, for a preprint
+make_submission()            # submission folder, for a journal
+make_preprint()              # deposit folder, for a preprint
 
 preview()                    # live preview while you write
 list_journals()              # available CSL files
 clean_cache()                # after changing data/
 check_citations()            # cited keys missing from the .bib
 ```
+
+Not one of those calls names a journal. They all read the `csl:` line of
+`manuscript.qmd`, which is where this project says where it is going; naming
+one in the call -- `render_docx("ecology-letters")` -- wins for that call
+alone and leaves every file as it was.
 
 ### The verbs
 

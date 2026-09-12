@@ -17,7 +17,7 @@ manuscript written in Quarto.
 remotes::install_github("danielsangarci/easypaper")
 
 library(easypaper)
-create_paper("~/papers/ant_chemistry",
+create_paper("~/paper_name",
              title   = "Manuscript title here",
              authors = c("First Author", "Second Author"))
 ```
@@ -33,17 +33,27 @@ render_html()                        # the working .html, in seconds
 preview()                            # live: reloads every time you save
 
 # the documents, into output/
-render_docx("myrmecological-news")   # the .docx, in that journal's style
+render_docx()                        # the .docx, in the journal manuscript.qmd names
 render_pdf()                         # the .pdf, for a preprint server
 render_supplementary()               # the supplement, with its own references
 export_code()                        # analysis_code.R + sessionInfo.txt
 make_all()                           # the four above, in order
 
 # what you send, into submission/
-make_submission("myrmecological-news")                                     # -> submission/MyrmecologicalNews/
+make_submission()                                                          # -> submission/MyrmecologicalNews/
 make_submission("myrmecological-news", label = "MyrmecologicalNews_v2")    # a second version, kept apart
 make_preprint()                                                            # the whole deposit
 ```
+
+None of those calls names a journal, and none of them has to. The `csl:` line
+of `manuscript.qmd` says where the paper is going, beside its title and its
+authors, and **every `render_*()` and `make_*()` function reads it from
+there** — `render_docx()`, `render_pdf()`, `render_supplementary()`,
+`make_all()`, `make_submission()` and `make_preprint()` alike. Naming one in
+the call — `render_docx("ecology-letters")`, `make_submission("ecology-letters")`
+— wins for that call alone and changes no file, which is what you want to see
+the manuscript in another journal's style. To move the paper for good, edit
+that one line.
 
 Every render checks first — citations with no entry, cross-references with no
 target, data files nobody reads — and records the environment it came out of.
@@ -119,8 +129,8 @@ and the checklist before submitting. It travels inside the project, so it is
 still there when easypaper is not, and it is the document to read on the
 first day.
 
-What every command takes — `journal`, `caption_style`, `split`,
-`suppl_figures`, `label`, `figure_format`, `blinded`, `snapshot` — is laid out
+What every command takes — `journal`, `caption_style`, `suppl_figures`,
+`label`, `figure_format`, `blinded`, `snapshot` — is laid out
 with its default in
 [Get started](https://danielsangarci.github.io/easypaper/articles/easypaper.html).
 

@@ -60,7 +60,7 @@ The stamp at the top of \code{make.R} then records both versions: the one that
 created the project and the one it was updated to.
 }
 \examples{
-dir <- file.path(tempdir(), "ant_chemistry")
+dir <- file.path(tempdir(), "paper_name")
 create_paper(dir, git = FALSE)
 update_project(dir, dry_run = TRUE)   # written by this version: nothing to do
 unlink(dir, recursive = TRUE)
