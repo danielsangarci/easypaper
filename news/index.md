@@ -18,10 +18,8 @@ written.
   `render_*()` and `make_*()` function takes the journal from the
   manuscript, and that naming one in the call wins for that call alone
   and changes no file.
-
 - The package README still listed `split` among the arguments a command
   takes. It was removed in 0.2.3.
-
 - `make_submission("myrmecological-news", label = "MyrmecologicalNews")`
   was still the headline example for `label`, and since 0.3.0 **it does
   nothing**: that is exactly what the call produces on its own. Every
@@ -29,7 +27,6 @@ written.
   the argument is actually for – a second version of the same
   submission, landing in `submission/MyrmecologicalNews_v2/` beside the
   first.
-
 - [`create_paper()`](https://danielsangarci.github.io/easypaper/reference/create_paper.md)
   is shown with `title = "Manuscript title here"`, the same placeholder
   the template writes, so what you read in the example is what you find
