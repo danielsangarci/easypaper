@@ -1,0 +1,16 @@
+<!-- Results report numbers, and every number is computed, never typed: the
+     inline R below reads the objects of the Methods chunks, so the text
+     follows the data. Cite figures and tables with @fig-... and @tbl-...;
+     Quarto numbers them in the order they appear in 10_figures.qmd and
+     11_tables.qmd. -->
+
+## Species richness
+
+The `r n_plots` plots held `r format(n_ind, big.mark = ",")` trees of
+`r n_species` species, between `r min(richness)` and `r max(richness)` species
+per plot (mean `r round(mean(richness), 1)`). Richness
+`r if (p_hab < 0.05) "differed" else "did not differ significantly"` among
+habitats (likelihood-ratio test, $\chi^2$ = `r round(chi_hab, 1)`,
+df = `r df_hab`, *P* `r fmt_p(p_hab)`; @tbl-richness): it was highest in the
+`r hab_text(hab_max)` and lowest in the `r hab_text(hab_min)`
+(@fig-richness).

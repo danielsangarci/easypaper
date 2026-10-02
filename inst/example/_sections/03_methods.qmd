@@ -1,0 +1,142 @@
+<!-- The analysis lives in the section that reports it. The chunks below read
+     the data from data/ -- never from where the originals are kept -- and
+     every cleaning step is code a reviewer can read. They print nothing:
+     _quarto.yml sets include: false for every chunk, and only figures and
+     tables turn it back on.
+     #| cache: true keeps a slow chunk from running at every render. When the
+     data underneath it change, run clean_cache(): a change in data/ is the
+     one thing knitr's cache does not notice.
+     Packages are loaded in a chunk of their own, without cache: a cached
+     chunk would not load them again. -->
+
+```{r}
+#| label: packages
+library(vegan)
+```
+
+```{r}
+#| label: data
+#| cache: true
+# The two tables, read from data/ with paths relative to the project root.
+abund <- read.csv(here::here("data/tree_abundance.csv"), check.names = FALSE)
+env   <- read.csv(here::here("data/plot_environment.csv"), check.names = FALSE)
+
+# The plots in the same order in both tables, or nothing below is right.
+stopifnot(identical(abund$plot, env$plot))
+
+Y_counts <- as.matrix(abund[, -1])
+species  <- colnames(Y_counts)
+habitat  <- factor(env$Habitat)
+
+n_plots   <- nrow(Y_counts)
+n_species <- ncol(Y_counts)
+n_ind     <- sum(Y_counts)
+richness  <- rowSums(Y_counts > 0)
+n_hab     <- table(habitat)
+n_top     <- min(30L, n_species)   # the species listed in the supplement
+
+# How the habitats are named in the text ("old forest on slopes") and in the
+# tables and axes ("Old, slope"). A level not in the list keeps its name.
+hab_text <- function(x) {
+  lab <- c(Young = "young forest", OldLow = "old forest on low ground",
+           OldSlope = "old forest on slopes", OldHigh = "old forest on high ground",
+           Swamp = "swamp")
+  ifelse(x %in% names(lab), lab[x], x)
+}
+hab_title <- function(x) {
+  lab <- c(Young = "Young", OldLow = "Old, low", OldSlope = "Old, slope",
+           OldHigh = "Old, high", Swamp = "Swamp")
+  ifelse(x %in% names(lab), lab[x], x)
+}
+# A P-value as the text writes it: "= 0.012", or "< 0.001".
+fmt_p <- function(p) {
+  if (p < 0.001) "< 0.001" else paste("=", formatC(p, digits = 3, format = "f"))
+}
+# The part of a species name that goes in italics -- the genus and the
+# epithet, not "sp. A" -- and the part that stays in roman.
+sp_italic <- function(x) sub("( sp\\..*| complex)$", "", x)
+sp_roman  <- function(x) substring(x, nchar(sp_italic(x)) + 1L)
+sp_label  <- function(x) bquote(italic(.(sp_italic(x))) * .(sp_roman(x)))
+```
+
+## Data
+
+We re-analysed the trees of the 50-ha forest dynamics plot of Barro Colorado
+Island, Panama [@Condit2002], distributed as the `BCI` dataset of the R
+package vegan [@R-vegan]: the number of trees of at least 10 cm in diameter at
+breast height of each of `r n_species` species in each of `r n_plots` plots of
+1 ha, censused in 1982, and the dominant habitat of each plot. The plots are
+unevenly spread among the `r nlevels(habitat)` habitats
+(`r knitr::combine_words(paste(n_hab, hab_text(names(n_hab))))`). The two
+tables are in `data/` and are described, column by column, in
+`data/metadata/`.
+
+## Statistical analysis
+
+```{r}
+#| label: richness-model
+#| cache: true
+m_rich  <- glm(richness ~ habitat, family = poisson)
+lrt     <- anova(m_rich, test = "Chisq")
+chi_hab <- lrt["habitat", "Deviance"]
+df_hab  <- lrt["habitat", "Df"]
+p_hab   <- lrt["habitat", "Pr(>Chi)"]
+dispersion <- sum(residuals(m_rich, type = "pearson")^2) / df.residual(m_rich)
+
+# The expected richness of each habitat, with its 95% confidence interval.
+nd   <- data.frame(habitat = factor(levels(habitat), levels = levels(habitat)))
+pr   <- predict(m_rich, newdata = nd, type = "link", se.fit = TRUE)
+pred_rich <- data.frame(habitat = levels(habitat),
+                        fit   = exp(pr$fit),
+                        lower = exp(pr$fit - 1.96 * pr$se.fit),
+                        upper = exp(pr$fit + 1.96 * pr$se.fit))
+hab_max <- pred_rich$habitat[which.max(pred_rich$fit)]
+hab_min <- pred_rich$habitat[which.min(pred_rich$fit)]
+```
+
+```{r}
+#| label: composition-model
+#| cache: true
+# 999 permutations: what a paper reports. They take a few seconds, once:
+# the chunk is cached.
+n_perm <- 999
+# Bray-Curtis dissimilarities between plots, on square-root abundances, so
+# that the few very abundant species do not decide everything.
+Y_sqrt <- sqrt(Y_counts)
+d_bray <- vegdist(Y_sqrt, method = "bray")
+
+# PERMANOVA: does the composition differ among habitats?
+perm     <- adonis2(d_bray ~ habitat, permutations = n_perm, by = "terms")
+tab_perm <- as.data.frame(perm)
+r2_hab   <- tab_perm["habitat", "R2"]
+f_hab    <- tab_perm["habitat", "F"]
+pp_hab   <- tab_perm["habitat", "Pr(>F)"]
+
+# PERMDISP: do the habitats differ in how variable their composition is?
+disp   <- betadisper(d_bray, habitat)
+pdisp  <- permutest(disp, permutations = n_perm)
+f_disp <- pdisp$tab["Groups", "F"]
+p_disp <- pdisp$tab["Groups", "Pr(>F)"]
+
+# NMDS of the same dissimilarities.
+nmds <- metaMDS(Y_sqrt, distance = "bray", k = 2, trymax = 50,
+                autotransform = FALSE, trace = FALSE)
+
+# The six most abundant species, named on the ordination.
+top_sp <- species[order(colSums(Y_counts), decreasing = TRUE)[1:6]]
+```
+
+Species richness, the number of species recorded in a plot, was modelled with
+a generalized linear model (GLM) with a Poisson distribution and habitat as
+the predictor, tested with a likelihood-ratio test (dispersion
+`r round(dispersion, 2)`).
+
+The composition of the assemblages was compared with Bray-Curtis
+dissimilarities between plots, calculated on square-root-transformed
+abundances. Its difference among habitats was tested with a permutational
+multivariate analysis of variance [PERMANOVA, @Anderson2001], and the
+homogeneity of the dispersions of the habitats with a permutational test of
+multivariate dispersions [PERMDISP, @Anderson2006], each with `r n_perm`
+permutations. The dissimilarities were represented with a non-metric
+multidimensional scaling (NMDS) in two dimensions. The analyses of composition
+were run with vegan [@R-vegan], and all analyses in R [@R-base].

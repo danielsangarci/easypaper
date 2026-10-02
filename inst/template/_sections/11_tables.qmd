@@ -1,0 +1,59 @@
+<!-- WARNING: knitr RUNS chunks and inline code even inside an HTML comment
+     like this one. Use #| eval: false to disable one. -->
+<!-- One table = one chunk with a tbl-* label and its legend in #| tbl-cap.
+     Cite it from the text with @tbl-models.
+     Quarto writes the caption: do NOT also use flextable::set_caption() or it
+     will be duplicated. -->
+
+```{r}
+#| label: tbl-models
+#| include: true
+#| tbl-cap: "Legend of table 1."
+# flextable when the table needs formatting: rules, footnotes, grouping.
+#
+# The three rules a scientific table wants are drawn here rather than left to
+# the Word template: none on top, one under the header row and one under the
+# table. `hline_top(width = 0)` is what removes the default top rule.
+#
+# fit_flextable_to_page() is autofit() plus a ceiling: the table keeps the
+# width its content needs and is only brought back in if it would run off the
+# page. Do NOT stretch a table to the width of the line -- Quarto puts it in a
+# container 5.5 inches wide, and a wider table comes out of Word misaligned.
+tab <- data.frame(
+  Variable = c("Treatment", "Altitude"),
+  Estimate = c(0.42, -0.13),
+  SE       = c(0.11, 0.05),
+  p        = c(0.002, 0.014)
+)
+rule <- fp_border_default(style = "solid", color = "black", width = 1)
+
+flextable(tab) |>
+  align(part = "all", align = "left") |>
+  hline_top(border = fp_border_default(width = 0), part = "all") |>
+  hline_bottom(border = rule, part = "all") |>
+  # The stars go in the p column as a suffix, so p stays a number and is
+  # formatted rather than pasted together as text.
+  colformat_double(j = "p", digits = 3, suffix = stars_pval(tab$p)) |>
+  add_footer_lines("*p ≤ 0.05, **p ≤ 0.01, ***p ≤ 0.001") |>
+  fit_flextable_to_page()
+```
+
+{{< pagebreak >}}
+
+```{r}
+#| label: tbl-summary
+#| include: true
+#| tbl-cap: "Legend of table 2."
+# Every table in the project is a flextable, so they all come out with the
+# same font, the same rules and columns measured from their content. The
+# reason is not taste: knitr::kable() hands pandoc a plain markdown table and
+# pandoc gives it columns of equal width, so a long heading is broken across
+# two lines while a short one sits in acres of space.
+flextable(head(iris, 3)) |>
+  align(part = "all", align = "left") |>
+  hline_top(border = fp_border_default(width = 0), part = "all") |>
+  hline_bottom(border = rule, part = "all") |>
+  fit_flextable_to_page()
+```
+
+{{< pagebreak >}}

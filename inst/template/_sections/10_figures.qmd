@@ -1,0 +1,33 @@
+<!-- WARNING: knitr RUNS chunks and inline code even inside an HTML comment
+     like this one. To disable a chunk use #| eval: false, never comment it
+     out. -->
+<!-- One figure = one chunk with a fig-* label, its legend in #| fig-cap and
+     #| include: true. Cite it from the text with @fig-richness.
+     Quarto assigns the number by ORDER OF APPEARANCE in this section.
+     fig-width / fig-height are in INCHES: mm / 25.4 (or use mm(180)).
+     Typical journal widths: 1 column 80-90 mm, 2 columns 180 mm. -->
+
+```{r}
+#| label: fig-richness
+#| include: true
+#| fig-width: 7.09
+#| fig-height: 6.30
+#| fig-cap: "Legend of figure 1. Supports *italics*, **bold** and $equations$."
+# Replace this placeholder with your figure.
+plot.new(); box(col = "grey80")
+text(0.5, 0.5, "figure 1", cex = 2, col = "grey60")
+```
+
+{{< pagebreak >}}
+
+```{r}
+#| label: fig-abundance
+#| include: true
+#| fig-width: 7.09
+#| fig-height: 3.54
+#| fig-cap: "Legend of figure 2."
+plot.new(); box(col = "grey80")
+text(0.5, 0.5, "figure 2", cex = 2, col = "grey60")
+```
+
+{{< pagebreak >}}

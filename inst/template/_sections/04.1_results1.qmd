@@ -1,0 +1,5 @@
+<!-- Results, part 1. See the README ("Working idiom") for the pattern:
+     analysis chunks with cache, inline R results, citations [@key] and figure
+     references with @fig-name.
+     WARNING: knitr evaluates chunks and inline code even inside an HTML
+     comment like this one. Never paste example code here. -->

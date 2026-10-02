@@ -1,0 +1,21 @@
+<!-- A scientific name written by R code still goes in italics: put the
+     asterisks around the inline code. check_species_text() reads the names
+     you type; it cannot read the ones R writes. -->
+
+## Assemblage composition
+
+The composition of the tree assemblages
+`r if (pp_hab < 0.05) "differed" else "did not differ significantly"` among
+habitats, which explained `r round(100 * r2_hab)`% of its variation
+(PERMANOVA, *F* = `r round(f_hab, 2)`, *P* `r fmt_p(pp_hab)`;
+@tbl-community), and the NMDS (stress `r round(nmds$stress, 2)`) ordered the
+plots by habitat (@fig-nmds). The dispersions of the habitats
+`r if (p_disp < 0.05) "also differed" else "did not differ"` (PERMDISP,
+*F* = `r round(f_disp, 2)`, *P* `r fmt_p(p_disp)`), so the difference among
+habitats `r if (p_disp < 0.05) "may in part be one of heterogeneity rather than of mean composition" else "is one of mean composition, not only of heterogeneity"`.
+The most abundant species was
+*`r sp_italic(top_sp[1])`*`r sp_roman(top_sp[1])`, with
+`r format(sum(Y_counts[, top_sp[1]]), big.mark = ",")` trees.
+
+The `r n_top` most abundant species are listed in @stbl-species, and the
+abundance of every species, ranked, is in @sfig-rankabund.

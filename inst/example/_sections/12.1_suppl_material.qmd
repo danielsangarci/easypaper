@@ -1,0 +1,74 @@
+<!-- The supplementary figures and tables, numbered on a counter of their
+     own: Figure S1, Table S1. Each is a div with the sfig- or stbl- id, the
+     chunk inside it, and the legend as the last paragraph of the div. Cite
+     them from anywhere in the manuscript with @sfig-... and @stbl-....
+     The supplement is also rendered as a document of its own -- by
+     render_docx(), render_pdf() and make_submission() -- and that document
+     runs R/setup.R and this file only, not the chunks of the Methods. So it
+     reads here, itself, the data its figures and tables need. -->
+
+```{r}
+#| label: suppl-data
+abund    <- read.csv(here::here("data/tree_abundance.csv"), check.names = FALSE)
+Y_counts <- as.matrix(abund[, -1])
+species  <- colnames(Y_counts)
+totals   <- sort(colSums(Y_counts), decreasing = TRUE)
+n_top    <- min(30L, length(species))
+# The part of a species name in italics, and the part in roman.
+sp_italic <- function(x) sub("( sp\\..*| complex)$", "", x)
+sp_roman  <- function(x) substring(x, nchar(sp_italic(x)) + 1L)
+sp_label  <- function(x) bquote(italic(.(sp_italic(x))) * .(sp_roman(x)))
+```
+
+::: {#sfig-rankabund}
+
+```{r}
+#| label: suppl-rankabund
+#| include: true
+#| fig-width: 7.09
+#| fig-height: 4.72
+par(mar = c(4.5, 4.5, 1, 1), las = 1)
+plot(seq_along(totals), totals, log = "y", type = "h", col = color5,
+     xlab = "Species rank", ylab = "Trees (log scale)")
+top5 <- names(totals)[1:5]
+text(1:5 + 6, totals[1:5], labels = as.expression(lapply(top5, sp_label)),
+     adj = 0, cex = 0.75, col = "grey30")
+```
+
+Rank-abundance of the tree species of the plot: the number of trees of each
+species, from the most to the least abundant, with the five most abundant
+named.
+:::
+
+{{< pagebreak >}}
+
+::: {#stbl-species}
+
+```{r}
+#| label: suppl-species
+#| include: true
+sp_tab <- data.frame(
+  Species = names(totals)[seq_len(n_top)],
+  Trees   = as.integer(totals[seq_len(n_top)]),
+  Plots   = as.integer(colSums(Y_counts[, names(totals)[seq_len(n_top)],
+                                        drop = FALSE] > 0)),
+  row.names = NULL
+)
+
+# The genus and the epithet in italics, "sp. A" in roman.
+flextable(sp_tab) |>
+  compose(j = "Species",
+          value = as_paragraph(as_i(sp_italic(sp_tab$Species)),
+                               as_chunk(sp_roman(sp_tab$Species)))) |>
+  align(part = "all", align = "left") |>
+  hline_top(border = fp_border_default(width = 0), part = "all") |>
+  hline_bottom(border = fp_border_default(style = "solid", color = "black",
+                                          width = 1), part = "all") |>
+  fit_flextable_to_page()
+```
+
+The most abundant tree species of the plot, with the number of trees and of
+1-ha plots each was found in.
+:::
+
+{{< pagebreak >}}

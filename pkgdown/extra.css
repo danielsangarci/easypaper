@@ -1,0 +1,19 @@
+/* Justified prose.
+ *
+ * hyphens is not decoration here: justifying a line of ~85 characters without
+ * breaking words forces the browser to stretch the word spacing instead,
+ * which opens the white "rivers" that run down a badly set page. With
+ * automatic hyphenation the slack is taken up at the line ends and the
+ * spacing stays even. It works because pkgdown writes <html lang="en">, which
+ * is what tells the browser which hyphenation dictionary to use.
+ *
+ * Code blocks and tables are left alone: never justify what is read by
+ * column, not by line.
+ */
+
+main p,
+main li {
+  text-align: justify;
+  -webkit-hyphens: auto;   /* Safari */
+  hyphens: auto;
+}

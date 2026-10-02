@@ -1,0 +1,53 @@
+<!-- WARNING: knitr RUNS chunks and inline code even inside an HTML comment
+     like this one. Use #| eval: false to disable one. -->
+<!-- This file carries the supplementary FIGURES AND TABLES. For
+     supplementary TEXT (an extended Methods, say) that needs its own
+     reference list, add a second file with no sfig/stbl div in it,
+     12.2_suppl_methods.qmd, and include it in manuscript.qmd below this
+     one: nothing else needs touching. Where the figures end up -- their own
+     document or the end of the main text -- is
+     make_submission(suppl_figures = ). See the README. -->
+<!-- Supplementary material is numbered independently with an S prefix. The
+     sfig and stbl types are defined under crossref: custom: in _quarto.yml.
+     Cite them from ANYWHERE in the manuscript with @sfig-map / @stbl-raw.
+     Syntax: a div carrying the id, the content inside, and the legend as the
+     last paragraph of the div. -->
+<!-- The supplement is also rendered as a document of its own, by
+     render_docx(), render_pdf() and make_submission(). That document runs
+     R/setup.R and this file only, not the chunks of the other sections: what
+     a supplementary figure or table needs -- the data, a model -- is read or
+     computed here, in a chunk at the top. -->
+
+::: {#sfig-map}
+
+```{r}
+#| label: suppl-map
+#| include: true
+#| fig-width: 7.09
+#| fig-height: 6.30
+plot.new(); box(col = "grey80")
+text(0.5, 0.5, "figure S1", cex = 2, col = "grey60")
+```
+
+Legend of supplementary figure 1.
+:::
+
+{{< pagebreak >}}
+
+::: {#stbl-raw}
+
+```{r}
+#| label: suppl-raw
+#| include: true
+flextable(head(iris, 3)) |>
+  align(part = "all", align = "left") |>
+  hline_top(border = fp_border_default(width = 0), part = "all") |>
+  hline_bottom(border = fp_border_default(style = "solid", color = "black",
+                                          width = 1), part = "all") |>
+  fit_flextable_to_page()
+```
+
+Legend of supplementary table 1.
+:::
+
+{{< pagebreak >}}

@@ -1,0 +1,80 @@
+url: https://danielsangarci.github.io/easypaper/
+
+template:
+  bootstrap: 5
+  bslib:
+    primary: "#1a5632"
+    base_font: {google: {family: "Source Sans 3", wght: [400, 600, 700], ital: [0, 1]}}
+    code_font: {google: {family: "Source Code Pro", wght: [400, 700]}}
+
+home:
+  title: Automate reproducible Quarto manuscripts from draft to submission
+  description: >
+    Focus on your research: easypaper handles the formatting and the
+    submission. Write your paper in Quarto, one section per file; easypaper
+    renders it for any journal, checks it before every render, and builds
+    the folder you send, double-blind manuscript and data deposit included.
+
+navbar:
+  structure:
+    left:  [intro, reference, articles, news]
+    right: [search, github]
+
+reference:
+  - title: Creating a project
+    desc: The project holds the paper; everything below builds it.
+    contents:
+      - create_paper
+      - create_example_paper
+      - affiliations
+  - title: Rendering
+    desc: >
+      Documents to read, written into output/. Every render checks the
+      project first, sets the scientific names of the references in italics,
+      and copies the figures to PNG, JPEG and TIFF at 600 dpi.
+    contents:
+      - render
+      - export_code
+      - export_figure_formats
+      - clean_cache
+  - title: Submitting
+    desc: >
+      What you send, built into submission/: the manuscript split for
+      double-blind review, the supplement, the figures, and the data and code
+      compendium.
+    contents:
+      - make_preprint
+      - make_submission
+  - title: Checking
+    desc: What every render verifies first, to call on its own.
+    contents:
+      - checks
+      - check_species
+      - check_species_text
+      - manuscript_stats
+  - title: Data and metadata
+    desc: >
+      data/ is the folder that publishes. convert_data() brings originals in,
+      in a format that will still open in twenty years; the deposit's
+      metadata is filled in from what the project already knows.
+    contents:
+      - convert_data
+      - deposit_zenodo
+      - sync_metadata
+      - edit_metadata
+      - sync_licenses
+  - title: Journals and references
+    desc: >
+      Any journal's citation style, fetched from the official CSL repository
+      into references/; and the scientific names of any bibliography in
+      italics.
+    contents:
+      - list_journals
+      - add_journal
+      - italicize_species
+  - title: Co-authors in Google Docs
+    contents:
+      - trackdown
+  - title: Package
+    contents:
+      - easypaper-package
