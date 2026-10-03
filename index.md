@@ -31,8 +31,7 @@ render, and builds the folder you send.
 remotes::install_github("danielsangarci/easypaper")
 
 library(easypaper)
-create_paper("my_paper", title = "My title",
-             authors = c("Ana Garcia", "Luis Perez"))
+create_paper("my_paper")
 ```
 
 Open the `.Rproj` it creates, write in `_sections/`, and:
