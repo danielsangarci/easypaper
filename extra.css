@@ -17,3 +17,21 @@ main li {
   -webkit-hyphens: auto;   /* Safari */
   hyphens: auto;
 }
+
+/* The key idea of the Get started guide: render_*() against make_*().
+ * In the green of the site rather than Bootstrap's blue alert, which no
+ * other part of the site uses. The table inside stays on white, so it reads
+ * as a table and not as part of the box.
+ */
+
+main .key-idea {
+  background-color: #eef5f0;
+  border-left: 4px solid #1a5632;
+  border-radius: 0.375rem;
+  padding: 1rem 1.25rem 0.25rem;
+  margin: 1.5rem 0;
+}
+
+main .key-idea table {
+  background-color: #ffffff;
+}

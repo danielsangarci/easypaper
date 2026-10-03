@@ -1,11 +1,11 @@
 # easypaper
 
-**Focus on your research: easypaper handles the formatting and the
-submission.**
+**Focus on your research: easypaper handles the formatting and gets your
+paper ready for submission.**
 
-Write your paper in Quarto, one section per file, with the analysis
-inside it. easypaper renders it for any journal, checks it before every
-render, and builds the folder you send.
+Write it in Quarto, one section per file, with the analysis inside it.
+easypaper renders it for any journal, checks it before every render, and
+builds the folder you send.
 
 - 📄 **One source, every output.** The journal’s `.docx`, a `.pdf` for
   the preprint server, a working `.html` and the supplement, each in the

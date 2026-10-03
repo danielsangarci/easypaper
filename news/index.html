@@ -56,8 +56,11 @@
 <h3 id="rendering-0-1-0">Rendering<a class="anchor" aria-label="anchor" href="#rendering-0-1-0"></a></h3>
 <ul><li>
 <code><a href="../reference/render.html">render_html()</a></code>, <code><a href="../reference/render.html">render_docx()</a></code>, <code><a href="../reference/render.html">render_pdf()</a></code> and <code><a href="../reference/render.html">render_supplementary()</a></code> write documents to read into <code>output/</code>, in the style of the journal the manuscript names or of any other; <code><a href="../reference/render.html">render_all()</a></code> runs <code><a href="../reference/render.html">render_docx()</a></code>, <code><a href="../reference/render.html">render_pdf()</a></code> and <code><a href="../reference/export_code.html">export_code()</a></code> in one go. <code><a href="../reference/render.html">preview()</a></code> reloads as you save.</li>
+<li>The main text has its lines numbered, in the <code>.docx</code> and in the <code>.pdf</code>. The affiliations and the keywords line start without the first-line indent of the text.</li>
 <li>The supplement is a document of its own, with its own reference list and its own numbering: <em>Figure S1</em>, <em>Table S1</em>.</li>
 <li>Figures are exported at 600 dpi as PNG, JPEG and TIFF on every render.</li>
+<li>
+<code><a href="../reference/export_code.html">export_code()</a></code> writes the code of every chunk into one script, <code>analysis_code.R</code>, that opens with a table of contents: the line each section starts on and the chunks it holds. Each analysis lives in the results section that reports it, so each is found under its own heading.</li>
 <li>Captions follow the <code>crossref:</code> block of <code>_quarto.yml</code>, or a caption style for one render: <code>"abbrev"</code>, <code>"colon"</code>, <code>"compact"</code>, <code>"nature"</code>, or one of your own.</li>
 <li>
 <code><a href="../reference/list_journals.html">list_journals()</a></code> and <code><a href="../reference/add_journal.html">add_journal()</a></code> manage the citation styles, fetched from the official CSL repository.</li>

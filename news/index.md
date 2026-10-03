@@ -55,9 +55,17 @@ First release.
   in one go.
   [`preview()`](https://danielsangarci.github.io/easypaper/reference/render.md)
   reloads as you save.
+- The main text has its lines numbered, in the `.docx` and in the
+  `.pdf`. The affiliations and the keywords line start without the
+  first-line indent of the text.
 - The supplement is a document of its own, with its own reference list
   and its own numbering: *Figure S1*, *Table S1*.
 - Figures are exported at 600 dpi as PNG, JPEG and TIFF on every render.
+- [`export_code()`](https://danielsangarci.github.io/easypaper/reference/export_code.md)
+  writes the code of every chunk into one script, `analysis_code.R`,
+  that opens with a table of contents: the line each section starts on
+  and the chunks it holds. Each analysis lives in the results section
+  that reports it, so each is found under its own heading.
 - Captions follow the `crossref:` block of `_quarto.yml`, or a caption
   style for one render: `"abbrev"`, `"colon"`, `"compact"`, `"nature"`,
   or one of your own.

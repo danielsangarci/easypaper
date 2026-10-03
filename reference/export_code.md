@@ -2,9 +2,11 @@
 
 Extracts the R code of `R/setup.R` and of every section, in the order
 the manuscript includes them, into `output/analysis_code.R`, with a
-header per section. Beside it goes `output/sessionInfo.txt`, with the
-versions of R, of every package and of Quarto, and a copy of `renv.lock`
-when there is one.
+header per section. It opens with a table of contents: the line each
+section starts on, and the labels of its chunks, so each analysis is
+found at a glance – the richness model in Results, part 1, say. Beside
+it goes `output/sessionInfo.txt`, with the versions of R, of every
+package and of Quarto, and a copy of `renv.lock` when there is one.
 [`render_all()`](https://danielsangarci.github.io/easypaper/reference/render.md)
 and
 [`make_submission()`](https://danielsangarci.github.io/easypaper/reference/make_submission.md)
@@ -32,12 +34,12 @@ The path of `analysis_code.R`, invisibly.
 ``` r
 dir <- file.path(tempdir(), "my_paper")
 create_paper(dir, git = FALSE)
-#> Project created: /tmp/RtmpMgNW60/my_paper
+#> Project created: /tmp/RtmpPIfBNQ/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
 #>   3. render_html()      # see ?render for every command
 export_code(dir)
-#> Written: /tmp/RtmpMgNW60/my_paper/output/analysis_code.R
+#> Written: /tmp/RtmpPIfBNQ/my_paper/output/analysis_code.R
 list.files(file.path(dir, "output"))
 #> [1] "analysis_code.R" "sessionInfo.txt"
 unlink(dir, recursive = TRUE)

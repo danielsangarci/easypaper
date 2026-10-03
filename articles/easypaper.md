@@ -118,8 +118,8 @@ thing done the way the package expects it:
 | `manuscript.qmd` | a title, a short title, two authors sharing an affiliation, one with two, the corresponding author, and the journal it is written for, *Journal of Ecology*, whose style is in `references/` |
 | `01_abstract.qmd` | the abstract, and the keywords on one line under it |
 | `02_introduction.qmd` | citations in brackets, `[PERMANOVA, @Anderson2001]`, and in the sentence, `@Condit2002` |
-| `03_methods.qmd` | the analysis in chunks that read `data/`, packages loaded in a chunk without cache, the slow models cached |
-| `04.1`, `04.2` | every number written by inline R, never typed — even the words that depend on a result (“differed”, “did not differ”); a species name written by R and put in italics |
+| `03_methods.qmd` | the text of the Methods, and above it what every analysis needs: the packages, loaded in a chunk without cache, and the data, read from `data/` |
+| `04.1_richness.qmd`, `04.2_composition.qmd` | each analysis beside the text that reports it, in a file named after it, as an author renames the template’s `04.1_results1.qmd` — the GLM of richness, then the PERMANOVA, PERMDISP and NMDS of composition, cached; every number written by inline R, never typed — even the words that depend on a result (“differed”, “did not differ”); a species name written by R and put in italics |
 | `05_discussion.qmd` | interpretation without the numbers, and the limits of the design |
 | `06`–`09` | the statements at the end, filled in, with the DOI placeholder [`deposit_zenodo()`](https://danielsangarci.github.io/easypaper/reference/deposit_zenodo.md) fills |
 | `10_figures.qmd`, `11_tables.qmd` | two figures, an NMDS with species names in italics among them, and two flextables with the three rules |
@@ -296,16 +296,31 @@ works in any folder, whether or not easypaper created it.
     [`preview()`](https://danielsangarci.github.io/easypaper/reference/render.md),
     which reloads every time you save.
 
-From there it is one loop — write, render, repeat — and the analysis
-lives inside the section that reports it, reading from `data/` with the
-path relative to the project root:
+From there it is one loop — write, render, repeat. `03_methods.qmd` is
+the text of the Methods, with a chunk above it for what every analysis
+needs: the packages and the data, read from `data/` with the path
+relative to the project root. Each analysis then lives in the results
+section that reports it, right before its text, and starts from that
+chunk and from nothing of another results section. Name each results
+file after its analysis: rename `04.1_results1.qmd` to
+`04.1_richness.qmd`, say, and change its include line in
+`manuscript.qmd` to match. In `03_methods.qmd`:
+
+    ```{r}
+    #| label: data
+    richness <- readr::read_csv(here::here("data/richness.csv")) |>
+      dplyr::filter(!is.na(S), status != "dead")
+    ```
+
+    ## Statistical analysis
+
+    Richness was modelled with a negative binomial GLMM...
+
+and in `04.1_richness.qmd`, the analysis and what it found:
 
     ```{r}
     #| label: richness-model
     #| cache: true
-    richness <- readr::read_csv(here::here("data/richness.csv")) |>
-      dplyr::filter(!is.na(S), status != "dead")
-
     m1 <- glmmTMB::glmmTMB(S ~ treatment + (1 | plot),
                            family = nbinom2, data = richness)
     ```
@@ -313,11 +328,17 @@ path relative to the project root:
     Richness was higher in the treatment
     (beta = r round(fixef(m1)$cond[2], 2)), as shown in @fig-richness.
 
-Cleaning happens there, from the input `.csv`, never as a derived file
-saved in `data/`. Excluding individuals or recoding a factor is a
-scientific decision: it belongs in code a reader can check, not in a
-spreadsheet nobody can trace. `#| cache: true` covers the cost of
-recomputing it — and
+[`export_code()`](https://danielsangarci.github.io/easypaper/reference/export_code.md)
+writes all of it into one script, `analysis_code.R`, in that order,
+opening with a table of contents that says on which line each section
+starts and which chunks it holds: the richness model is found under
+`04.1_richness.qmd`.
+
+Cleaning happens in the chunk of the Methods, from the input `.csv`,
+never as a derived file saved in `data/`. Excluding individuals or
+recoding a factor is a scientific decision: it belongs in code a reader
+can check, not in a spreadsheet nobody can trace. `#| cache: true`
+covers the cost of recomputing it — and
 [`clean_cache()`](https://danielsangarci.github.io/easypaper/reference/clean_cache.md)
 empties that cache, which is what you run when the data underneath a
 chunk changed, because a change in `data/` is the one thing knitr’s
@@ -368,8 +389,11 @@ alone, with no affiliation and no asterisk, and it gives each author a
 paragraph of their own. So every render of the package hands Quarto the
 names as one line, marks included, and the chunk right under the YAML,
 [`easypaper::affiliations()`](https://danielsangarci.github.io/easypaper/reference/affiliations.md),
-writes the affiliations. A double-blind main text leaves that chunk out,
-and the title page is given it. Quarto’s own preview —
+writes the affiliations. In the `.docx` they have a paragraph style of
+their own, *Affiliation*, without the first-line indent of the text,
+which you can restyle in Word for all of them at once; the keywords line
+under the abstract has no indent either. A double-blind main text leaves
+that chunk out, and the title page is given it. Quarto’s own preview —
 [`preview()`](https://danielsangarci.github.io/easypaper/reference/render.md),
 or `quarto preview` — draws the title block its own way, and the chunk
 prints nothing there.
@@ -648,9 +672,9 @@ render_all()                        # docx and pdf, with their supplements, and 
 |----|----|
 | [`render_html()`](https://danielsangarci.github.io/easypaper/reference/render.md) | the working `.html`, images embedded |
 | [`render_docx()`](https://danielsangarci.github.io/easypaper/reference/render.md) | `manuscript_<journal>.docx`, with the journal’s citation style and Word template, and the supplement beside it, `supporting_information.docx` |
-| [`render_pdf()`](https://danielsangarci.github.io/easypaper/reference/render.md) | `manuscript_<journal>.pdf`, for a preprint server or for reading, and the supplement beside it as `.pdf` |
+| [`render_pdf()`](https://danielsangarci.github.io/easypaper/reference/render.md) | `manuscript_<journal>.pdf`, its lines numbered as in the `.docx`, for a preprint server or for reading, and the supplement beside it as `.pdf` |
 | [`render_supplementary()`](https://danielsangarci.github.io/easypaper/reference/render.md) | the supplement alone, `supporting_information.docx`, with its own reference list: when only the supplement changed |
-| [`export_code()`](https://danielsangarci.github.io/easypaper/reference/export_code.md) | `analysis_code.R`, the code of every chunk in order, and `sessionInfo.txt` |
+| [`export_code()`](https://danielsangarci.github.io/easypaper/reference/export_code.md) | `analysis_code.R`, the code of every chunk in order, opening with a table of contents — the line each section starts on and the chunks it holds — and `sessionInfo.txt` |
 | [`preview()`](https://danielsangarci.github.io/easypaper/reference/render.md) | nothing on disk: a live `.html` in the viewer that reloads every time you save |
 | [`render_all()`](https://danielsangarci.github.io/easypaper/reference/render.md) | [`render_docx()`](https://danielsangarci.github.io/easypaper/reference/render.md), [`render_pdf()`](https://danielsangarci.github.io/easypaper/reference/render.md) and [`export_code()`](https://danielsangarci.github.io/easypaper/reference/export_code.md), in order: both documents with their supplements, and the code |
 
@@ -698,9 +722,11 @@ take all three.
 | `caption_style` | `"default"` | How figures and tables are named, in their captions and in the text: `"default"` is what the `crossref:` block of `_quarto.yml` says (*Figure 1.* and *Table 1.* in a new project), `"abbrev"` gives *Fig. 1.*, `"colon"` *Figure 1:*, `"compact"` *Fig. 1:*, `"nature"` *Figure 1* followed by a vertical rule. Your own go under `caption-styles:` in `_quarto.yml`: see [How figures and tables are named](#how-figures-and-tables-are-named) |
 | `suppl_figures` | `"separate"` | Whether the supplementary figures and tables travel with the supplement or stay at the end of the manuscript. Either way they are cited from the main text |
 
-Line numbers and line spacing are not set here: they belong to what you
-send, and are arguments of [`make_preprint()`](#the-preprint-deposit)
-and [`make_submission()`](#submitting-to-a-journal).
+The main text comes out with its lines numbered, in the `.docx` and in
+the `.pdf` alike, and the supplement without them. Whether to number
+them, and the line spacing, belong to what you send: they are arguments
+of [`make_preprint()`](#the-preprint-deposit) and
+[`make_submission()`](#submitting-to-a-journal).
 
 One thing worth reading once: **the manuscript and its supplement are
 never joined into a single file**. Each render writes one document per

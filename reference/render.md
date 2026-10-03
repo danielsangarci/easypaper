@@ -103,8 +103,9 @@ useful.
   project's Word template, and the supplement beside it, as
   `render_supplementary()` does.
 
-- `render_pdf()` writes `output/manuscript_<journal>.pdf`, and the
-  supplement beside it as `.pdf`. It needs a LaTeX installation:
+- `render_pdf()` writes `output/manuscript_<journal>.pdf`, its lines
+  numbered as in the `.docx`, and the supplement beside it as `.pdf`. It
+  needs a LaTeX installation:
   [`tinytex::install_tinytex()`](https://rdrr.io/pkg/tinytex/man/install_tinytex.html)
   is enough.
 

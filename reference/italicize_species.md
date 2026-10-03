@@ -191,7 +191,7 @@ writeLines('[{"id": "perez2020", "type": "article-journal",
   "title": "Effects of fire on Pinus halepensis regeneration"}]', refs)
 out <- italicize_species(refs, names = "Pinus halepensis", gbif = FALSE)
 #> Scientific names in italics (1): Pinus halepensis
-#> Written: /tmp/RtmpMgNW60/refs_italic.json
+#> Written: /tmp/RtmpPIfBNQ/refs_italic.json
 jsonlite::read_json(out)[[1]]$title
 #> [1] "<span class=\"nocase\">Effects of fire on <i><span class=\"nocase\">Pinus halepensis</span></i> regeneration</span>"
 unlink(c(refs, out))

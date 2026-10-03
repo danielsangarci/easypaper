@@ -142,8 +142,8 @@ returns the <code>output/</code> folder, and <code>preview()</code> nothing usef
 <ul><li><p><code>render_docx()</code> writes <code>output/manuscript_&lt;journal&gt;.docx</code>, on the
 project's Word template, and the supplement beside it, as
 <code>render_supplementary()</code> does.</p></li>
-<li><p><code>render_pdf()</code> writes <code>output/manuscript_&lt;journal&gt;.pdf</code>, and the
-supplement beside it as <code>.pdf</code>. It needs a LaTeX installation:
+<li><p><code>render_pdf()</code> writes <code>output/manuscript_&lt;journal&gt;.pdf</code>, its lines
+numbered as in the <code>.docx</code>, and the supplement beside it as <code>.pdf</code>. It needs a LaTeX installation:
 <code><a href="https://rdrr.io/pkg/tinytex/man/install_tinytex.html" class="external-link">tinytex::install_tinytex()</a></code> is enough.</p></li>
 <li><p><code>render_html()</code> writes <code>output/manuscript.html</code>: the working copy, in
 seconds instead of minutes. It does not record <code>renv.lock</code>, so rendering

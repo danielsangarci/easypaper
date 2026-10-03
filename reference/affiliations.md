@@ -47,6 +47,10 @@ name them. An affiliation may also be written in place, quoted, as
 `affiliations: ["University X, City"]`, or with Quarto's own fields
 (`department:`, `city:`, `country:` ...).
 
+In a `.docx` they have a paragraph style of their own, *Affiliation*:
+the body text of the Word template without its first-line indent, which
+you can restyle in Word for every affiliation at once.
+
 A double-blind main text leaves the chunk out, and the title page of
 [`make_submission()`](https://danielsangarci.github.io/easypaper/reference/make_submission.md)
 is given it.
@@ -61,7 +65,7 @@ block itself.
 ``` r
 dir <- file.path(tempdir(), "my_paper")
 create_paper(dir, authors = c("Ada Lovelace", "Alan Turing"), git = FALSE)
-#> Project created: /tmp/RtmpMgNW60/my_paper
+#> Project created: /tmp/RtmpPIfBNQ/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
 #>   3. render_html()      # see ?render for every command

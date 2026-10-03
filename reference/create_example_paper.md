@@ -53,9 +53,12 @@ The absolute path of the created project, invisibly.
                                 affiliations, the corresponding author
     _sections/01_abstract.qmd   the abstract, and the keywords under it
     _sections/02_introduction   citations in brackets and in the sentence
-    _sections/03_methods        the analysis in chunks: data read from data/,
-                                a GLM, a PERMANOVA, a PERMDISP and an NMDS
-    _sections/04.x_results      numbers written by inline R, never typed;
+    _sections/03_methods        the text of the Methods, and a chunk that reads
+                                the data from data/ for every analysis
+    _sections/04.1_richness     each analysis beside its text, in a file named
+    _sections/04.2_composition  after it: a GLM of richness; a PERMANOVA, a
+                                PERMDISP and an NMDS of composition;
+                                numbers written by inline R, never typed;
                                 scientific names written by R, in italics
     _sections/10_figures        two figures: an NMDS with names in italics
     _sections/11_tables         two flextables, with the three rules
@@ -92,7 +95,7 @@ if (requireNamespace("vegan", quietly = TRUE)) {
   list.files(file.path(dir, "data"))
   unlink(dir, recursive = TRUE)
 }
-#> Example project created: /tmp/RtmpMgNW60/example_paper
+#> Example project created: /tmp/RtmpPIfBNQ/example_paper
 #>   1. open example_paper.Rproj
 #>   2. library(easypaper)
 #>   3. render_html()      # the study, rendered

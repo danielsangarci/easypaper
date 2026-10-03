@@ -87,6 +87,9 @@ superscripts. The affiliations are numbered in the order the
 authors name them. An affiliation may also be written in place, quoted,
 as <code>affiliations: ["University X, City"]</code>, or with Quarto's own fields
 (<code>department:</code>, <code>city:</code>, <code>country:</code> ...).</p>
+<p>In a <code>.docx</code> they have a paragraph style of their own, <em>Affiliation</em>:
+the body text of the Word template without its first-line indent, which
+you can restyle in Word for every affiliation at once.</p>
 <p>A double-blind main text leaves the chunk out, and the title page of
 <code><a href="make_submission.html">make_submission()</a></code> is given it.</p>
 <p>Quarto's own preview, <code><a href="render.html">preview()</a></code> or <code>quarto preview</code>, gets nothing from
@@ -97,7 +100,7 @@ it: there Quarto draws the title block itself.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"my_paper"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="create_paper.html">create_paper</a></span><span class="op">(</span><span class="va">dir</span>, authors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Ada Lovelace"</span>, <span class="st">"Alan Turing"</span><span class="op">)</span>, git <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Project created: /tmp/RtmpMgNW60/my_paper</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Project created: /tmp/RtmpPIfBNQ/my_paper</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   1. open my_paper.Rproj</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   2. library(easypaper)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   3. render_html()      # see ?render for every command</span>

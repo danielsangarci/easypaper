@@ -74,7 +74,7 @@ resolution the journal demands, and a data deposit. easypaper writes a
 project that holds only the paper, and its functions do the rest. This
 guide follows a paper in the order you write it: set it up, bring the
 data in, write, render, submit. The reference tables are kept for the <a href="#technical-details">technical details</a> at the end.</p>
-<div class="alert alert-info">
+<div class="key-idea">
 <p><strong>Two families of functions, two jobs.</strong> Most of what
 you call starts with <code>render_</code> or <code>make_</code>, and the
 prefix tells you what you get.</p>
@@ -280,16 +280,22 @@ in the sentence, <code>@Condit2002</code>
 </tr>
 <tr class="even">
 <td><code>03_methods.qmd</code></td>
-<td>the analysis in chunks that read <code>data/</code>, packages loaded
-in a chunk without cache, the slow models cached</td>
+<td>the text of the Methods, and above it what every analysis needs: the
+packages, loaded in a chunk without cache, and the data, read from
+<code>data/</code>
+</td>
 </tr>
 <tr class="odd">
 <td>
-<code>04.1</code>, <code>04.2</code>
+<code>04.1_richness.qmd</code>,
+<code>04.2_composition.qmd</code>
 </td>
-<td>every number written by inline R, never typed — even the words that
-depend on a result (“differed”, “did not differ”); a species name
-written by R and put in italics</td>
+<td>each analysis beside the text that reports it, in a file named after
+it, as an author renames the template’s <code>04.1_results1.qmd</code> —
+the GLM of richness, then the PERMANOVA, PERMDISP and NMDS of
+composition, cached; every number written by inline R, never typed —
+even the words that depend on a result (“differed”, “did not differ”); a
+species name written by R and put in italics</td>
 </tr>
 <tr class="even">
 <td><code>05_discussion.qmd</code></td>
@@ -493,27 +499,47 @@ headings and paragraphs, nothing to declare.</li>
 seconds, not minutes — or <code><a href="../reference/render.html">preview()</a></code>, which reloads every
 time you save.</li>
 </ol>
-<p>From there it is one loop — write, render, repeat — and the analysis
-lives inside the section that reports it, reading from
-<code>data/</code> with the path relative to the project root:</p>
+<p>From there it is one loop — write, render, repeat.
+<code>03_methods.qmd</code> is the text of the Methods, with a chunk
+above it for what every analysis needs: the packages and the data, read
+from <code>data/</code> with the path relative to the project root. Each
+analysis then lives in the results section that reports it, right before
+its text, and starts from that chunk and from nothing of another results
+section. Name each results file after its analysis: rename
+<code>04.1_results1.qmd</code> to <code>04.1_richness.qmd</code>, say,
+and change its include line in <code>manuscript.qmd</code> to match. In
+<code>03_methods.qmd</code>:</p>
+<pre><code>```{r}
+#| label: data
+richness &lt;- readr::read_csv(here::here("data/richness.csv")) |&gt;
+  dplyr::filter(!is.na(S), status != "dead")
+```
+
+## Statistical analysis
+
+Richness was modelled with a negative binomial GLMM...</code></pre>
+<p>and in <code>04.1_richness.qmd</code>, the analysis and what it
+found:</p>
 <pre><code>```{r}
 #| label: richness-model
 #| cache: true
-richness &lt;- readr::read_csv(here::here("data/richness.csv")) |&gt;
-  dplyr::filter(!is.na(S), status != "dead")
-
 m1 &lt;- glmmTMB::glmmTMB(S ~ treatment + (1 | plot),
                        family = nbinom2, data = richness)
 ```
 
 Richness was higher in the treatment
 (beta = r round(fixef(m1)$cond[2], 2)), as shown in @fig-richness.</code></pre>
-<p>Cleaning happens there, from the input <code>.csv</code>, never as a
-derived file saved in <code>data/</code>. Excluding individuals or
-recoding a factor is a scientific decision: it belongs in code a reader
-can check, not in a spreadsheet nobody can trace.
-<code>#| cache: true</code> covers the cost of recomputing it — and
-<code><a href="../reference/clean_cache.html">clean_cache()</a></code> empties that cache, which is what you run
+<p><code><a href="../reference/export_code.html">export_code()</a></code> writes all of it into one script,
+<code>analysis_code.R</code>, in that order, opening with a table of
+contents that says on which line each section starts and which chunks it
+holds: the richness model is found under
+<code>04.1_richness.qmd</code>.</p>
+<p>Cleaning happens in the chunk of the Methods, from the input
+<code>.csv</code>, never as a derived file saved in <code>data/</code>.
+Excluding individuals or recoding a factor is a scientific decision: it
+belongs in code a reader can check, not in a spreadsheet nobody can
+trace. <code>#| cache: true</code> covers the cost of recomputing it —
+and <code><a href="../reference/clean_cache.html">clean_cache()</a></code> empties that cache, which is what you run
 when the data underneath a chunk changed, because a change in
 <code>data/</code> is the one thing knitr’s cache does not notice.</p>
 </div>
@@ -523,18 +549,18 @@ when the data underneath a chunk changed, because a change in
 <p>You write the authors and their affiliations in the YAML of
 <code>manuscript.qmd</code>, the way Quarto documents them, and never a
 number:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">author</span><span class="kw">:</span></span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Ana Garcia</span></span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="at">    </span><span class="fu">affiliations</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">ecology</span><span class="kw">]</span></span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="at">    </span><span class="fu">email</span><span class="kw">:</span><span class="at"> ana.garcia@example.org</span></span>
-<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="at">    </span><span class="fu">corresponding</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
-<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Luis Perez</span></span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="at">    </span><span class="fu">affiliations</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">ecology</span><span class="kw">,</span><span class="at"> institute</span><span class="kw">]</span></span>
-<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="fu">affiliations</span><span class="kw">:</span></span>
-<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> ecology</span></span>
-<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> University X, Department of Ecology, City, Country</span></span>
-<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> institute</span></span>
-<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Institute Y, City, Country</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">author</span><span class="kw">:</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Ana Garcia</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="at">    </span><span class="fu">affiliations</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">ecology</span><span class="kw">]</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="at">    </span><span class="fu">email</span><span class="kw">:</span><span class="at"> ana.garcia@example.org</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="at">    </span><span class="fu">corresponding</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Luis Perez</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="at">    </span><span class="fu">affiliations</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">ecology</span><span class="kw">,</span><span class="at"> institute</span><span class="kw">]</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="fu">affiliations</span><span class="kw">:</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> ecology</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> University X, Department of Ecology, City, Country</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> institute</span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Institute Y, City, Country</span></span></code></pre></div>
 <p>Every render prints it as a paper does — the authors on one line, one
 after another, and the affiliations under them:</p>
 <blockquote>
@@ -557,10 +583,14 @@ the names alone, with no affiliation and no asterisk, and it gives each
 author a paragraph of their own. So every render of the package hands
 Quarto the names as one line, marks included, and the chunk right under
 the YAML, <code><a href="../reference/affiliations.html">easypaper::affiliations()</a></code>, writes the
-affiliations. A double-blind main text leaves that chunk out, and the
-title page is given it. Quarto’s own preview — <code><a href="../reference/render.html">preview()</a></code>,
-or <code>quarto preview</code> — draws the title block its own way, and
-the chunk prints nothing there.</p>
+affiliations. In the <code>.docx</code> they have a paragraph style of
+their own, <em>Affiliation</em>, without the first-line indent of the
+text, which you can restyle in Word for all of them at once; the
+keywords line under the abstract has no indent either. A double-blind
+main text leaves that chunk out, and the title page is given it.
+Quarto’s own preview — <code><a href="../reference/render.html">preview()</a></code>, or
+<code>quarto preview</code> — draws the title block its own way, and the
+chunk prints nothing there.</p>
 </div>
 <div class="section level3">
 <h3 id="short-title">Short title<a class="anchor" aria-label="anchor" href="#short-title"></a>
@@ -568,8 +598,8 @@ the chunk prints nothing there.</p>
 <p>Some journals ask for a short title, or running head. Write it in the
 YAML of <code>manuscript.qmd</code>, under the title — the template has
 the line, commented out:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">title</span><span class="kw">:</span><span class="at"> </span><span class="st">"Chemical mimicry in the parasitic butterfly Maculinea rebeli"</span></span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="fu">short-title</span><span class="kw">:</span><span class="at"> </span><span class="st">"Chemical mimicry in Maculinea"</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">title</span><span class="kw">:</span><span class="at"> </span><span class="st">"Chemical mimicry in the parasitic butterfly Maculinea rebeli"</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">short-title</span><span class="kw">:</span><span class="at"> </span><span class="st">"Chemical mimicry in Maculinea"</span></span></code></pre></div>
 <p>Every document prints it under the title as “Short title: Chemical
 mimicry in Maculinea”, as a second line of the title itself, in the same
 font and size: the main text, signed or blinded, the title page, the
@@ -696,7 +726,7 @@ not tell you, so render the <code>.docx</code> once before you rely on
 it.</p>
 <p>Where the figures end up is decided when you submit, and the
 citations work either way:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/make_submission.html">make_submission</a></span><span class="op">(</span><span class="op">)</span>                        <span class="co"># own document</span></span>
 <span><span class="fu"><a href="../reference/make_submission.html">make_submission</a></span><span class="op">(</span>suppl_figures <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span>  <span class="co"># end of the main text</span></span></code></pre></div>
 </div>
@@ -705,7 +735,7 @@ citations work either way:</p>
 </h3>
 <p>Co-authors who do not use R can comment and edit in Google Docs, one
 section at a time, through the trackdown package:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/trackdown.html">td_upload</a></span><span class="op">(</span><span class="st">"02_introduction"</span><span class="op">)</span>     <span class="co"># the section, as a Google Doc</span></span>
 <span><span class="fu"><a href="../reference/trackdown.html">td_download</a></span><span class="op">(</span><span class="st">"02_introduction"</span><span class="op">)</span>   <span class="co"># their edits, back into the .qmd</span></span>
 <span><span class="fu"><a href="../reference/trackdown.html">td_update</a></span><span class="op">(</span><span class="st">"02_introduction"</span><span class="op">)</span>     <span class="co"># your local version, over the Google Doc</span></span></code></pre></div>
@@ -736,7 +766,7 @@ write, but it can read it the way an editor does.
 captions and the supplement, and reports each scientific name not
 written the way journals ask, with the file, the line and what to
 write:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_species_text.html">check_species_text</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code>Scientific names in the text: Fagus sylvatica, Formica rufa, Lasius niger
 5 things to look at:
@@ -778,7 +808,7 @@ taken for a name, and a warning says what could not be checked.</p>
 <h3 id="the-checks">The checks<a class="anchor" aria-label="anchor" href="#the-checks"></a>
 </h3>
 <p>Every render runs them, and you can call them yourself:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/checks.html">check_packages</a></span><span class="op">(</span><span class="op">)</span>    <span class="co"># packages the manuscript loads that are not installed</span></span>
 <span><span class="fu"><a href="../reference/checks.html">check_citations</a></span><span class="op">(</span><span class="op">)</span>   <span class="co"># @keys with no entry in references/, and the reverse</span></span>
 <span><span class="fu"><a href="../reference/checks.html">check_crossrefs</a></span><span class="op">(</span><span class="op">)</span>   <span class="co"># @fig-/@tbl- with no target, and figures nobody cites</span></span>
@@ -795,7 +825,7 @@ there is not reported as uncited.</p>
 <p>Every render and every <code>make_*()</code> also ends with a summary
 of the manuscript: what a journal’s submission form asks for.
 <code><a href="../reference/manuscript_stats.html">manuscript_stats()</a></code> says it on its own:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/manuscript_stats.html">manuscript_stats</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Manuscript summary</span></span>
 <span><span class="co">#&gt;   Title                          87 characters</span></span>
@@ -826,7 +856,7 @@ reference list, as the journal’s style prints it.</p>
 <p>Rendering produces documents to read: one file each, complete, with
 the authors on the front, written into <code>output/</code>. You will do
 it a hundred times.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/render.html">render_html</a></span><span class="op">(</span><span class="op">)</span>                       <span class="co"># seconds, while you write</span></span>
 <span><span class="fu"><a href="../reference/render.html">render_docx</a></span><span class="op">(</span><span class="op">)</span>                       <span class="co"># the .docx, in the journal manuscript.qmd names</span></span>
 <span><span class="fu"><a href="../reference/render.html">render_pdf</a></span><span class="op">(</span><span class="op">)</span>                        <span class="co"># the .pdf, for a preprint server or for reading</span></span>
@@ -857,8 +887,9 @@ citation style and Word template, and the supplement beside it,
 <tr class="odd">
 <td><code><a href="../reference/render.html">render_pdf()</a></code></td>
 <td>
-<code>manuscript_&lt;journal&gt;.pdf</code>, for a preprint server
-or for reading, and the supplement beside it as <code>.pdf</code>
+<code>manuscript_&lt;journal&gt;.pdf</code>, its lines numbered as
+in the <code>.docx</code>, for a preprint server or for reading, and the
+supplement beside it as <code>.pdf</code>
 </td>
 </tr>
 <tr class="even">
@@ -869,8 +900,9 @@ its own reference list: when only the supplement changed</td>
 <tr class="odd">
 <td><code><a href="../reference/export_code.html">export_code()</a></code></td>
 <td>
-<code>analysis_code.R</code>, the code of every chunk in order, and
-<code>sessionInfo.txt</code>
+<code>analysis_code.R</code>, the code of every chunk in order,
+opening with a table of contents — the line each section starts on and
+the chunks it holds — and <code>sessionInfo.txt</code>
 </td>
 </tr>
 <tr class="even">
@@ -958,8 +990,10 @@ cited from the main text</td>
 </tr>
 </tbody>
 </table>
-<p>Line numbers and line spacing are not set here: they belong to what
-you send, and are arguments of <a href="#the-preprint-deposit"><code>make_preprint()</code></a> and <a href="#submitting-to-a-journal"><code>make_submission()</code></a>.</p>
+<p>The main text comes out with its lines numbered, in the
+<code>.docx</code> and in the <code>.pdf</code> alike, and the
+supplement without them. Whether to number them, and the line spacing,
+belong to what you send: they are arguments of <a href="#the-preprint-deposit"><code>make_preprint()</code></a> and <a href="#submitting-to-a-journal"><code>make_submission()</code></a>.</p>
 <p>One thing worth reading once: <strong>the manuscript and its
 supplement are never joined into a single file</strong>. Each render
 writes one document per section, into <code>output/</code>, each with
@@ -995,7 +1029,7 @@ and to a journal.</p>
 <p>A preprint goes to two places at once — the manuscript to a server,
 the data and code to a repository — and <code><a href="../reference/make_preprint.html">make_preprint()</a></code>
 builds both halves into <code>submission/bioRxiv/</code>.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/make_preprint.html">make_preprint</a></span><span class="op">(</span><span class="op">)</span>                       <span class="co"># -&gt; submission/bioRxiv/</span></span>
 <span><span class="fu"><a href="../reference/make_preprint.html">make_preprint</a></span><span class="op">(</span>label <span class="op">=</span> <span class="st">"EcoEvoRxiv"</span><span class="op">)</span>   <span class="co"># another server</span></span>
 <span><span class="fu"><a href="../reference/make_preprint.html">make_preprint</a></span><span class="op">(</span>label <span class="op">=</span> <span class="st">"bioRxiv_v2"</span><span class="op">)</span>   <span class="co"># the revised version</span></span>
@@ -1088,7 +1122,7 @@ reserves its DOI, and writes it wherever the text says
 stays a draft until you review it on Zenodo and press Publish there.
 Called again after the data changed, it replaces the file of the same
 draft.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/make_preprint.html">make_preprint</a></span><span class="op">(</span><span class="op">)</span>                     <span class="co"># builds data_and_code.zip (or make_submission())</span></span>
 <span><span class="fu"><a href="../reference/deposit_zenodo.html">deposit_zenodo</a></span><span class="op">(</span>sandbox <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>      <span class="co"># try it on Zenodo's sandbox first</span></span>
 <span><span class="fu"><a href="../reference/deposit_zenodo.html">deposit_zenodo</a></span><span class="op">(</span><span class="op">)</span>                    <span class="co"># the real draft, and its DOI</span></span></code></pre></div>
@@ -1112,7 +1146,7 @@ ever adds, so the descriptions and the units you write by hand are never
 overwritten — and what no machine can guess — what each column means,
 its units, the dates and places the data cover — stays yours, and
 <code><a href="../reference/edit_metadata.html">edit_metadata()</a></code> opens an editor for it:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/edit_metadata.html">edit_metadata</a></span><span class="op">(</span><span class="st">"attributes"</span><span class="op">)</span>   <span class="co"># what each column means, and its units</span></span>
 <span><span class="fu"><a href="../reference/edit_metadata.html">edit_metadata</a></span><span class="op">(</span><span class="st">"biblio"</span><span class="op">)</span>       <span class="co"># what the dataset is, when and where</span></span>
 <span><span class="fu"><a href="../reference/edit_metadata.html">edit_metadata</a></span><span class="op">(</span><span class="st">"write"</span><span class="op">)</span>        <span class="co"># dataspice.json and its web page</span></span></code></pre></div>
@@ -1120,7 +1154,7 @@ its units, the dates and places the data cover — stays yours, and
 <div class="section level3">
 <h3 id="submitting-to-a-journal">Submitting to a journal<a class="anchor" aria-label="anchor" href="#submitting-to-a-journal"></a>
 </h3>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/make_submission.html">make_submission</a></span><span class="op">(</span><span class="op">)</span>                                     <span class="co"># -&gt; submission/JournalofEcology/, double-blind</span></span>
 <span><span class="fu"><a href="../reference/make_submission.html">make_submission</a></span><span class="op">(</span>blind <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>                        <span class="co"># signed, for a journal that is not blind</span></span>
 <span><span class="fu"><a href="../reference/make_submission.html">make_submission</a></span><span class="op">(</span>label <span class="op">=</span> <span class="st">"JournalofEcology_v2"</span><span class="op">)</span>        <span class="co"># a second version, kept apart</span></span></code></pre></div>
@@ -1291,7 +1325,7 @@ or <code>2</code>. Its lines are never numbered</td>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/make_submission.html">make_submission</a></span><span class="op">(</span>line_numbers <span class="op">=</span> <span class="cn">FALSE</span>, line_spacing <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/make_submission.html">make_submission</a></span><span class="op">(</span>figure_format <span class="op">=</span> <span class="st">"png"</span>, suppl_figures <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span></span></code></pre></div>
 <p><strong>Double-blind.</strong> The split into title page and main
@@ -1460,10 +1494,10 @@ your field uses something it has not heard of, pass the extension for a
 single call, or list it under <code>open-formats:</code> in the
 <code>easypaper:</code> block of <code>_quarto.yml</code>, and every
 call copies it from then on:</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/convert_data.html">convert_data</a></span><span class="op">(</span><span class="st">"originals"</span>, also <span class="op">=</span> <span class="st">"las"</span><span class="op">)</span>   <span class="co"># LiDAR point clouds, copied too</span></span></code></pre></div>
-<div class="sourceCode" id="cb28"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="fu">easypaper</span><span class="kw">:</span></span>
-<span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a><span class="at">  </span><span class="fu">open-formats</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">las</span><span class="kw">,</span><span class="at"> laz</span><span class="kw">]</span></span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a><span class="fu">easypaper</span><span class="kw">:</span></span>
+<span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a><span class="at">  </span><span class="fu">open-formats</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">las</span><span class="kw">,</span><span class="at"> laz</span><span class="kw">]</span></span></code></pre></div>
 <p>The last row is not a failure, it is the honest answer: a proprietary
 instrument file, an ArcGIS project, a photograph of a field notebook.
 Nothing can tell whether they belong in the paper, or what “the table”
@@ -1605,7 +1639,7 @@ the <code>easypaper:</code> block of <code>_quarto.yml</code>. The live
 <code><a href="../reference/render.html">render_html()</a></code> and every document for someone else have the
 italics.</p>
 <p>The same function works on any bibliography, outside a project:</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># in the first chunk of any .qmd or .Rmd, which runs before pandoc reads it</span></span>
 <span><span class="fu">easypaper</span><span class="fu">::</span><span class="fu"><a href="../reference/italicize_species.html">italicize_species</a></span><span class="op">(</span><span class="st">"references.bib"</span>, <span class="st">"references_italic.json"</span><span class="op">)</span></span></code></pre></div>
 <p>with <code>bibliography: references_italic.json</code> in its YAML.
@@ -1620,18 +1654,18 @@ It reads a <code>.bib</code> or a CSL-JSON (Zotero’s export);
 <code>_quarto.yml</code>. Quarto ignores it; easypaper reads it on every
 call, and it travels with the project, so a setting made once holds on
 every computer the paper is rendered on. Every setting is optional:</p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a><span class="fu">easypaper</span><span class="kw">:</span></span>
-<span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a><span class="at">  </span><span class="fu">created</span><span class="kw">:</span><span class="at"> </span><span class="st">"0.1.0"</span><span class="co">              # written by create_paper()</span></span>
-<span id="cb31-3"><a href="#cb31-3" tabindex="-1"></a><span class="at">  </span><span class="fu">italicize-species</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span><span class="co">       # false: the references as they are</span></span>
-<span id="cb31-4"><a href="#cb31-4" tabindex="-1"></a><span class="at">  </span><span class="fu">blinded-sections</span><span class="kw">:</span><span class="co">             # what a double-blind submission moves</span></span>
-<span id="cb31-5"><a href="#cb31-5" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> Acknowledgements</span><span class="co">          #   to the title page</span></span>
-<span id="cb31-6"><a href="#cb31-6" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> CRediT authorship contribution statement</span></span>
-<span id="cb31-7"><a href="#cb31-7" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> Conflict of Interest Statement</span></span>
-<span id="cb31-8"><a href="#cb31-8" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> Data availability statement</span></span>
-<span id="cb31-9"><a href="#cb31-9" tabindex="-1"></a><span class="at">  </span><span class="fu">open-formats</span><span class="kw">:</span><span class="at"> </span><span class="kw">[]</span><span class="co">              # more extensions convert_data() copies</span></span>
-<span id="cb31-10"><a href="#cb31-10" tabindex="-1"></a><span class="at">  </span><span class="fu">caption-styles</span><span class="kw">:</span><span class="co">               # your own, for caption_style = "custom"</span></span>
-<span id="cb31-11"><a href="#cb31-11" tabindex="-1"></a><span class="at">    </span><span class="fu">custom</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="fu">fig</span><span class="kw">:</span><span class="at"> </span><span class="st">"Fig."</span><span class="kw">,</span><span class="at"> </span><span class="fu">tbl</span><span class="kw">:</span><span class="at"> </span><span class="st">"Tab."</span><span class="kw">,</span><span class="at"> </span><span class="fu">sfig</span><span class="kw">:</span><span class="at"> </span><span class="st">"Fig. S"</span><span class="kw">,</span><span class="at"> </span><span class="fu">stbl</span><span class="kw">:</span><span class="at"> </span><span class="st">"Tab. S"</span><span class="kw">,</span><span class="at"> </span><span class="fu">delim</span><span class="kw">:</span><span class="at"> </span><span class="st">":"</span><span class="kw">}</span></span>
-<span id="cb31-12"><a href="#cb31-12" tabindex="-1"></a><span class="at">  </span><span class="fu">trackdown-folder</span><span class="kw">:</span><span class="at"> </span><span class="st">""</span><span class="co">          # the Google Drive folder of td_upload()</span></span></code></pre></div>
+<div class="sourceCode" id="cb32"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a><span class="fu">easypaper</span><span class="kw">:</span></span>
+<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a><span class="at">  </span><span class="fu">created</span><span class="kw">:</span><span class="at"> </span><span class="st">"0.1.0"</span><span class="co">              # written by create_paper()</span></span>
+<span id="cb32-3"><a href="#cb32-3" tabindex="-1"></a><span class="at">  </span><span class="fu">italicize-species</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span><span class="co">       # false: the references as they are</span></span>
+<span id="cb32-4"><a href="#cb32-4" tabindex="-1"></a><span class="at">  </span><span class="fu">blinded-sections</span><span class="kw">:</span><span class="co">             # what a double-blind submission moves</span></span>
+<span id="cb32-5"><a href="#cb32-5" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> Acknowledgements</span><span class="co">          #   to the title page</span></span>
+<span id="cb32-6"><a href="#cb32-6" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> CRediT authorship contribution statement</span></span>
+<span id="cb32-7"><a href="#cb32-7" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> Conflict of Interest Statement</span></span>
+<span id="cb32-8"><a href="#cb32-8" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> Data availability statement</span></span>
+<span id="cb32-9"><a href="#cb32-9" tabindex="-1"></a><span class="at">  </span><span class="fu">open-formats</span><span class="kw">:</span><span class="at"> </span><span class="kw">[]</span><span class="co">              # more extensions convert_data() copies</span></span>
+<span id="cb32-10"><a href="#cb32-10" tabindex="-1"></a><span class="at">  </span><span class="fu">caption-styles</span><span class="kw">:</span><span class="co">               # your own, for caption_style = "custom"</span></span>
+<span id="cb32-11"><a href="#cb32-11" tabindex="-1"></a><span class="at">    </span><span class="fu">custom</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="fu">fig</span><span class="kw">:</span><span class="at"> </span><span class="st">"Fig."</span><span class="kw">,</span><span class="at"> </span><span class="fu">tbl</span><span class="kw">:</span><span class="at"> </span><span class="st">"Tab."</span><span class="kw">,</span><span class="at"> </span><span class="fu">sfig</span><span class="kw">:</span><span class="at"> </span><span class="st">"Fig. S"</span><span class="kw">,</span><span class="at"> </span><span class="fu">stbl</span><span class="kw">:</span><span class="at"> </span><span class="st">"Tab. S"</span><span class="kw">,</span><span class="at"> </span><span class="fu">delim</span><span class="kw">:</span><span class="at"> </span><span class="st">":"</span><span class="kw">}</span></span>
+<span id="cb32-12"><a href="#cb32-12" tabindex="-1"></a><span class="at">  </span><span class="fu">trackdown-folder</span><span class="kw">:</span><span class="at"> </span><span class="st">""</span><span class="co">          # the Google Drive folder of td_upload()</span></span></code></pre></div>
 <p>A section added to <code>blinded-sections</code> needs nothing else:
 the title page is built from the manuscript, with the sections in the
 order of that list. A project that wants more on its title page — a word
@@ -1791,25 +1825,25 @@ default: <code><a href="../reference/render.html">render_docx()</a></code>, <cod
 <code><a href="../reference/make_submission.html">make_submission()</a></code> and <code><a href="../reference/render.html">preview()</a></code> all follow it.
 A new project writes <em>Figure 1.</em> and <em>Table 1.</em>; for a
 journal that wants <em>Fig. 1:</em>, change it to:</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a><span class="fu">crossref</span><span class="kw">:</span></span>
-<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a><span class="at">  </span><span class="fu">fig-title</span><span class="kw">:</span><span class="at"> </span><span class="st">"Fig."</span><span class="co">       # the caption of a figure:  "Fig. 1: ..."</span></span>
-<span id="cb32-3"><a href="#cb32-3" tabindex="-1"></a><span class="at">  </span><span class="fu">tbl-title</span><span class="kw">:</span><span class="at"> </span><span class="st">"Table"</span><span class="co">      # the heading of a table:   "Table 1: ..."</span></span>
-<span id="cb32-4"><a href="#cb32-4" tabindex="-1"></a><span class="at">  </span><span class="fu">fig-prefix</span><span class="kw">:</span><span class="at"> </span><span class="st">"Fig."</span><span class="co">      # in the text: @fig-nmds -&gt; "Fig. 1"</span></span>
-<span id="cb32-5"><a href="#cb32-5" tabindex="-1"></a><span class="at">  </span><span class="fu">tbl-prefix</span><span class="kw">:</span><span class="at"> </span><span class="st">"Table"</span><span class="co">     # in the text: @tbl-community -&gt; "Table 1"</span></span>
-<span id="cb32-6"><a href="#cb32-6" tabindex="-1"></a><span class="at">  </span><span class="fu">eq-prefix</span><span class="kw">:</span><span class="at"> </span><span class="st">"Eq."</span></span>
-<span id="cb32-7"><a href="#cb32-7" tabindex="-1"></a><span class="at">  </span><span class="fu">title-delim</span><span class="kw">:</span><span class="at"> </span><span class="st">":"</span><span class="co">        # what follows the number: "." ":" " |"</span></span>
-<span id="cb32-8"><a href="#cb32-8" tabindex="-1"></a><span class="at">  </span><span class="fu">custom</span><span class="kw">:</span></span>
-<span id="cb32-9"><a href="#cb32-9" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">kind</span><span class="kw">:</span><span class="at"> float</span></span>
-<span id="cb32-10"><a href="#cb32-10" tabindex="-1"></a><span class="at">      </span><span class="fu">key</span><span class="kw">:</span><span class="at"> sfig</span></span>
-<span id="cb32-11"><a href="#cb32-11" tabindex="-1"></a><span class="at">      </span><span class="fu">reference-prefix</span><span class="kw">:</span><span class="at"> </span><span class="st">"Fig. S"</span><span class="co">     # the supplement: "Fig. S1"</span></span>
-<span id="cb32-12"><a href="#cb32-12" tabindex="-1"></a><span class="at">      </span><span class="fu">latex-env</span><span class="kw">:</span><span class="at"> sfig</span></span>
-<span id="cb32-13"><a href="#cb32-13" tabindex="-1"></a><span class="at">      </span><span class="fu">space-before-numbering</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
-<span id="cb32-14"><a href="#cb32-14" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">kind</span><span class="kw">:</span><span class="at"> float</span></span>
-<span id="cb32-15"><a href="#cb32-15" tabindex="-1"></a><span class="at">      </span><span class="fu">key</span><span class="kw">:</span><span class="at"> stbl</span></span>
-<span id="cb32-16"><a href="#cb32-16" tabindex="-1"></a><span class="at">      </span><span class="fu">reference-prefix</span><span class="kw">:</span><span class="at"> </span><span class="st">"Table S"</span><span class="co">    # the supplement: "Table S1"</span></span>
-<span id="cb32-17"><a href="#cb32-17" tabindex="-1"></a><span class="at">      </span><span class="fu">latex-env</span><span class="kw">:</span><span class="at"> stbl</span></span>
-<span id="cb32-18"><a href="#cb32-18" tabindex="-1"></a><span class="at">      </span><span class="fu">space-before-numbering</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
-<span id="cb32-19"><a href="#cb32-19" tabindex="-1"></a><span class="at">      </span><span class="fu">caption-location</span><span class="kw">:</span><span class="at"> top</span></span></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a><span class="fu">crossref</span><span class="kw">:</span></span>
+<span id="cb33-2"><a href="#cb33-2" tabindex="-1"></a><span class="at">  </span><span class="fu">fig-title</span><span class="kw">:</span><span class="at"> </span><span class="st">"Fig."</span><span class="co">       # the caption of a figure:  "Fig. 1: ..."</span></span>
+<span id="cb33-3"><a href="#cb33-3" tabindex="-1"></a><span class="at">  </span><span class="fu">tbl-title</span><span class="kw">:</span><span class="at"> </span><span class="st">"Table"</span><span class="co">      # the heading of a table:   "Table 1: ..."</span></span>
+<span id="cb33-4"><a href="#cb33-4" tabindex="-1"></a><span class="at">  </span><span class="fu">fig-prefix</span><span class="kw">:</span><span class="at"> </span><span class="st">"Fig."</span><span class="co">      # in the text: @fig-nmds -&gt; "Fig. 1"</span></span>
+<span id="cb33-5"><a href="#cb33-5" tabindex="-1"></a><span class="at">  </span><span class="fu">tbl-prefix</span><span class="kw">:</span><span class="at"> </span><span class="st">"Table"</span><span class="co">     # in the text: @tbl-community -&gt; "Table 1"</span></span>
+<span id="cb33-6"><a href="#cb33-6" tabindex="-1"></a><span class="at">  </span><span class="fu">eq-prefix</span><span class="kw">:</span><span class="at"> </span><span class="st">"Eq."</span></span>
+<span id="cb33-7"><a href="#cb33-7" tabindex="-1"></a><span class="at">  </span><span class="fu">title-delim</span><span class="kw">:</span><span class="at"> </span><span class="st">":"</span><span class="co">        # what follows the number: "." ":" " |"</span></span>
+<span id="cb33-8"><a href="#cb33-8" tabindex="-1"></a><span class="at">  </span><span class="fu">custom</span><span class="kw">:</span></span>
+<span id="cb33-9"><a href="#cb33-9" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">kind</span><span class="kw">:</span><span class="at"> float</span></span>
+<span id="cb33-10"><a href="#cb33-10" tabindex="-1"></a><span class="at">      </span><span class="fu">key</span><span class="kw">:</span><span class="at"> sfig</span></span>
+<span id="cb33-11"><a href="#cb33-11" tabindex="-1"></a><span class="at">      </span><span class="fu">reference-prefix</span><span class="kw">:</span><span class="at"> </span><span class="st">"Fig. S"</span><span class="co">     # the supplement: "Fig. S1"</span></span>
+<span id="cb33-12"><a href="#cb33-12" tabindex="-1"></a><span class="at">      </span><span class="fu">latex-env</span><span class="kw">:</span><span class="at"> sfig</span></span>
+<span id="cb33-13"><a href="#cb33-13" tabindex="-1"></a><span class="at">      </span><span class="fu">space-before-numbering</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb33-14"><a href="#cb33-14" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">kind</span><span class="kw">:</span><span class="at"> float</span></span>
+<span id="cb33-15"><a href="#cb33-15" tabindex="-1"></a><span class="at">      </span><span class="fu">key</span><span class="kw">:</span><span class="at"> stbl</span></span>
+<span id="cb33-16"><a href="#cb33-16" tabindex="-1"></a><span class="at">      </span><span class="fu">reference-prefix</span><span class="kw">:</span><span class="at"> </span><span class="st">"Table S"</span><span class="co">    # the supplement: "Table S1"</span></span>
+<span id="cb33-17"><a href="#cb33-17" tabindex="-1"></a><span class="at">      </span><span class="fu">latex-env</span><span class="kw">:</span><span class="at"> stbl</span></span>
+<span id="cb33-18"><a href="#cb33-18" tabindex="-1"></a><span class="at">      </span><span class="fu">space-before-numbering</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb33-19"><a href="#cb33-19" tabindex="-1"></a><span class="at">      </span><span class="fu">caption-location</span><span class="kw">:</span><span class="at"> top</span></span></code></pre></div>
 <p>Leave the other lines of the block as they are:
 <code>space-before-numbering: false</code> is what keeps the S and the
 number together.</p>
@@ -1817,7 +1851,7 @@ number together.</p>
 the manuscript as another journal would print it, or to send it to two
 journals that want different things, name a style in the call. Nothing
 in <code>_quarto.yml</code> changes:</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/render.html">render_docx</a></span><span class="op">(</span>caption_style <span class="op">=</span> <span class="st">"abbrev"</span><span class="op">)</span>              <span class="co"># Fig. 1. / Table 1.</span></span>
 <span><span class="fu"><a href="../reference/make_submission.html">make_submission</a></span><span class="op">(</span><span class="st">"ecology-letters"</span>, caption_style <span class="op">=</span> <span class="st">"colon"</span><span class="op">)</span></span></code></pre></div>
 <p>The package comes with five, ready to use in any project:</p>
@@ -1895,10 +1929,10 @@ with <code>caption_style</code> in the same call —
 block at the end of <code>_quarto.yml</code>. It does not exist until
 you write it there. Each line is one style: a name, then what it
 changes. The template carries this one, commented out:</p>
-<div class="sourceCode" id="cb34"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a><span class="fu">easypaper</span><span class="kw">:</span></span>
-<span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a><span class="at">  </span><span class="fu">caption-styles</span><span class="kw">:</span></span>
-<span id="cb34-3"><a href="#cb34-3" tabindex="-1"></a><span class="at">    </span><span class="fu">custom</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="fu">fig</span><span class="kw">:</span><span class="at"> </span><span class="st">"Fig."</span><span class="kw">,</span><span class="at"> </span><span class="fu">tbl</span><span class="kw">:</span><span class="at"> </span><span class="st">"Tab."</span><span class="kw">,</span><span class="at"> </span><span class="fu">sfig</span><span class="kw">:</span><span class="at"> </span><span class="st">"Fig. S"</span><span class="kw">,</span><span class="at"> </span><span class="fu">stbl</span><span class="kw">:</span><span class="at"> </span><span class="st">"Tab. S"</span><span class="kw">,</span><span class="at"> </span><span class="fu">delim</span><span class="kw">:</span><span class="at"> </span><span class="st">":"</span><span class="kw">}</span></span></code></pre></div>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a><span class="fu">easypaper</span><span class="kw">:</span></span>
+<span id="cb35-2"><a href="#cb35-2" tabindex="-1"></a><span class="at">  </span><span class="fu">caption-styles</span><span class="kw">:</span></span>
+<span id="cb35-3"><a href="#cb35-3" tabindex="-1"></a><span class="at">    </span><span class="fu">custom</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="fu">fig</span><span class="kw">:</span><span class="at"> </span><span class="st">"Fig."</span><span class="kw">,</span><span class="at"> </span><span class="fu">tbl</span><span class="kw">:</span><span class="at"> </span><span class="st">"Tab."</span><span class="kw">,</span><span class="at"> </span><span class="fu">sfig</span><span class="kw">:</span><span class="at"> </span><span class="st">"Fig. S"</span><span class="kw">,</span><span class="at"> </span><span class="fu">stbl</span><span class="kw">:</span><span class="at"> </span><span class="st">"Tab. S"</span><span class="kw">,</span><span class="at"> </span><span class="fu">delim</span><span class="kw">:</span><span class="at"> </span><span class="st">":"</span><span class="kw">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/render.html">render_docx</a></span><span class="op">(</span>caption_style <span class="op">=</span> <span class="st">"custom"</span><span class="op">)</span>   <span class="co"># Fig. 1: ... / Tab. 1: ... / Fig. S1: ...</span></span></code></pre></div>
 <p><code>custom</code> is only a name. Any other works, and a project
 can have as many styles as it needs, one per line — one for each journal
@@ -1906,7 +1940,7 @@ you send papers to, say, named after it.</p>
 <p>A style writes only what it changes. Its keys are the ones of the
 table at the top of this section, and each one it leaves out is taken
 from the <code>crossref:</code> block. So in a new project</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a><span class="at">    </span><span class="fu">figs</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="fu">fig</span><span class="kw">:</span><span class="at"> </span><span class="st">"Fig."</span><span class="kw">,</span><span class="at"> </span><span class="fu">sfig</span><span class="kw">:</span><span class="at"> </span><span class="st">"Fig. S"</span><span class="kw">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a><span class="at">    </span><span class="fu">figs</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="fu">fig</span><span class="kw">:</span><span class="at"> </span><span class="st">"Fig."</span><span class="kw">,</span><span class="at"> </span><span class="fu">sfig</span><span class="kw">:</span><span class="at"> </span><span class="st">"Fig. S"</span><span class="kw">}</span></span></code></pre></div>
 <p>writes <em>Fig. 1.</em> and <em>Fig. S1.</em>, and keeps <em>Table
 1.</em>, <em>Table S1.</em> and the full stop from
 <code>crossref:</code>. Give <code>sfig</code> whenever you give
@@ -2009,7 +2043,7 @@ availability statement.</p>
 <div class="section level3">
 <h3 id="citing-easypaper">Citing easypaper<a class="anchor" aria-label="anchor" href="#citing-easypaper"></a>
 </h3>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"easypaper"</span><span class="op">)</span></span></code></pre></div>
 <p>The BibTeX entry carries the key <code>easypaper</code>, so it drops
 into a <code>.bib</code> as it is. GitHub’s <em>Cite this
