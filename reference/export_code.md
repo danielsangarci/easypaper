@@ -32,12 +32,12 @@ The path of `analysis_code.R`, invisibly.
 ``` r
 dir <- file.path(tempdir(), "my_paper")
 create_paper(dir, git = FALSE)
-#> Project created: /tmp/RtmppX1nkW/my_paper
+#> Project created: /tmp/Rtmpm4qFvs/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
 #>   3. render_html()      # see ?render for every command
 export_code(dir)
-#> Written: /tmp/RtmppX1nkW/my_paper/output/analysis_code.R
+#> Written: /tmp/Rtmpm4qFvs/my_paper/output/analysis_code.R
 list.files(file.path(dir, "output"))
 #> [1] "analysis_code.R" "sessionInfo.txt"
 unlink(dir, recursive = TRUE)
