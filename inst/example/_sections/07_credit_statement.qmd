@@ -1,0 +1,7 @@
+<!-- One line per author, with the roles of the CRediT taxonomy
+     (https://credit.niso.org). A double-blind submission moves this section
+     to the title page. -->
+
+**Jane Doe:** Conceptualization, Formal analysis, Visualization, Writing -
+original draft. **John Smith:** Data curation, Methodology, Writing - review &
+editing.

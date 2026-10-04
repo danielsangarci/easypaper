@@ -1,0 +1,7 @@
+<!-- Material and methods: the text. Each analysis goes in the results
+     section that reports it (04.1, 04.2 ...), beside the numbers it gives.
+     What every analysis needs -- the packages, the data read from data/, the
+     cleaning -- goes in a chunk here, before the text: it prints nothing, and
+     the results sections start from it.
+     Cite R packages with [@R-glmmTMB]: knitr::write_bib() generates those
+     keys into references/packages.bib at the end of every render. -->

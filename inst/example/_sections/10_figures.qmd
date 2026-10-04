@@ -1,0 +1,52 @@
+<!-- One figure = one chunk with a fig- label, its legend in fig-cap and
+     include: true. Quarto numbers them in the order they appear here, so
+     keep them in the order the text cites them. fig-width and fig-height are
+     in inches: 7.09 is 180 mm, the width of two columns. The colours come
+     from the palette of R/setup.R. -->
+
+```{r}
+#| label: fig-richness
+#| include: true
+#| fig-width: 7.09
+#| fig-height: 4.72
+#| fig-cap: "Number of tree species in each 1-ha plot, by habitat. Grey points are the plots; dark points and bars are the richness expected by the Poisson GLM and its 95% confidence interval."
+x <- as.integer(habitat)
+k <- nlevels(habitat)
+par(mar = c(4.5, 4.5, 1, 1), las = 1)
+plot(jitter(x, amount = 0.15), richness, pch = 21, bg = color7, col = "white",
+     cex = 1.4, xaxt = "n", xlim = c(0.5, k + 0.5),
+     ylim = range(c(richness, pred_rich$lower, pred_rich$upper)),
+     xlab = "Habitat", ylab = "Species per hectare")
+axis(1, at = seq_len(k), labels = hab_title(levels(habitat)))
+arrows(seq_len(k), pred_rich$lower, seq_len(k), pred_rich$upper,
+       angle = 90, code = 3, length = 0.05, col = color4, lwd = 1.5)
+points(seq_len(k), pred_rich$fit, pch = 19, col = color4, cex = 1.4)
+```
+
+{{< pagebreak >}}
+
+```{r}
+#| label: fig-nmds
+#| include: true
+#| fig-width: 7.09
+#| fig-height: 6.30
+#| fig-cap: "Non-metric multidimensional scaling of the tree assemblages of the plots (Bray-Curtis dissimilarities of square-root abundances), coloured by habitat. The names in italics are the six most abundant species."
+site_sc <- scores(nmds, display = "sites")
+sp_sc   <- scores(nmds, display = "species")
+cols    <- palette5[seq_len(nlevels(habitat))]
+
+par(mar = c(4.5, 4.5, 1, 1), las = 1)
+plot(site_sc, type = "n", asp = 1, xlab = "NMDS1", ylab = "NMDS2")
+abline(h = 0, v = 0, col = "grey85")
+points(site_sc, pch = 21, bg = cols[as.integer(habitat)], col = "white",
+       cex = 1.6)
+legend("topright", legend = hab_title(levels(habitat)), pt.bg = cols,
+       pch = 21, col = "white", pt.cex = 1.4, bty = "n", title = "Habitat")
+# Species names in a figure go in italics too.
+idx <- match(top_sp, species)
+text(sp_sc[idx, 1], sp_sc[idx, 2],
+     labels = as.expression(lapply(top_sp, sp_label)), cex = 0.8,
+     col = "grey30")
+```
+
+{{< pagebreak >}}

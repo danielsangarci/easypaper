@@ -1,0 +1,176 @@
+# ===========================================================================
+# _quarto.yml - project configuration.
+#
+# ALL format configuration lives here, not in the manuscript YAML. Paths are
+# relative to THE PROJECT ROOT, in this file and in the R code alike
+# (execute-dir: project). manuscript.qmd only carries content: title,
+# authors, and the journal it is going to.
+#
+# The project is built with the R package easypaper -- library(easypaper),
+# then render_docx(), make_submission() and the rest. Its settings are the
+# easypaper: block at the end of this file.
+# ===========================================================================
+
+project:
+  type: default
+  output-dir: output
+  # Equivalent to the old knit_root_dir = here(): chunks run with the working
+  # directory at the project root.
+  execute-dir: project
+  # Without this list, `quarto render` would also render README.md.
+  render:
+    - manuscript.qmd
+  # Not the supplement nor the title page: render_supplementary() and
+  # make_submission() build them from the manuscript and its sections.
+
+# --- Execution (equivalent to knitr::opts_chunk$set) -----------------------
+execute:
+  echo: false
+  message: false
+  warning: false
+  error: false
+  # freeze: auto would hold results frozen until the .qmd changes. It is off
+  # because it does not notice changes in data/: per-chunk cache is used.
+  freeze: false
+
+knitr:
+  opts_chunk:
+    # include: false -> analysis chunks print nothing. Figures and tables turn
+    # it back on one by one with #| include: true.
+    include: false
+    comment: ""
+    # Figures are written out at 600 dpi, which is what journals ask for on
+    # acceptance. knitr can only write PNG here; the jpg/ and tiff/ copies are
+    # produced by export_figure_formats() at the end of every render. With the
+    # .qmd at the root, knitr writes and pandoc reads the same path.
+    fig.path: "figures/png/"
+    cache.path: "cache/"
+    dev: "ragg_png"
+    dpi: 600
+
+# --- Bibliography ----------------------------------------------------------
+bibliography:
+  - references/references.bib
+  - references/packages.bib
+# The journal now lives in the YAML of manuscript.qmd, beside the title and
+# the authors. A `csl:` here still works and is read as a fallback, but the
+# manuscript wins -- which is Quarto's own order, the document over the
+# project.
+
+# --- Figure and table numbering -------------------------------------------
+# How figures and tables are named, written once, here: preview() and every
+# render follow it. The journal's .csl does not decide it -- the .csl writes
+# the citations and the references, nothing else -- so a journal that wants
+# Fig. 1. needs it written here too. Change it to what your journal asks for:
+#
+#   Figures         fig-title:   Tables          tbl-title:   title-delim:
+#   Figure 1. ...   "Figure"     Table 1. ...    "Table"      "."  (as it is)
+#   Figure 1: ...   "Figure"     Table 1: ...    "Table"      ":"
+#   Fig. 1. ...     "Fig."       Tab. 1. ...     "Tab."       "."
+#   Fig. 1: ...     "Fig."       Tab. 1: ...     "Tab."       ":"
+#   Figure 1 | ...  "Figure"     Table 1 | ...   "Table"      " |"
+#
+# The word is set apart for figures and for tables; the delimiter is one,
+# title-delim, for both: Quarto has no tbl-delim, so a figure and a table
+# always end their number the same way. Quarto also always puts a space
+# between the word and the number. Change the -prefix lines to the same word
+# as the -title ones, so the text cites "Fig. 1", and the reference-prefix of
+# sfig and stbl below, so the supplement says "Fig. S1".
+#
+# A render can also name a style for one call -- caption_style = "abbrev"
+# (Fig. 1.), "colon" (Figure 1:), "compact" (Fig. 1:), "nature" (Figure 1 |),
+# or one of caption-styles: at the end of this file -- and this block is left
+# as it is.
+crossref:
+  fig-title: "Figure"     # the caption of a figure:  "Figure 1. ..."
+  tbl-title: "Table"      # the heading of a table:   "Table 1. ..."
+  fig-prefix: "Figure"    # in the text: @fig-x -> "Figure 1"
+  tbl-prefix: "Table"     # in the text: @tbl-x -> "Table 1"
+  eq-prefix: "Eq."
+  title-delim: "."        # what follows the number: "." ":" " |"
+  # Custom types for the supplementary material: independent numbering with an
+  # S prefix. Cite them with @sfig-... and @stbl-... from anywhere in the
+  # manuscript.
+  custom:
+    - kind: float
+      key: sfig
+      reference-prefix: "Figure S"
+      latex-env: sfig
+      space-before-numbering: false
+    - kind: float
+      key: stbl
+      reference-prefix: "Table S"
+      latex-env: stbl
+      space-before-numbering: false
+      caption-location: top
+
+# NOTE: there are no Lua filters here. Two were tried and neither works, for
+# the same reason: by the time a user filter runs -- even with at: pre-quarto --
+# Quarto has already replaced figures and tables with UUID divs carrying no
+# identifier, and it resolves cross-references AFTERWARDS. Verified. That is
+# why the broken-reference check (check_crossrefs) and the supplementary split
+# (make_submission) are done in R, on the source, before rendering.
+
+# --- Output formats --------------------------------------------------------
+# render_docx(), render_pdf() and render_html() render these. The Word
+# templates ship with easypaper; to use your own, put a file of the same name
+# in a format/ folder here (see ?render_docx).
+format:
+  docx:
+    toc: false
+    number-sections: false
+    # The title block -- the authors on one line with the marks of their
+    # affiliations, the affiliations under them -- comes from the YAML of
+    # manuscript.qmd: every render of the package writes it, because in a
+    # .docx Quarto prints the names alone. See ?affiliations.
+
+  pdf:
+    documentclass: article
+    papersize: a4
+    geometry: margin=2.5cm
+    fontsize: 11pt
+    linestretch: 1.5
+    number-sections: false
+    pdf-engine: xelatex
+    keep-tex: false
+
+  # Working format: `quarto preview --to html` reloads only what you change as
+  # you write. Not a deliverable.
+  html:
+    theme: cosmo
+    toc: true
+    embed-resources: true
+    fig-align: center
+
+# --- easypaper --------------------------------------------------------------
+# What the package that builds this project needs to know. Quarto ignores
+# this block. Every setting is optional: delete one and its default applies.
+easypaper:
+  # The version of easypaper that created this project. create_paper()
+  # writes it; every render records the one that built each document in
+  # renv.lock.
+  created: "0.0.0"
+  # false hands Quarto the references as they are, with the scientific names
+  # of their titles in roman. What GBIF said about each name is kept in
+  # references/species_cache.rds: commit it.
+  italicize-species: true
+  # The sections a double-blind submission moves from the main text to the
+  # title page, in the order they come out there.
+  blinded-sections:
+    - Acknowledgements
+    - CRediT authorship contribution statement
+    - Conflict of Interest Statement
+    - Data availability statement
+  # Extensions convert_data() copies as they are, besides the open formats it
+  # already knows, e.g. [las, laz].
+  open-formats: []
+  # Caption styles of your own, for render_docx(caption_style = "..."), to
+  # switch between journals without touching crossref: above. One style per
+  # line: a name of your choosing -- "custom" is only an example -- and what
+  # it changes from crossref:. fig and tbl are the word of a figure and of a
+  # table, sfig and stbl the same in the supplement, and delim what follows
+  # the number, for both; what a style leaves out is taken from crossref:.
+  # caption-styles:
+  #   custom: {fig: "Fig.", tbl: "Tab.", sfig: "Fig. S", stbl: "Tab. S", delim: ":"}  # Fig. 1: / Tab. 1:
+  # The Google Drive folder td_upload() and friends use, e.g. "papers/ants".
+  trackdown-folder: ""

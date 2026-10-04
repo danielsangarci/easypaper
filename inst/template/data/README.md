@@ -1,0 +1,75 @@
+# Data
+
+One folder, and it is the one that publishes. Whatever is here is what the
+analysis reads, what `sync_metadata()` describes and what the submission
+compendium carries to the repository. A file that is not here does not reach
+the deposit.
+
+- `metadata/` — [dataspice](https://github.com/ropensci/dataspice) metadata,
+  filled in on every render by `sync_metadata()` with what the project already
+  knows, and by you with `edit_metadata()`. It describes the files beside it; it is not data itself,
+  and it travels to the deposit as its own folder.
+
+## Getting your data in here
+
+The originals live wherever you keep them — a folder in the project, a shared
+drive, your downloads. The project does not prescribe a place, because it does
+not publish them. `convert_data()` brings a copy in here, in a format that will
+still open in twenty years:
+
+```r
+convert_data("originals/counts.xlsx")   # one workbook, one .csv per sheet
+convert_data("originals")               # a whole folder at once
+convert_data("~/Drive/plots.gpkg")      # copied, not converted
+```
+
+The path is relative to the project root, or absolute. Each file takes one of
+three roads, decided by its extension alone:
+
+| the original | what `convert_data()` does |
+|---|---|
+| `.xlsx`, `.xls` | **converts** it, one `.csv` per sheet (needs `readxl`) |
+| `.sav`, `.dta`, `.sas7bdat` | **converts** it, one `.csv` per file (needs `haven`) |
+| anything already open | **copies** it byte for byte. Text and tables: `.csv` `.tsv` `.txt` `.json` `.geojson` `.xml` `.yml` `.yaml`. Containers: `.parquet` `.nc` `.h5` `.hdf5` `.sqlite` `.db` `.gpkg`. Spatial: `.shp` with its sidecars (`.shx` `.dbf` `.prj` `.cpg` `.sbn` `.sbx` `.qix`), `.kml` `.gml` `.tif` `.tiff` `.asc`. Sequences and trees: `.fasta` `.fa` `.fastq` `.fq` `.nwk` `.tre` |
+| anything else | **leaves it where it is and names it on screen** |
+
+When your field uses an open format the third row has not heard of, list its
+extension under `open-formats:` in the `easypaper:` block of `_quarto.yml`, or
+pass `convert_data(path, also = "las")` for one call. The fourth
+is for what nothing can place — a proprietary instrument file, an ArcGIS
+project. Export those yourself and drop the result in here; anything you put
+here by hand travels to the deposit exactly as it is, and nothing in this
+folder is ever deleted.
+
+Everything lands flat: subfolders of a source folder are read but not
+reproduced. If two originals want the same name, one keeps it and the rest are
+refused with a warning saying which was kept and which was not.
+
+**The originals are never moved, edited or converted in place.** Keep them.
+Every conversion costs something — an `.xlsx` loses its formulas, an `.sav` its
+value and variable labels — and the original is the only answer when, two years
+from now, a number here looks wrong.
+
+## What this folder is not
+
+**It is not "my clean data".** What `convert_data()` does is a format
+conversion, not a transformation. Filtering, recoding, excluding individuals
+and aggregating belong inside the analysis chunk that needs them, where a
+reviewer can read the decision, never as a derived file nobody can trace. Use
+`#| cache: true` if the step is slow — that is what the cache is for.
+
+`check_data()` reports what is sitting here that the analysis never reads: it
+would travel to the repository and into the metadata all the same. It reports;
+it never removes.
+
+## What gets published
+
+All of it, plus `metadata/`. On the way out the compendium drops closed
+formats it finds here — `.xlsx`, `.xls`, `.sav`, `.dta`, `.mdb` — because those
+belong with your originals, not in a deposit somebody has to open in ten years.
+
+## License
+
+The data in this directory are distributed under **CC BY 4.0**: you may reuse
+them by citing the source. Full text in [`../LICENSE`](../LICENSE), rationale in
+the Licenses section of [`../README.md`](../README.md).

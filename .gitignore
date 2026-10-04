@@ -1,0 +1,14 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.DS_Store
+docs/
+inst/doc
+*.tar.gz
+*.Rcheck/
+/doc/
+/Meta/
+
+# Written by testthat when a test fails; never part of the package
+tests/testthat/_problems/

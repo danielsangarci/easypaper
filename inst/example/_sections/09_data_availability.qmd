@@ -1,0 +1,11 @@
+<!-- Where the data and code are, and how the analysis is re-run. The DOI
+     below is a placeholder: deposit_zenodo() reserves the real one and
+     writes it here. A double-blind submission moves this section to the
+     title page, and make_submission() also writes a copy of the compendium
+     with no author in it, for the reviewers. -->
+
+The data are the `BCI` dataset of the R package vegan [@R-vegan], collected
+by @Condit2002. Data and code are archived at Zenodo
+(doi:10.5281/zenodo.XXXXXXX). The analysis environment is recorded in
+`renv.lock` and can be restored with renv [@R-renv]; the project structure
+was generated with easypaper [@R-easypaper].

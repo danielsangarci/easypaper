@@ -1,0 +1,15 @@
+<!-- The discussion interprets; it does not repeat the numbers. Say what the
+     design allows you to conclude and what it does not, and where the work
+     goes next. -->
+
+Habitat was recorded for the same plots as the trees, so the differences
+reported here are associations, not effects: a habitat may stand for soil,
+drainage or disturbance history that were not measured. The plots are also
+unevenly spread among habitats, and the habitats with few plots are compared
+with little power.
+
+Distance-based methods summarise the assemblage, not its species: they say
+that composition changes, not which species drive the change, which models
+fitted to the abundance of each species would add [@Warton2012]. And the data
+are a single census of 1982 of the larger trees only: the full and updated
+censuses of the plot are the place to go beyond this example.

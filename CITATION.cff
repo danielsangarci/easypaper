@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: >-
+  easypaper: Automate Reproducible Quarto Manuscripts from Draft to Submission
+abstract: >-
+  Creates and builds reproducible scientific manuscripts written in Quarto.
+  create_paper() writes a project that holds only the paper: its sections as
+  separate files, its references and journal style, the setup of the
+  analysis and the data. The functions of the package render it for any
+  journal, check citations and cross-references before every render, give the
+  supplementary material a bibliography of its own, and build the submission
+  folder: the manuscript split for double-blind review, together with a data
+  and code compendium ready for a data repository. Every render sets the
+  scientific names of the reference list in italics, and italicize_species()
+  does the same for any other bibliography.
+authors:
+  - family-names: "Sanchez-Garcia"
+    given-names: "Daniel"
+    email: "danielsangarci@gmail.com"
+    orcid: "https://orcid.org/0000-0002-0710-6292"
+version: 0.1.0
+license: MIT
+repository-code: "https://github.com/danielsangarci/easypaper"
+url: "https://github.com/danielsangarci/easypaper"
+keywords:
+  - reproducible-research
+  - quarto
+  - manuscript
+  - r
