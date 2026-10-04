@@ -55,7 +55,9 @@ version of it is made on Zenodo.
 
 The DOI is written into the text wherever it says
 `10.5281/zenodo.XXXXXXX` – the placeholder of the data availability
-statement – and printed, to cite it wherever else it belongs.
+statement – and into the cover letters of `submission/` where they say
+`[repository DOI]`, and printed, to cite it wherever else it belongs. A
+cover letter written after it carries the DOI from the start.
 
 It needs a personal access token of Zenodo, with the scopes
 `deposit:write` and `deposit:actions`: create one at

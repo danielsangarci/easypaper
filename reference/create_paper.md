@@ -115,7 +115,7 @@ create_paper(dir,
              title   = "Manuscript title here",
              authors = c("First Author", "Second Author"),
              git     = FALSE)
-#> Project created: /tmp/RtmpPIfBNQ/my_paper
+#> Project created: /tmp/RtmpRj0IWO/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
 #>   3. render_html()      # see ?render for every command

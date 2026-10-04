@@ -820,9 +820,10 @@ gets it: it uploads `data_and_code.zip` to a new Zenodo deposit,
 describes it from the manuscript — title (the short title when there is
 one), authors with their affiliations and ORCID, keywords, CC BY 4.0 —
 reserves its DOI, and writes it wherever the text says
-`10.5281/zenodo.XXXXXXX`. It never publishes: the deposit stays a draft
-until you review it on Zenodo and press Publish there. Called again
-after the data changed, it replaces the file of the same draft.
+`10.5281/zenodo.XXXXXXX` and into the cover letters of `submission/`,
+where they say `[repository DOI]`. It never publishes: the deposit stays
+a draft until you review it on Zenodo and press Publish there. Called
+again after the data changed, it replaces the file of the same draft.
 
 ``` r
 
@@ -871,7 +872,7 @@ make_submission(label = "JournalofEcology_v2")        # a second version, kept a
 That builds, from what is already in the project:
 
     submission/JournalofEcology/
-      cover_letter_JournalofEcology.docx      template, never overwritten
+      cover_letter_JournalofEcology.docx      dated, titled and signed; never overwritten
       CHECKLIST.md                            what still has to be done by hand
       manuscript/
         title_JournalofEcology.docx           title, authors, affiliations; double-blind only
@@ -894,7 +895,7 @@ What it does that a render does not:
 | The supplement | its own file, signed, cited as *Figure S1* from the main text | the same, and without the authors when double-blind |
 | The figures | embedded in the document | also on their own, at 600 dpi and renumbered in order |
 | Data and code | — | the compendium and its `.zip`, `renv.lock` included; double-blind, also a copy that names nobody, for the reviewers |
-| Also writes | — | a cover letter and a `CHECKLIST.md` |
+| Also writes | — | a cover letter, dated, with the title and the corresponding author’s signature, and a `CHECKLIST.md` |
 | `renv.lock` | rewritten, to describe this render | rewritten, and copied into the compendium |
 
 | Argument | Default | What it decides |

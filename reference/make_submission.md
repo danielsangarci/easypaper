@@ -4,7 +4,10 @@ Writes `submission/<label>/`: the manuscript split the way journals with
 double-blind review ask for – a title page, and a main text that opens
 with the title and names nobody – or, signed, the main text alone; the
 supplement as its own document, every figure on its own at 600 dpi, a
-blank cover letter, a checklist of what is left to do by hand, and the
+cover letter – dated, with the title of the manuscript, signed by the
+corresponding author, and with the DOI of the data once
+[`deposit_zenodo()`](https://danielsangarci.github.io/easypaper/reference/deposit_zenodo.md)
+has reserved it – a checklist of what is left to do by hand, and the
 data and code compendium, zipped, ready for Zenodo or Dryad. Everything
 in it is rebuilt on every call except the cover letter, which is never
 overwritten.

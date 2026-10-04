@@ -99,15 +99,16 @@ First release.
 - [`make_submission()`](https://danielsangarci.github.io/easypaper/reference/make_submission.md)
   builds the folder for a journal into `submission/`: double-blind by
   default, with a title page and a main text that names nobody, figures
-  renumbered at 600 dpi, a cover letter, a checklist, and a data and
-  code compendium – with a copy for the reviewers that names nobody
-  either. `blind = FALSE` for a signed manuscript.
+  renumbered at 600 dpi, a cover letter already dated, titled and signed
+  by the corresponding author, a checklist, and a data and code
+  compendium – with a copy for the reviewers that names nobody either.
+  `blind = FALSE` for a signed manuscript.
 - [`make_preprint()`](https://danielsangarci.github.io/easypaper/reference/make_preprint.md)
   builds the preprint: one signed PDF and its supplement, with the same
   compendium.
 - [`deposit_zenodo()`](https://danielsangarci.github.io/easypaper/reference/deposit_zenodo.md)
-  reserves the DOI of the data on Zenodo and writes it into the text,
-  without publishing.
+  reserves the DOI of the data on Zenodo and writes it into the text and
+  the cover letters, without publishing.
 
 ### Co-authors
 
