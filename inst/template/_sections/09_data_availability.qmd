@@ -1,0 +1,10 @@
+<!-- Where the compendium ends up (the DOI that Zenodo or Dryad gives you when
+     you upload data_and_code.zip), in a short statement. The software,
+     renv and easypaper included, is cited in the Methods. Example:
+
+     Data and code are archived at Zenodo (doi:10.5281/zenodo.XXXXXXX).
+
+     deposit_zenodo() uploads data_and_code.zip as a Zenodo draft, reserves
+     its DOI and writes it wherever the text says 10.5281/zenodo.XXXXXXX.
+
+     A double-blind submission moves this section to the title page. -->

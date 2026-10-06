@@ -1,0 +1,57 @@
+<!-- One table = one chunk with a tbl- label and its legend in tbl-cap.
+     Every table is a flextable, with the three rules of a scientific table:
+     none on top, one under the header and one under the table. Quarto
+     writes the caption: do not add flextable::set_caption() as well. -->
+
+```{r}
+#| label: tbl-richness
+#| include: true
+#| tbl-cap: "Tree species per 1-ha plot by habitat: the number of plots, the mean observed, and the richness expected by the Poisson GLM with its 95% confidence interval."
+tab <- data.frame(
+  Habitat  = hab_title(levels(habitat)),
+  Plots    = as.integer(n_hab),
+  Observed = as.numeric(tapply(richness, habitat, mean)),
+  Expected = pred_rich$fit,
+  CI       = sprintf("%.1f-%.1f", pred_rich$lower, pred_rich$upper),
+  row.names = NULL
+)
+rule <- fp_border_default(style = "solid", color = "black", width = 1)
+
+flextable(tab) |>
+  set_header_labels(CI = "95% CI") |>
+  align(part = "all", align = "left") |>
+  hline_top(border = fp_border_default(width = 0), part = "all") |>
+  hline_bottom(border = rule, part = "all") |>
+  colformat_double(j = c("Observed", "Expected"), digits = 1) |>
+  fit_flextable_to_page()
+```
+
+{{< pagebreak >}}
+
+```{r}
+#| label: tbl-community
+#| include: true
+#| tbl-cap: "PERMANOVA of the composition of the tree assemblages among habitats (Bray-Curtis dissimilarities of square-root abundances, 999 permutations)."
+tab_c <- data.frame(
+  Term = c("Habitat", "Residual"),
+  df   = tab_perm[c("habitat", "Residual"), "Df"],
+  SS   = tab_perm[c("habitat", "Residual"), "SumOfSqs"],
+  R2   = tab_perm[c("habitat", "Residual"), "R2"],
+  F    = tab_perm[c("habitat", "Residual"), "F"],
+  p    = tab_perm[c("habitat", "Residual"), "Pr(>F)"],
+  row.names = NULL
+)
+
+flextable(tab_c) |>
+  set_header_labels(R2 = "R²") |>
+  align(part = "all", align = "left") |>
+  hline_top(border = fp_border_default(width = 0), part = "all") |>
+  hline_bottom(border = rule, part = "all") |>
+  colformat_double(j = c("SS", "R2", "F"), digits = 2, na_str = "") |>
+  colformat_double(j = "p", digits = 3, na_str = "",
+                   suffix = ifelse(is.na(tab_c$p), "", stars_pval(tab_c$p))) |>
+  add_footer_lines("*p ≤ 0.05, **p ≤ 0.01, ***p ≤ 0.001") |>
+  fit_flextable_to_page()
+```
+
+{{< pagebreak >}}

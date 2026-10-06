@@ -1,0 +1,15 @@
+<!-- Material and methods: the text. Each analysis goes in the results
+     section that reports it (04.1, 04.2 ...), beside the numbers it gives.
+     What every analysis needs -- the packages, the data read from data/, the
+     cleaning -- goes in a chunk here, before the text: it prints nothing, and
+     the results sections start from it.
+     Cite the software here, every package with [@R-glmmTMB]:
+     write_packages_bib() writes those keys into references/packages.bib at
+     the end of every render. The paragraph below cites what renders the
+     manuscript and keeps the analysis reproducible: keep it at the end of
+     your Methods. -->
+
+The manuscript was written in Quarto, and its rendered documents and its data
+and code compendium were produced with easypaper [@R-easypaper]; the versions
+of the R packages were recorded with renv [@R-renv] and can be restored from
+`renv.lock`.

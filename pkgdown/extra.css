@@ -1,0 +1,37 @@
+/* Justified prose.
+ *
+ * hyphens is not decoration here: justifying a line of ~85 characters without
+ * breaking words forces the browser to stretch the word spacing instead,
+ * which opens the white "rivers" that run down a badly set page. With
+ * automatic hyphenation the slack is taken up at the line ends and the
+ * spacing stays even. It works because pkgdown writes <html lang="en">, which
+ * is what tells the browser which hyphenation dictionary to use.
+ *
+ * Code blocks and tables are left alone: never justify what is read by
+ * column, not by line.
+ */
+
+main p,
+main li {
+  text-align: justify;
+  -webkit-hyphens: auto;   /* Safari */
+  hyphens: auto;
+}
+
+/* The key idea of the Get started guide: render_*() against make_*().
+ * In the green of the site rather than Bootstrap's blue alert, which no
+ * other part of the site uses. The table inside stays on white, so it reads
+ * as a table and not as part of the box.
+ */
+
+main .key-idea {
+  background-color: #eef5f0;
+  border-left: 4px solid #1a5632;
+  border-radius: 0.375rem;
+  padding: 1rem 1.25rem 0.25rem;
+  margin: 1.5rem 0;
+}
+
+main .key-idea table {
+  background-color: #ffffff;
+}

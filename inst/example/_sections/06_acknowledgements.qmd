@@ -1,0 +1,8 @@
+<!-- Who helped, and who paid for it: people, institutions, permits, grants
+     with their numbers. A double-blind submission moves this section to the
+     title page. -->
+
+We thank the authors of @Condit2002, and everyone who has censused the
+Barro Colorado plot, for making their data available, and the authors of
+vegan for distributing them. This manuscript is a worked example of an
+easypaper project, not a published study.

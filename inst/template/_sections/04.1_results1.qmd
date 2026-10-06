@@ -1,0 +1,8 @@
+<!-- Results, part 1. The analysis goes here, in chunks, and the text that
+     reports it right after: every number written by inline R, never typed;
+     citations [@key]; figures and tables cited with @fig-name and @tbl-name.
+     It starts from what the chunk of 03_methods.qmd prepares, and from
+     nothing of another results section. create_example_paper() writes a
+     project with this done.
+     WARNING: knitr evaluates chunks and inline code even inside an HTML
+     comment like this one. Never paste example code here. -->

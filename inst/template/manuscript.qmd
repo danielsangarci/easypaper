@@ -1,0 +1,155 @@
+---
+title: "Manuscript title here"
+# The short title, or running head, some journals ask for: printed as
+# "Short title: ..." under the title of every document -- in the title's
+# font and size in the .docx, a size smaller in the .pdf and the .html.
+# Leave it out and nothing is printed.
+# short-title: "Short title here"
+# The authors, in order, each with the ids of their affiliations: the
+# numbers are worked out from here, in the order the authors name them, and
+# written on one line with the names in every render. The corresponding
+# author carries `corresponding: true` and an `email:`. Each affiliation is
+# one line, `address:`, written as the paper prints it. It can also go in
+# place, quoted: `affiliations: ["University X, City, Country"]`.
+# Each author's ORCID iD goes in `orcid:`: it puts the ORCID icon, linked to
+# the record, beside the name in the README, and reaches the metadata of the
+# data and the Zenodo deposit.
+# The copyright holders in LICENSE-CODE.txt and in the README come from this
+# block.
+author:
+  - name: Author1
+    affiliations: [aff1]
+    orcid:            # the ORCID iD: XXXX-XXXX-XXXX-XXXX
+    email: correspondent@example.org
+    corresponding: true
+  - name: Author2
+    affiliations: [aff2]
+    orcid:            # the ORCID iD: XXXX-XXXX-XXXX-XXXX
+affiliations:
+  - id: aff1
+    address: Institution 1, Department, City, Country
+  - id: aff2
+    address: Institution 2, Department, City, Country
+# The journal this manuscript is going to: a .csl in references/. Every
+# command reads it from here, so you name it once. list_journals() shows what
+# you have, and add_journal("ecology-letters") fetches another. Naming one in
+# a call -- render_docx("ecology-letters") -- wins for that call alone.
+csl: references/journal-of-ecology.csl
+# No date: a manuscript is dated by the journal, not by the day you happened
+# to render it, and a date on a draft you circulate only ever misleads. Add
+# `date: today` and `date-format: long` back here if you want one; a blinded
+# main text drops it either way.
+---
+
+```{r affiliations}
+#| include: true
+#| echo: false
+#| purl: false
+# The affiliations and the correspondence line, numbered from the YAML above.
+# A double-blind submission leaves this chunk out; the title page is given it.
+easypaper::affiliations()
+```
+
+<!-- ==========================================================================
+PATHS: one single rule. Everything is relative to the PROJECT ROOT, both in the
+YAML (_quarto.yml) and in R code (execute-dir: project). The double rule of the
+Rmarkdown project ("../format/ in the YAML but here() in the code") is gone.
+
+CONTENT: this file is only the skeleton, with the title block in its YAML.
+The text is written in _sections/.
+That folder starts with "_" so Quarto does not try to render each section as a
+standalone document.
+=========================================================================== -->
+
+```{r setup}
+#| include: false
+#| purl: false
+# Seed, packages, palette, table helpers. It can also be loaded from the
+# console (source("R/setup.R")) to work interactively with the same objects the
+# manuscript sees.
+source(here::here("R/setup.R"))
+```
+
+# Abstract
+
+{{< include _sections/01_abstract.qmd >}}
+
+# Introduction
+
+{{< include _sections/02_introduction.qmd >}}
+
+# Material and Methods
+
+{{< include _sections/03_methods.qmd >}}
+
+# Results
+
+{{< include _sections/04.1_results1.qmd >}}
+
+{{< include _sections/04.2_results2.qmd >}}
+
+# Discussion
+
+{{< include _sections/05_discussion.qmd >}}
+
+# Acknowledgements
+
+{{< include _sections/06_acknowledgements.qmd >}}
+
+# CRediT authorship contribution statement
+
+{{< include _sections/07_credit_statement.qmd >}}
+
+# Conflict of Interest Statement
+
+{{< include _sections/08_conflict_of_interest.qmd >}}
+
+# Data availability statement
+
+{{< include _sections/09_data_availability.qmd >}}
+
+# References
+
+::: {#refs}
+:::
+
+{{< pagebreak >}}
+
+# Figures
+
+{{< include _sections/10_figures.qmd >}}
+
+{{< pagebreak >}}
+
+# Tables
+
+{{< include _sections/11_tables.qmd >}}
+
+{{< pagebreak >}}
+
+# Supporting information
+
+{{< include _sections/12.1_suppl_material.qmd >}}
+
+```{r package-bibliography}
+#| include: false
+#| purl: false
+# Writes the .bib entries of the packages in use, so they can be cited in
+# Methods. It runs last, once they are all loaded. Pandoc reads packages.bib
+# after knitr, so citations already work in this same pass.
+#
+# .packages() only sees what is ATTACHED during the render. Packages that
+# prepared the data or the metadata (dataspice, readxl) ran in another session
+# and would never get an entry, yet they deserve the citation as much as the
+# rest. They are added by name; any that is not installed is skipped.
+#
+# write_packages_bib() is knitr::write_bib() with the names in the titles
+# kept as written -- {vegan}, {Quarto} -- whatever case the journal's style
+# sets titles in.
+pkg_extra <- c("knitr", "quarto", "rmarkdown", "renv", "dataspice", "readxl",
+               "easypaper")
+pkg_extra <- pkg_extra[vapply(pkg_extra, requireNamespace, logical(1),
+                              quietly = TRUE)]
+easypaper::write_packages_bib(c(.packages(), pkg_extra),
+                              here::here("references/packages.bib"))
+```

@@ -1,0 +1,11 @@
+<!-- What each author did, in the roles of the CRediT taxonomy
+     (https://credit.niso.org): Conceptualization, Data curation, Formal
+     analysis, Funding acquisition, Investigation, Methodology, Project
+     administration, Resources, Software, Supervision, Validation,
+     Visualization, Writing - original draft, Writing - review & editing.
+     One line per author, for example:
+
+     **Ada Lovelace:** Conceptualization, Methodology, Writing - original draft.
+     **Alan Turing:** Formal analysis, Software, Writing - review & editing.
+
+     A double-blind submission moves this section to the title page. -->
