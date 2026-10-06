@@ -1,0 +1,43 @@
+<!-- Each analysis lives here, in the section that reports it, and the text
+     comes right after it: the chunk below fits the model of richness, and
+     the inline R of the text reads its results, so every number is computed,
+     never typed. It starts from what 03_methods.qmd prepares -- the packages,
+     the data, the helpers -- and from nothing of another results section.
+     #| cache: true keeps a slow chunk from running at every render. When the
+     data underneath it change, run clean_cache(): a change in data/ is the
+     one thing knitr's cache does not notice.
+     Cite figures and tables with @fig-... and @tbl-...; Quarto numbers them
+     in the order they appear in 10_figures.qmd and 11_tables.qmd. -->
+
+```{r}
+#| label: richness-model
+#| cache: true
+m_rich  <- glm(richness ~ habitat, family = poisson)
+lrt     <- anova(m_rich, test = "Chisq")
+chi_hab <- lrt["habitat", "Deviance"]
+df_hab  <- lrt["habitat", "Df"]
+p_hab   <- lrt["habitat", "Pr(>Chi)"]
+dispersion <- sum(residuals(m_rich, type = "pearson")^2) / df.residual(m_rich)
+
+# The expected richness of each habitat, with its 95% confidence interval.
+nd   <- data.frame(habitat = factor(levels(habitat), levels = levels(habitat)))
+pr   <- predict(m_rich, newdata = nd, type = "link", se.fit = TRUE)
+pred_rich <- data.frame(habitat = levels(habitat),
+                        fit   = exp(pr$fit),
+                        lower = exp(pr$fit - 1.96 * pr$se.fit),
+                        upper = exp(pr$fit + 1.96 * pr$se.fit))
+hab_max <- pred_rich$habitat[which.max(pred_rich$fit)]
+hab_min <- pred_rich$habitat[which.min(pred_rich$fit)]
+```
+
+## Species richness
+
+The `r n_plots` plots held `r format(n_ind, big.mark = ",")` trees of
+`r n_species` species, between `r min(richness)` and `r max(richness)` species
+per plot (mean `r round(mean(richness), 1)`). Richness
+`r if (p_hab < 0.05) "differed" else "did not differ significantly"` among
+habitats (likelihood-ratio test, $\chi^2$ = `r round(chi_hab, 1)`,
+df = `r df_hab`, *P* `r fmt_p(p_hab)`; dispersion `r round(dispersion, 2)`;
+@tbl-richness): it was highest in the
+`r hab_text(hab_max)` and lowest in the `r hab_text(hab_min)`
+(@fig-richness).

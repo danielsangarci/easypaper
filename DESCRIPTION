@@ -1,0 +1,58 @@
+Package: easypaper
+Title: Automate Reproducible 'Quarto' Manuscripts Ready for Submission
+Version: 0.1.0
+Authors@R:
+    person("Daniel", "Sanchez-Garcia", email = "danielsangarci@gmail.com",
+           role = c("aut", "cre", "cph"),
+           comment = c(ORCID = "0000-0002-0710-6292"))
+Description: Creates and builds reproducible scientific manuscripts written
+    in 'Quarto'. create_paper() writes a project that holds only the paper:
+    its sections as separate files, its references and journal style as a
+    'CSL' (Citation Style Language) file, the setup of the analysis and the
+    data. The functions of the package then render it for any journal, check
+    citations and cross-references before every render, export figures to
+    PNG, JPEG and TIFF at 600 dpi, give the supplementary material a
+    document and a bibliography of its own, and build the submission folder:
+    the manuscript split for double-blind review, together with a data and
+    code compendium ready for a data repository. Every render records the
+    versions of the packages it used, 'easypaper' included, with 'renv', so
+    the manuscript can be rebuilt years later. Every render also sets the
+    scientific names of the reference list in italics, checking genera and
+    species against the Global Biodiversity Information Facility ('GBIF')
+    Backbone Taxonomy <doi:10.15468/39omei>; italicize_species() does the
+    same for any other bibliography.
+URL: https://github.com/danielsangarci/easypaper,
+    https://danielsangarci.github.io/easypaper/
+BugReports: https://github.com/danielsangarci/easypaper/issues
+License: MIT + file LICENSE
+Encoding: UTF-8
+SystemRequirements: Quarto command line tool (<https://quarto.org>)
+Roxygen: list(markdown = TRUE)
+Depends:
+    R (>= 4.1)
+Imports:
+    dataspice,
+    flextable,
+    haven,
+    here,
+    jsonlite,
+    knitr,
+    magick,
+    quarto,
+    ragg,
+    readxl,
+    renv,
+    rmarkdown,
+    rstudioapi,
+    tools,
+    utils,
+    yaml,
+    zip
+Suggests:
+    curl,
+    testthat (>= 3.0.0),
+    trackdown,
+    vegan
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0

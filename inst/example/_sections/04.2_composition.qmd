@@ -1,0 +1,55 @@
+<!-- The analysis of composition, beside the text that reports it, as in
+     04.1_richness.qmd. It starts from what 03_methods.qmd prepares, n_perm
+     included.
+     A scientific name written by R code still goes in italics: put the
+     asterisks around the inline code. check_species_text() reads the names
+     you type; it cannot read the ones R writes. -->
+
+```{r}
+#| label: composition-model
+#| cache: true
+# n_perm permutations, set in 03_methods.qmd. They take a few seconds, once:
+# the chunk is cached.
+# Bray-Curtis dissimilarities between plots, on square-root abundances, so
+# that the few very abundant species do not decide everything.
+Y_sqrt <- sqrt(Y_counts)
+d_bray <- vegdist(Y_sqrt, method = "bray")
+
+# PERMANOVA: does the composition differ among habitats?
+perm     <- adonis2(d_bray ~ habitat, permutations = n_perm, by = "terms")
+tab_perm <- as.data.frame(perm)
+r2_hab   <- tab_perm["habitat", "R2"]
+f_hab    <- tab_perm["habitat", "F"]
+pp_hab   <- tab_perm["habitat", "Pr(>F)"]
+
+# PERMDISP: do the habitats differ in how variable their composition is?
+disp   <- betadisper(d_bray, habitat)
+pdisp  <- permutest(disp, permutations = n_perm)
+f_disp <- pdisp$tab["Groups", "F"]
+p_disp <- pdisp$tab["Groups", "Pr(>F)"]
+
+# NMDS of the same dissimilarities.
+nmds <- metaMDS(Y_sqrt, distance = "bray", k = 2, trymax = 50,
+                autotransform = FALSE, trace = FALSE)
+
+# The six most abundant species, named on the ordination.
+top_sp <- species[order(colSums(Y_counts), decreasing = TRUE)[1:6]]
+```
+
+## Assemblage composition
+
+The composition of the tree assemblages
+`r if (pp_hab < 0.05) "differed" else "did not differ significantly"` among
+habitats, which explained `r round(100 * r2_hab)`% of its variation
+(PERMANOVA, *F* = `r round(f_hab, 2)`, *P* `r fmt_p(pp_hab)`;
+@tbl-community), and the NMDS (stress `r round(nmds$stress, 2)`) ordered the
+plots by habitat (@fig-nmds). The dispersions of the habitats
+`r if (p_disp < 0.05) "also differed" else "did not differ"` (PERMDISP,
+*F* = `r round(f_disp, 2)`, *P* `r fmt_p(p_disp)`), so the difference among
+habitats `r if (p_disp < 0.05) "may in part be one of heterogeneity rather than of mean composition" else "is one of mean composition, not only of heterogeneity"`.
+The most abundant species was
+*`r sp_italic(top_sp[1])`*`r sp_roman(top_sp[1])`, with
+`r format(sum(Y_counts[, top_sp[1]]), big.mark = ",")` trees.
+
+The `r n_top` most abundant species are listed in @stbl-species, and the
+abundance of every species, ranked, is in @sfig-rankabund.

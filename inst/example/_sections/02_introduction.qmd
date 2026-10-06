@@ -1,0 +1,23 @@
+<!-- An introduction in three paragraphs: what is known, what is missing,
+     what this paper does. Cite with [@key] -- the keys are in
+     references/references.bib -- or with @key when the authors are part of
+     the sentence: "@Condit2002 found...". -->
+
+Tropical forests hold more tree species than any other terrestrial
+ecosystem, and which of them grow together changes from place to place, even
+within a single forest. How fast it changes -- beta diversity -- and how much
+of that change follows the habitat are central questions of tropical
+ecology [@Condit2002].
+
+The composition of an assemblage -- which species, and how many of each -- is
+usually compared between sites through a dissimilarity, such as Bray-Curtis.
+Its relationship with the environment is then tested with a permutational
+multivariate analysis of variance [PERMANOVA, @Anderson2001], and shown with
+an ordination such as a non-metric multidimensional scaling (NMDS). Because a
+PERMANOVA can confound a difference in the mean composition of the groups with
+a difference in how variable they are [@Warton2012], it is accompanied by a
+test of the homogeneity of their dispersions [PERMDISP, @Anderson2006].
+
+Here we use the trees of the 50-ha plot of Barro Colorado Island to ask two
+questions: does the number of tree species differ among the habitats of the
+forest, and does the composition of the tree assemblage?

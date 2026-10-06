@@ -1,0 +1,23 @@
+<!-- The abstract is a single paragraph, in the order of the paper: question,
+     what was done, what was found, what it means. It is rendered BEFORE the
+     Methods run the analysis, so inline R here would find no results yet:
+     write its numbers by hand once the results are final, or keep it, as
+     here, to what does not change when the data do.
+     The keywords go on the last line, after "**Keywords:**", all on that one
+     line: every render reads them from there, and so do the summary and the
+     deposit. -->
+
+Tropical forests hold many tree species, and which of them grow together
+changes from place to place within a forest. We asked whether the number of
+tree species and the composition of the tree assemblage differ among the
+habitats of the forest of Barro Colorado Island, Panama, with the trees of
+its 50-ha plot as the vegan package distributes them. Species richness was
+modelled with a Poisson generalized linear model, and composition was compared
+among habitats with a PERMANOVA on Bray-Curtis dissimilarities, with a test
+of the homogeneity of their dispersions (PERMDISP) and a non-metric
+multidimensional scaling. How strongly habitat structures the forest, and
+which species dominate it, are reported with their uncertainty. The analysis
+is a worked example: every number in the text, the figures and the tables is
+computed from the data when the manuscript is rendered.
+
+**Keywords:** Barro Colorado Island, beta diversity, NMDS, PERMANOVA, tropical trees

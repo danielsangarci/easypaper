@@ -1,0 +1,19 @@
+---
+# The supplement as a document of its own, on the supplement's Word template.
+# Its text is not written here: every render puts in the setup of R/setup.R
+# and the supplementary section of _sections/ it is rendering --
+# 12.1_suppl_material.qmd, or each 12.x in turn, one document each -- so
+# adding one is an include in manuscript.qmd and nothing else. The title is
+# yours; with several supplements each is named "Appendix S1", "S2"...
+title: "Supporting Information"
+---
+
+<!-- Where this document's OWN reference list goes. Without this block Quarto
+     still resolves the citations and still writes the list, but at the very
+     end and with no heading: a supplement that reaches a journal ending in
+     bare bibliographic entries. The main text has the same block. -->
+
+# References
+
+::: {#refs}
+:::
