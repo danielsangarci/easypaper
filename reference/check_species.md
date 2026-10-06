@@ -41,7 +41,7 @@ the same for any bibliography outside a project.
 ``` r
 dir <- file.path(tempdir(), "my_paper")
 create_paper(dir, git = FALSE)
-#> Project created: /tmp/RtmpXrpJXp/my_paper
+#> Project created: /tmp/RtmppAhlbc/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
 #>   3. render_html()      # see ?render for every command
