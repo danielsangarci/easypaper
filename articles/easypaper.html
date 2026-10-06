@@ -1161,7 +1161,10 @@ cover letters of <code>submission/</code>, where they say
 <code>README.md</code>, as a badge and in its citation. It never
 publishes: the deposit stays a draft until you review it on Zenodo and
 press Publish there. Called again after the data changed, it replaces
-the file of the same draft.</p>
+the file of the same draft. Zenodo refuses a whole deposit over one
+ORCID it cannot read, so an ORCID that is not four groups of four digits
+— the example’s placeholders, or one mistyped — is left out of it, with
+a warning naming the author.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/make_preprint.html">make_preprint</a></span><span class="op">(</span><span class="op">)</span>                     <span class="co"># builds data_and_code.zip (or make_submission())</span></span>
 <span><span class="fu"><a href="../reference/deposit_zenodo.html">deposit_zenodo</a></span><span class="op">(</span>sandbox <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>      <span class="co"># try it on Zenodo's sandbox first</span></span>

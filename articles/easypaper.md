@@ -853,7 +853,10 @@ of `submission/`, where they say `[repository DOI]`, and into the
 project’s `README.md`, as a badge and in its citation. It never
 publishes: the deposit stays a draft until you review it on Zenodo and
 press Publish there. Called again after the data changed, it replaces
-the file of the same draft.
+the file of the same draft. Zenodo refuses a whole deposit over one
+ORCID it cannot read, so an ORCID that is not four groups of four digits
+— the example’s placeholders, or one mistyped — is left out of it, with
+a warning naming the author.
 
 ``` r
 

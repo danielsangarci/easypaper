@@ -50,7 +50,8 @@ The absolute path of the created project, invisibly.
 ## Details
 
     manuscript.qmd              title, short title, authors with shared
-                                affiliations, the corresponding author
+                                affiliations and their ORCID iDs, the
+                                corresponding author
     _sections/01_abstract.qmd   the abstract, and the keywords under it
     _sections/02_introduction   citations in brackets and in the sentence
     _sections/03_methods        the text of the Methods, and a chunk that reads
@@ -82,8 +83,8 @@ Condit et al. (2002), *Science* 295: 666–669,
 [doi:10.1126/science.1066854](https://doi.org/10.1126/science.1066854) :
 cite them, not this example, if you use them. The authors of the example
 are borrowed from the history of the field – Charles Darwin and Alfred
-Russel Wallace, who never wrote it – and their affiliations and emails
-are made up.
+Russel Wallace, who never wrote it – and their affiliations, emails and
+ORCID iDs are made up.
 
 ## See also
 
@@ -99,7 +100,7 @@ if (requireNamespace("vegan", quietly = TRUE)) {
   list.files(file.path(dir, "data"))
   unlink(dir, recursive = TRUE)
 }
-#> Example project created: /tmp/RtmppAhlbc/example_paper
+#> Example project created: /tmp/RtmpyulCis/example_paper
 #>   1. open example_paper.Rproj
 #>   2. library(easypaper)
 #>   3. render_html()      # the study, rendered

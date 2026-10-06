@@ -48,9 +48,13 @@ The description comes from the manuscript: the title (the short title,
 `short-title:`, when there is one; the title otherwise), the authors
 with their affiliations and ORCID (`orcid:` on an author), the keywords,
 and the licence of the data, from the project's `LICENSE.txt` (CC BY 4.0
-in a new project). The deposit and its DOI are recorded in the
-`easypaper:` block of `_quarto.yml`, so a second call – after the data
-changed – replaces the file of the same draft instead of opening
+in a new project). Zenodo refuses a whole deposit over one ORCID it
+cannot read, so one that is not four groups of four digits –
+`0000-0000-0000-000X`, the last may be an X – is left out of it, with a
+warning naming the author: add it on the draft, or correct it in
+`manuscript.qmd` and call again. The deposit and its DOI are recorded in
+the `easypaper:` block of `_quarto.yml`, so a second call – after the
+data changed – replaces the file of the same draft instead of opening
 another. A deposit already published is left alone: a new version of it
 is made on Zenodo.
 
