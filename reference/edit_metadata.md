@@ -60,15 +60,15 @@ and <https://docs.ropensci.org/dataspice/> for what each field means.
 ``` r
 dir <- file.path(tempdir(), "my_paper")
 create_paper(dir, git = FALSE)
-#> Project created: /tmp/RtmpiEvxjx/my_paper
+#> Project created: /tmp/RtmpaR1kbe/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
 #>   3. render_html()      # see ?render for every command
 write.csv(head(iris), file.path(dir, "data", "iris.csv"), row.names = FALSE)
 
 edit_metadata("write", path = dir)   # dataspice.json and its web page
-#> Written: /tmp/RtmpiEvxjx/my_paper/data/metadata/dataspice.json
-#>          /tmp/RtmpiEvxjx/my_paper/data/metadata/index_metadata.html
+#> Written: /tmp/RtmpaR1kbe/my_paper/data/metadata/dataspice.json
+#>          /tmp/RtmpaR1kbe/my_paper/data/metadata/index_metadata.html
 list.files(file.path(dir, "data", "metadata"))
 #> [1] "access.csv"          "attributes.csv"      "biblio.csv"         
 #> [4] "creators.csv"        "dataspice.json"      "index_metadata.html"
