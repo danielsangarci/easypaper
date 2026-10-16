@@ -103,11 +103,11 @@ write.csv(head(iris), file.path(src, "iris.csv"), row.names = FALSE)
 out <- file.path(tempdir(), "data")
 
 convert_data(src, to = out)   # copied: a .csv is already open
-#> /tmp/RtmpylAgiS/data/ updated: 1 file(s) -- iris.csv
+#> /tmp/RtmpsfFR5O/data/ updated: 1 file(s) -- iris.csv
 
 # A workbook: one .csv per sheet.
 convert_data(readxl::readxl_example("datasets.xlsx"), to = out)
-#> /tmp/RtmpylAgiS/data/ updated: 3 file(s) -- datasets_mtcars.csv, datasets_chickwts.csv, datasets_quakes.csv
+#> /tmp/RtmpsfFR5O/data/ updated: 3 file(s) -- datasets_mtcars.csv, datasets_chickwts.csv, datasets_quakes.csv
 list.files(out)
 #> [1] "datasets_chickwts.csv" "datasets_mtcars.csv"   "datasets_quakes.csv"  
 #> [4] "iris.csv"             
@@ -115,7 +115,7 @@ list.files(out)
 # An extension it does not know, copied as it is when named in `also`.
 writeLines("x y z", file.path(src, "points.las"))
 convert_data(file.path(src, "points.las"), to = out, also = "las")
-#> /tmp/RtmpylAgiS/data/ updated: 1 file(s) -- points.las
+#> /tmp/RtmpsfFR5O/data/ updated: 1 file(s) -- points.las
 list.files(out)
 #> [1] "datasets_chickwts.csv" "datasets_mtcars.csv"   "datasets_quakes.csv"  
 #> [4] "iris.csv"              "points.las"           
