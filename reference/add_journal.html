@@ -51,7 +51,7 @@ project's <code>references/</code> folder, beside the <code>.bib</code>, where
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">add_journal</span><span class="op">(</span><span class="va">journal</span>, path <span class="op">=</span> <span class="st">"."</span>, overwrite <span class="op">=</span> <span class="cn">FALSE</span>, repo <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">add_journal</span><span class="op">(</span><span class="va">journal</span>, path <span class="op">=</span> <span class="cn">NULL</span>, overwrite <span class="op">=</span> <span class="cn">FALSE</span>, repo <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -64,8 +64,10 @@ or the URL of a <code>.csl</code> file.</p></dd>
 
 
 <dt id="arg-path">path<a class="anchor" aria-label="anchor" href="#arg-path"></a></dt>
-<dd><p>The project, or any folder inside it. The working directory by
-default, which is the project root once its <code>.Rproj</code> is open.</p></dd>
+<dd><p>The project, or any folder inside it. Left out, the project
+the working directory is in – its root once its <code>.Rproj</code> is open – and,
+since this writes into it, in an interactive session the first such call
+asks you to allow it, once a session; in a script, name it.</p></dd>
 
 
 <dt id="arg-overwrite">overwrite<a class="anchor" aria-label="anchor" href="#arg-overwrite"></a></dt>
@@ -110,7 +112,7 @@ be a CSL style before it is kept.</p>
 <span class="r-in"><span><span class="va">dir</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"my_paper"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">repo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"styles"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="create_paper.html">create_paper</a></span><span class="op">(</span><span class="va">dir</span>, git <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Project created: /tmp/RtmpyulCis/my_paper</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Project created: /tmp/RtmpaorZQx/my_paper</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   1. open my_paper.Rproj</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   2. library(easypaper)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   3. render_html()      # see ?render for every command</span>
@@ -124,13 +126,6 @@ be a CSL style before it is kept.</p>
 <span class="r-in"><span><span class="fu"><a href="list_journals.html">list_journals</a></span><span class="op">(</span><span class="va">dir</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "journal-of-ecology" "my-journal"        </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">dir</span>, <span class="va">repo</span><span class="op">)</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co"># The usual way, from the root of a project. Needs a connection.</span></span></span>
-<span class="r-in"><span><span class="fu">add_journal</span><span class="op">(</span><span class="st">"ecology-letters"</span><span class="op">)</span>     <span class="co"># then: render_docx("ecology-letters")</span></span></span>
-<span class="r-in"><span><span class="fu">add_journal</span><span class="op">(</span><span class="st">"plos-one"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">add_journal</span><span class="op">(</span><span class="st">"https://www.zotero.org/styles/nature"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -13,7 +13,7 @@ instead of the original. The original is only ever read.
 ``` r
 italicize_species(
   input,
-  output = NULL,
+  output,
   names = NULL,
   exclude = NULL,
   gbif = TRUE,
@@ -36,7 +36,7 @@ italicize_species(
 - output:
 
   The CSL-JSON file to write, which is the one the document must name in
-  `bibliography:`. By default beside `input`, ending in `_italic.json`.
+  `bibliography:`, e.g. `"references_italic.json"`.
 
 - names:
 
@@ -189,14 +189,23 @@ whose projects run this before every render.
 refs <- file.path(tempdir(), "refs.json")
 writeLines('[{"id": "perez2020", "type": "article-journal",
   "title": "Effects of fire on Pinus halepensis regeneration"}]', refs)
-out <- italicize_species(refs, names = "Pinus halepensis", gbif = FALSE)
+out <- file.path(tempdir(), "refs_italic.json")
+italicize_species(refs, out, names = "Pinus halepensis", gbif = FALSE)
 #> Scientific names in italics (1): Pinus halepensis
-#> Written: /tmp/RtmpyulCis/refs_italic.json
 jsonlite::read_json(out)[[1]]$title
 #> [1] "<span class=\"nocase\">Effects of fire on <i><span class=\"nocase\">Pinus halepensis</span></i> regeneration</span>"
-unlink(c(refs, out))
 
-# The real thing: a .bib, every name looked up in GBIF. Needs pandoc (it
-# comes with Quarto and RStudio) and, the first time, a connection:
-#   italicize_species("references.bib", "references_italic.json")
+# A .bib, which pandoc reads. With gbif = TRUE, the default, every name is
+# looked up in GBIF instead, and the answers are kept in `cache`.
+bib <- file.path(tempdir(), "refs.bib")
+writeLines(c("@article{perez2020, author = {Perez, A.}, year = {2020},",
+             "  title = {Effects of fire on Pinus halepensis regeneration},",
+             "  journal = {Forest Ecology}}"), bib)
+if (rmarkdown::pandoc_available()) {
+  italicize_species(bib, out, names = "Pinus halepensis", gbif = FALSE)
+  jsonlite::read_json(out)[[1]]$title
+}
+#> Scientific names in italics (1): Pinus halepensis
+#> [1] "<span class=\"nocase\">Effects of fire on <i><span class=\"nocase\">Pinus halepensis</span></i> regeneration</span>"
+unlink(c(refs, bib, out))
 ```

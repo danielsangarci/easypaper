@@ -12,7 +12,7 @@ check_species_text(
   abbreviate = TRUE,
   exclude = NULL,
   quiet = FALSE,
-  path = "."
+  path = NULL
 )
 ```
 
@@ -40,8 +40,10 @@ check_species_text(
 
 - path:
 
-  The project, or any folder inside it. The working directory by
-  default, which is the project root once its `.Rproj` is open.
+  The project, or any folder inside it. Left out, the project the
+  working directory is in – its root once its `.Rproj` is open – and,
+  since this writes into it, in an interactive session the first such
+  call asks you to allow it, once a session; in a script, name it.
 
 ## Value
 
@@ -98,7 +100,7 @@ for the names in the reference list.
 ``` r
 dir <- file.path(tempdir(), "my_paper")
 create_paper(dir, git = FALSE)
-#> Project created: /tmp/RtmpyulCis/my_paper
+#> Project created: /tmp/RtmpaorZQx/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
 #>   3. render_html()      # see ?render for every command

@@ -54,7 +54,9 @@ make_submission()        # the journal's folder, double-blind
 ```
 
 `render_*()` makes documents to read, as often as you like; `make_*()`
-assembles what you send, a few times per paper.
+assembles what you send, a few times per paper. The first call that
+writes into the project asks you to allow it, once a session; in a
+script, name the project instead: `render_all(path = ".")`.
 
 To see a finished paper first, `create_example_paper("example_paper")`
 writes the same project with a small study in it, ready to render.

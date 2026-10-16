@@ -76,10 +76,9 @@ stays the one to start a paper of your own with: it writes the structure
 and nothing else.
 
 It needs one package, vegan: its `BCI` and `BCI.env` data are written
-into `data/`, and the analysis uses it. When it is missing, it is
-offered for installation – in an interactive session; elsewhere the
-function stops and says what to install. The data were collected by
-Condit et al. (2002), *Science* 295: 666–669,
+into `data/`, and the analysis uses it. When it is missing, the function
+stops before writing anything, and says what to install. The data were
+collected by Condit et al. (2002), *Science* 295: 666–669,
 [doi:10.1126/science.1066854](https://doi.org/10.1126/science.1066854) :
 cite them, not this example, if you use them. The authors of the example
 are borrowed from the history of the field – Charles Darwin and Alfred
@@ -100,15 +99,9 @@ if (requireNamespace("vegan", quietly = TRUE)) {
   list.files(file.path(dir, "data"))
   unlink(dir, recursive = TRUE)
 }
-#> Example project created: /tmp/RtmpyulCis/example_paper
+#> Example project created: /tmp/RtmpaorZQx/example_paper
 #>   1. open example_paper.Rproj
 #>   2. library(easypaper)
 #>   3. render_html()      # the study, rendered
 #>   The sections are in _sections/: read them to see how each part is written.
-
-if (FALSE) { # \dontrun{
-create_example_paper("example_paper", open = TRUE)
-# then, in the project:
-render_html()
-} # }
 ```

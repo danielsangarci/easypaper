@@ -7,8 +7,10 @@ not reviewed blind – its supplement as PDF too, every figure on its own,
 and the data and code compendium, zipped. There is no cover letter:
 there is no editor. Nor is there a short title, even when the manuscript
 has one: a running head is what a journal asks for, not a preprint
-server. A `README.md` inside says what goes to the preprint server and
-what goes to the data repository, and what to do before pressing submit.
+server. The supplement names the server where a journal's would name the
+journal – "Preprint, *bioRxiv*" – since the paper is in no journal yet.
+A `README.md` inside says what goes to the preprint server and what goes
+to the data repository, and what to do before pressing submit.
 
 ## Usage
 
@@ -23,7 +25,8 @@ make_preprint(
   line_numbers = TRUE,
   line_spacing = NULL,
   suppl_line_spacing = NULL,
-  path = "."
+  figure_dpi = NULL,
+  path = NULL
 )
 ```
 
@@ -78,10 +81,19 @@ make_preprint(
   or `2`. `NULL`, the default, keeps the `linestretch` of the pdf format
   in `_quarto.yml` – `1.5` in the template.
 
+- figure_dpi:
+
+  The resolution the figures are drawn at, in dpi, for this call: `NULL`
+  (the default) keeps the `dpi` of the knitr block of `_quarto.yml`, 600
+  in a new project. The standalone figures are named with it and with
+  the size they print at: `Figure_1_600dpi_180x120mm.tiff`.
+
 - path:
 
-  The project, or any folder inside it. The working directory by
-  default, which is the project root once its `.Rproj` is open.
+  The project, or any folder inside it. Left out, the project the
+  working directory is in – its root once its `.Rproj` is open – and,
+  since this writes into it, in an interactive session the first such
+  call asks you to allow it, once a session; in a script, name it.
 
 ## Value
 
@@ -100,9 +112,19 @@ is enough.
 ## Examples
 
 ``` r
+dir <- file.path(tempdir(), "my_paper")
+create_paper(dir, title = "Ant colonies", authors = "Ada Lovelace",
+             git = FALSE)
+#> Project created: /tmp/RtmpaorZQx/my_paper
+#>   1. open my_paper.Rproj
+#>   2. library(easypaper)
+#>   3. render_html()      # see ?render for every command
+
+# It renders the manuscript, so it needs Quarto (https://quarto.org).
 if (FALSE) { # \dontrun{
-# Inside a project, with its .Rproj open:
-make_preprint()                     # -> submission/bioRxiv/
-make_preprint(label = "EcoEvoRxiv")
+make_preprint(path = dir)
+make_preprint(label = "EcoEvoRxiv", path = dir)
+list.files(file.path(dir, "submission"))
 } # }
+unlink(dir, recursive = TRUE)
 ```

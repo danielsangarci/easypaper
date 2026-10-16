@@ -5,8 +5,9 @@ Each render runs the checks first
 keeps the licences and the deposit's metadata in step with the
 manuscript, sets the scientific names of the references in italics,
 renders with Quarto, repairs what Word would refuse to open, and copies
-every figure to `figures/` as PNG, JPEG and TIFF at 600 dpi. What it
-writes goes to the project's `output/` folder.
+every figure to `figures/` as PNG, JPEG and TIFF at the `dpi` of
+`_quarto.yml`, 600 in a new project. What it writes goes to the
+project's `output/` folder.
 
 ## Usage
 
@@ -15,17 +16,17 @@ render_docx(
   journal = NULL,
   caption_style = "default",
   suppl_figures = "separate",
-  path = "."
+  path = NULL
 )
 
 render_pdf(
   journal = NULL,
   caption_style = "default",
   suppl_figures = "separate",
-  path = "."
+  path = NULL
 )
 
-render_html(journal = NULL, caption_style = "default", path = ".")
+render_html(journal = NULL, caption_style = "default", path = NULL)
 
 render_supplementary(
   journal = NULL,
@@ -33,12 +34,12 @@ render_supplementary(
   output_format = "docx",
   files = NULL,
   blind = FALSE,
-  path = "."
+  path = NULL
 )
 
-render_all(journal = NULL, caption_style = "default", path = ".")
+render_all(journal = NULL, caption_style = "default", path = NULL)
 
-preview(path = ".")
+preview(path = NULL)
 ```
 
 ## Arguments
@@ -60,20 +61,25 @@ preview(path = ".")
   `"abbrev"` (Fig. 1.), `"colon"` (Figure 1:), `"compact"` (Fig. 1:) and
   `"nature"` (Figure 1 \|), or one you define, under a name of your
   choosing, in `caption-styles:` of the `easypaper:` block of
-  `_quarto.yml`. It does not follow `journal`: a citation style says
-  nothing about figures or tables.
+  `_quarto.yml`. The text cites with the caption's word unless the style
+  gives it one of its own – `fig-prefix` beside `fig-title` in
+  `crossref:`, or `fig-text` in a caption style – "Figure 1." under the
+  figure, "Fig. 1" in the text. It does not follow `journal`: a citation
+  style says nothing about figures or tables.
 
 - suppl_figures:
 
   `"separate"` (the default) leaves the supplementary figures and tables
   in the supplement, and rewrites their citations in the main text:
-  `@sfig-map` becomes "Figure S1". `"main"` keeps them at the end of the
-  manuscript instead.
+  `@sfig-map` becomes "Figure S1", and `-@sfig-map`, the number alone,
+  "S1". `"main"` keeps them at the end of the manuscript instead.
 
 - path:
 
-  The project, or any folder inside it. The working directory by
-  default, which is the project root once its `.Rproj` is open.
+  The project, or any folder inside it. Left out, the project the
+  working directory is in – its root once its `.Rproj` is open – and,
+  since this writes into it, in an interactive session the first such
+  call asks you to allow it, once a session; in a script, name it.
 
 - output_format:
 
@@ -110,8 +116,10 @@ yours as it was. Rename the folder and the next render follows.
   `render_supplementary()` does.
 
 - `render_pdf()` writes `output/manuscript_<project>.pdf`, its lines
-  numbered as in the `.docx`, and the supplement beside it as `.pdf`. It
-  needs a LaTeX installation:
+  numbered as in the `.docx`, and the supplement beside it as `.pdf`:
+  the title block flush left, with an ORCID icon beside each author who
+  has one, the captions justified, and the Greek letters of the text
+  printed, which LaTeX's font lacks. It needs a LaTeX installation:
   [`tinytex::install_tinytex()`](https://rdrr.io/pkg/tinytex/man/install_tinytex.html)
   is enough.
 
@@ -125,7 +133,8 @@ yours as it was. Rename the folder and the next render follows.
   supplementary section when there are several
   (`_sections/12.1_suppl_*.qmd`, `12.2_suppl_*.qmd` ...). Its own
   numbering (Figure S1...), its own Word template and its own reference
-  list.
+  list, left out when it cites nothing. It opens with "Supporting
+  Information" and, under it, the reference of the paper it belongs to.
 
 - `render_all()` runs `render_docx()`, `render_pdf()` and
   [`export_code()`](https://danielsangarci.github.io/easypaper/reference/export_code.md),
@@ -159,13 +168,23 @@ for what every render verifies first.
 ## Examples
 
 ``` r
+dir <- file.path(tempdir(), "my_paper")
+create_paper(dir, title = "Ant colonies", authors = "Ada Lovelace",
+             git = FALSE)
+#> Project created: /tmp/RtmpaorZQx/my_paper
+#>   1. open my_paper.Rproj
+#>   2. library(easypaper)
+#>   3. render_html()      # see ?render for every command
+
+# The renders need Quarto, a program of its own (https://quarto.org).
 if (FALSE) { # \dontrun{
-# Inside a project, with its .Rproj open:
-render_html()                            # the working copy
-render_docx()                            # in the manuscript's own journal
-render_docx("ecology-letters", "abbrev") # another journal, "Fig. 1."
-render_pdf()
-render_supplementary()
-render_all()                             # all of the above but the .html
+render_html(path = dir)
+render_docx(path = dir)
+render_docx("ecology-letters", "abbrev", path = dir)
+render_pdf(path = dir)
+render_supplementary(path = dir)
+render_all(path = dir)
+list.files(file.path(dir, "output"))
 } # }
+unlink(dir, recursive = TRUE)
 ```

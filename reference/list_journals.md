@@ -8,15 +8,16 @@ fetches any other journal's style.
 ## Usage
 
 ``` r
-list_journals(path = ".")
+list_journals(path = NULL)
 ```
 
 ## Arguments
 
 - path:
 
-  The project, or any folder inside it. The working directory by
-  default, which is the project root once its `.Rproj` is open.
+  The project, or any folder inside it. Left out, the project the
+  working directory is in – its root once its `.Rproj` is open. This
+  only reads, so it never asks.
 
 ## Value
 
@@ -35,7 +36,7 @@ and
 ``` r
 dir <- file.path(tempdir(), "my_paper")
 create_paper(dir, git = FALSE)
-#> Project created: /tmp/RtmpyulCis/my_paper
+#> Project created: /tmp/RtmpaorZQx/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
 #>   3. render_html()      # see ?render for every command

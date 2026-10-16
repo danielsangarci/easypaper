@@ -25,6 +25,10 @@ First release.
   but the preprint, and counted.
 - Settings go in the `easypaper:` block of `_quarto.yml`, so they travel
   with the paper.
+- Every function works on the project the working directory is in, or on
+  the one `path` names. One that writes into it without a `path` asks
+  first, once a session; in a script, where nobody can answer, `path`
+  names the project.
 - The project’s `README.md`, what a repository shows first, carries the
   title, the authors with their affiliations and ORCID, the keywords and
   the licence notice from the first commit, and the DOI of the data once
@@ -35,12 +39,14 @@ First release.
 - [`convert_data()`](https://danielsangarci.github.io/easypaper/reference/convert_data.md)
   brings originals into `data/` in open formats: workbooks and
   statistical files become `.csv`, files already open are copied, and
-  the originals are only ever read.
+  the originals are only ever read. Outside a project, `to` says where
+  the results go.
 - [`sync_metadata()`](https://danielsangarci.github.io/easypaper/reference/sync_metadata.md)
   describes the data deposit from what the project already knows – the
   title, the keywords, the authors with their affiliations, the email of
   the corresponding author and their ORCID, the licence of the data from
-  the project’s `LICENSE`, the variables – and
+  the project’s `LICENSE`, every file of `data/`, and the variables of
+  each table, read with its own separator (`,`, `;` or a tab) – and
   [`edit_metadata()`](https://danielsangarci.github.io/easypaper/reference/edit_metadata.md)
   opens an editor for the rest.
   [`make_preprint()`](https://danielsangarci.github.io/easypaper/reference/make_preprint.md)
@@ -73,8 +79,16 @@ First release.
   `.pdf`. The affiliations and the keywords line start without the
   first-line indent of the text.
 - The supplement is a document of its own, with its own reference list
-  and its own numbering: *Figure S1*, *Table S1*.
-- Figures are exported at 600 dpi as PNG, JPEG and TIFF on every render.
+  and its own numbering: *Figure S1*, *Table S1*; `-@sfig-x` cites the
+  number alone, *S1*. It opens with “Supporting Information” and, under
+  it, the reference of the paper, flush left; a preprint’s names the
+  server instead of a journal. One that cites nothing has no reference
+  list.
+- Figures are exported as PNG, JPEG and TIFF on every render, at the
+  `dpi` of `_quarto.yml` (600 in a new project).
+- The `.pdf` sets the title block flush left, with an ORCID icon beside
+  each author who has one, justifies the captions, and prints the Greek
+  letters of the text, which LaTeX’s font lacks.
 - [`export_code()`](https://danielsangarci.github.io/easypaper/reference/export_code.md)
   writes the code of every chunk into one script, `analysis_code.R`,
   that opens with a table of contents: the line each section starts on
@@ -82,7 +96,8 @@ First release.
   that reports it, so each is found under its own heading.
 - Captions follow the `crossref:` block of `_quarto.yml`, or a caption
   style for one render: `"abbrev"`, `"colon"`, `"compact"`, `"nature"`,
-  or one of your own.
+  or one of your own. The text may cite with another word than the
+  caption’s: *Figure 1.* under the figure, *Fig. 1* in the text.
 - [`list_journals()`](https://danielsangarci.github.io/easypaper/reference/list_journals.md)
   and
   [`add_journal()`](https://danielsangarci.github.io/easypaper/reference/add_journal.md)
@@ -98,14 +113,16 @@ First release.
 
 ### Checks
 
-- Every render checks citations, cross-references, packages, data files,
-  the title and `renv.lock` first
+- Every render checks citations, cross-references, packages, data files
+  and the title first
   ([`?checks`](https://danielsangarci.github.io/easypaper/reference/checks.md)),
-  and records the environment it came out of.
+  and records the environment it came out of in `renv.lock`;
+  [`check_renv()`](https://danielsangarci.github.io/easypaper/reference/checks.md)
+  says whether that record matches the library.
 - Every render sets the scientific names of the reference list in
   italics, checked against GBIF;
   [`italicize_species()`](https://danielsangarci.github.io/easypaper/reference/italicize_species.md)
-  does it for any bibliography, and
+  does it for any bibliography, into the CSL-JSON file you name, and
   [`check_species()`](https://danielsangarci.github.io/easypaper/reference/check_species.md)
   lists the names left in doubt.
 - [`check_species_text()`](https://danielsangarci.github.io/easypaper/reference/check_species_text.md)
@@ -120,10 +137,12 @@ First release.
 
 - [`make_submission()`](https://danielsangarci.github.io/easypaper/reference/make_submission.md)
   builds the folder for a journal into `submission/`: double-blind by
-  default, with a title page and a main text that names nobody, figures
-  renumbered at 600 dpi, a cover letter already dated, titled and signed
-  by the corresponding author – written from the last one, with those
-  brought up to date, when the paper goes to a second journal – a
+  default, with a title page and a main text that names nobody,
+  standalone figures renumbered and named with their resolution and
+  printed size (`Figure_1_600dpi_180x120mm.tiff`; `figure_dpi` changes
+  the resolution for one call), a cover letter already dated, titled and
+  signed by the corresponding author – written from the last one, with
+  those brought up to date, when the paper goes to a second journal – a
   checklist, and a data and code compendium – with a copy for the
   reviewers that names nobody either. `blind = FALSE` for a signed
   manuscript.
@@ -139,7 +158,8 @@ First release.
 - [`deposit_zenodo()`](https://danielsangarci.github.io/easypaper/reference/deposit_zenodo.md)
   reserves the DOI of the data on Zenodo and writes it into the text and
   the cover letters, without publishing. The deposit carries the licence
-  of the project’s `LICENSE`, as the data’s metadata do.
+  of the project’s `LICENSE`, as the data’s metadata do; an ORCID iD
+  Zenodo could not read is left out of it, with a warning.
 
 ### Co-authors
 

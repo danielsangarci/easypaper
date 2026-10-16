@@ -5,7 +5,9 @@ carries its authors, and is not reviewed blind – its supplement as PDF
 too, every figure on its own, and the data and code compendium, zipped.
 There is no cover letter: there is no editor. Nor is there a short title,
 even when the manuscript has one: a running head is what a journal asks
-for, not a preprint server. A README.md inside says what
+for, not a preprint server. The supplement names the server where a
+journal's would name the journal – &quot;Preprint, bioRxiv&quot; – since the
+paper is in no journal yet. A README.md inside says what
 goes to the preprint server and what goes to the data repository, and what
 to do before pressing submit."><meta property="og:description" content="make_submission()'s sibling, for the other destination. Writes
 submission/&amp;lt;label&amp;gt;/: the manuscript as ONE signed PDF – a preprint
@@ -13,7 +15,9 @@ carries its authors, and is not reviewed blind – its supplement as PDF
 too, every figure on its own, and the data and code compendium, zipped.
 There is no cover letter: there is no editor. Nor is there a short title,
 even when the manuscript has one: a running head is what a journal asks
-for, not a preprint server. A README.md inside says what
+for, not a preprint server. The supplement names the server where a
+journal's would name the journal – &quot;Preprint, bioRxiv&quot; – since the
+paper is in no journal yet. A README.md inside says what
 goes to the preprint server and what goes to the data repository, and what
 to do before pressing submit."><meta property="og:image" content="https://danielsangarci.github.io/easypaper/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -56,7 +60,9 @@ carries its authors, and is not reviewed blind – its supplement as PDF
 too, every figure on its own, and the data and code compendium, zipped.
 There is no cover letter: there is no editor. Nor is there a short title,
 even when the manuscript has one: a running head is what a journal asks
-for, not a preprint server. A <code>README.md</code> inside says what
+for, not a preprint server. The supplement names the server where a
+journal's would name the journal – "Preprint, <em>bioRxiv</em>" – since the
+paper is in no journal yet. A <code>README.md</code> inside says what
 goes to the preprint server and what goes to the data repository, and what
 to do before pressing submit.</p>
     </div>
@@ -73,7 +79,8 @@ to do before pressing submit.</p>
 <span>  line_numbers <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  line_spacing <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  suppl_line_spacing <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  path <span class="op">=</span> <span class="st">"."</span></span>
+<span>  figure_dpi <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  path <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -131,9 +138,19 @@ and of the supplement: <code>1</code>, <code>1.5</code> or <code>2</code>. <code
 template.</p></dd>
 
 
+<dt id="arg-figure-dpi">figure_dpi<a class="anchor" aria-label="anchor" href="#arg-figure-dpi"></a></dt>
+<dd><p>The resolution the figures are drawn at, in dpi, for this
+call: <code>NULL</code> (the default) keeps the <code>dpi</code> of the knitr block of
+<code>_quarto.yml</code>, 600 in a new project. The standalone figures are named
+with it and with the size they print at:
+<code>Figure_1_600dpi_180x120mm.tiff</code>.</p></dd>
+
+
 <dt id="arg-path">path<a class="anchor" aria-label="anchor" href="#arg-path"></a></dt>
-<dd><p>The project, or any folder inside it. The working directory by
-default, which is the project root once its <code>.Rproj</code> is open.</p></dd>
+<dd><p>The project, or any folder inside it. Left out, the project
+the working directory is in – its root once its <code>.Rproj</code> is open – and,
+since this writes into it, in an interactive session the first such call
+asks you to allow it, once a session; in a script, name it.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -152,11 +169,21 @@ enough.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co"># Inside a project, with its .Rproj open:</span></span></span>
-<span class="r-in"><span><span class="fu">make_preprint</span><span class="op">(</span><span class="op">)</span>                     <span class="co"># -&gt; submission/bioRxiv/</span></span></span>
-<span class="r-in"><span><span class="fu">make_preprint</span><span class="op">(</span>label <span class="op">=</span> <span class="st">"EcoEvoRxiv"</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"my_paper"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="create_paper.html">create_paper</a></span><span class="op">(</span><span class="va">dir</span>, title <span class="op">=</span> <span class="st">"Ant colonies"</span>, authors <span class="op">=</span> <span class="st">"Ada Lovelace"</span>,</span></span>
+<span class="r-in"><span>             git <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Project created: /tmp/RtmpaorZQx/my_paper</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   1. open my_paper.Rproj</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   2. library(easypaper)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   3. render_html()      # see ?render for every command</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># It renders the manuscript, so it needs Quarto (https://quarto.org).</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="fu">make_preprint</span><span class="op">(</span>path <span class="op">=</span> <span class="va">dir</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">make_preprint</span><span class="op">(</span>label <span class="op">=</span> <span class="st">"EcoEvoRxiv"</span>, path <span class="op">=</span> <span class="va">dir</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">dir</span>, <span class="st">"submission"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">dir</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

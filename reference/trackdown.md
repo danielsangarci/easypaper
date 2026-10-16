@@ -8,11 +8,11 @@ uploading it would show them no text.
 ## Usage
 
 ``` r
-td_upload(section, gpath = NULL, hide_code = TRUE, path = ".")
+td_upload(section, gpath = NULL, hide_code = TRUE, path = NULL)
 
-td_update(section, gpath = NULL, hide_code = TRUE, path = ".")
+td_update(section, gpath = NULL, hide_code = TRUE, path = NULL)
 
-td_download(section, gpath = NULL, path = ".")
+td_download(section, gpath = NULL, path = NULL)
 ```
 
 ## Arguments
@@ -35,8 +35,10 @@ td_download(section, gpath = NULL, path = ".")
 
 - path:
 
-  The project, or any folder inside it. The working directory by
-  default, which is the project root once its `.Rproj` is open.
+  The project, or any folder inside it. Left out, the project the
+  working directory is in – its root once its `.Rproj` is open – and,
+  since this writes into it, in an interactive session the first such
+  call asks you to allow it, once a session; in a script, name it.
 
 ## Value
 
@@ -62,9 +64,11 @@ CRAN does not.
 ## Examples
 
 ``` r
+# It needs a Google account, authorised for trackdown, so it does not run
+# here.
 if (FALSE) { # \dontrun{
-td_upload("02_introduction")     # first upload
-td_update("02_introduction")     # overwrite with your local version
-td_download("02_introduction")   # bring back their edits
+td_upload("02_introduction", path = "my_paper")
+td_update("02_introduction", path = "my_paper")
+td_download("02_introduction", path = "my_paper")
 } # }
 ```

@@ -28,7 +28,7 @@ copies the figures to PNG, JPEG and TIFF at 600 dpi.
 - [`export_code()`](https://danielsangarci.github.io/easypaper/reference/export_code.md)
   : Write the analysis code as one script
 - [`export_figure_formats()`](https://danielsangarci.github.io/easypaper/reference/export_figure_formats.md)
-  : Copy every figure to JPEG and TIFF at 600 dpi
+  : Copy every figure to JPEG and TIFF
 - [`clean_cache()`](https://danielsangarci.github.io/easypaper/reference/clean_cache.md)
   : Clear the knitr cache
 

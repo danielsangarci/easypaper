@@ -23,9 +23,10 @@ convert_data(path, to = NULL, overwrite = FALSE, also = character(0))
 
 - to:
 
-  Where the results go. Defaults to the `data/` folder of the project
-  the working directory is in, or of the working directory itself when
-  it is in none.
+  Where the results go. Left out, the `data/` folder of the project the
+  working directory is in – in an interactive session, the first call
+  that writes into a project asks you to allow it – and outside a
+  project it has to be given.
 
 - overwrite:
 
@@ -102,16 +103,21 @@ write.csv(head(iris), file.path(src, "iris.csv"), row.names = FALSE)
 out <- file.path(tempdir(), "data")
 
 convert_data(src, to = out)   # copied: a .csv is already open
-#> /tmp/RtmpyulCis/data/ updated: 1 file(s) -- iris.csv
-list.files(out)
-#> [1] "iris.csv"
-unlink(c(src, out), recursive = TRUE)
+#> /tmp/RtmpaorZQx/data/ updated: 1 file(s) -- iris.csv
 
-if (FALSE) { # \dontrun{
-# Inside a project, with its .Rproj open:
-convert_data("originals/counts.xlsx")   # one workbook, one .csv per sheet
-convert_data("originals")               # a whole folder
-convert_data("~/Downloads/plots.gpkg")  # copied, not converted
-convert_data("originals", also = "las") # teach it one more open format
-} # }
+# A workbook: one .csv per sheet.
+convert_data(readxl::readxl_example("datasets.xlsx"), to = out)
+#> /tmp/RtmpaorZQx/data/ updated: 3 file(s) -- datasets_mtcars.csv, datasets_chickwts.csv, datasets_quakes.csv
+list.files(out)
+#> [1] "datasets_chickwts.csv" "datasets_mtcars.csv"   "datasets_quakes.csv"  
+#> [4] "iris.csv"             
+
+# An extension it does not know, copied as it is when named in `also`.
+writeLines("x y z", file.path(src, "points.las"))
+convert_data(file.path(src, "points.las"), to = out, also = "las")
+#> /tmp/RtmpaorZQx/data/ updated: 1 file(s) -- points.las
+list.files(out)
+#> [1] "datasets_chickwts.csv" "datasets_mtcars.csv"   "datasets_quakes.csv"  
+#> [4] "iris.csv"              "points.las"           
+unlink(c(src, out), recursive = TRUE)
 ```

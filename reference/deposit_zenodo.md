@@ -13,7 +13,7 @@ undone. Nothing in the package needs it; it runs only when you call it.
 ## Usage
 
 ``` r
-deposit_zenodo(file = NULL, sandbox = FALSE, token = NULL, path = ".")
+deposit_zenodo(file = NULL, sandbox = FALSE, token = NULL, path = NULL)
 ```
 
 ## Arguments
@@ -34,8 +34,10 @@ deposit_zenodo(file = NULL, sandbox = FALSE, token = NULL, path = ".")
 
 - path:
 
-  The project, or any folder inside it. The working directory by
-  default, which is the project root once its `.Rproj` is open.
+  The project, or any folder inside it. Left out, the project the
+  working directory is in – its root once its `.Rproj` is open – and,
+  since this writes into it, in an interactive session the first such
+  call asks you to allow it, once a session; in a script, name it.
 
 ## Value
 
@@ -78,9 +80,11 @@ into the text.
 ## Examples
 
 ``` r
+# It needs a Zenodo token (see Details), Quarto for the compendium, and a
+# connection, so it does not run here.
 if (FALSE) { # \dontrun{
-make_submission()            # builds submission/<Journal>/data_and_code.zip
-deposit_zenodo(sandbox = TRUE)   # try it on the sandbox first
-deposit_zenodo()                 # the real one: a draft, and its DOI
+make_submission(path = "my_paper")
+deposit_zenodo(sandbox = TRUE, path = "my_paper")
+deposit_zenodo(path = "my_paper")
 } # }
 ```

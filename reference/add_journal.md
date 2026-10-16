@@ -10,7 +10,7 @@ it.
 ## Usage
 
 ``` r
-add_journal(journal, path = ".", overwrite = FALSE, repo = NULL)
+add_journal(journal, path = NULL, overwrite = FALSE, repo = NULL)
 ```
 
 ## Arguments
@@ -22,8 +22,10 @@ add_journal(journal, path = ".", overwrite = FALSE, repo = NULL)
 
 - path:
 
-  The project, or any folder inside it. The working directory by
-  default, which is the project root once its `.Rproj` is open.
+  The project, or any folder inside it. Left out, the project the
+  working directory is in – its root once its `.Rproj` is open – and,
+  since this writes into it, in an interactive session the first such
+  call asks you to allow it, once a session; in a script, name it.
 
 - overwrite:
 
@@ -70,7 +72,7 @@ for the styles a project has.
 dir  <- file.path(tempdir(), "my_paper")
 repo <- file.path(tempdir(), "styles")
 create_paper(dir, git = FALSE)
-#> Project created: /tmp/RtmpyulCis/my_paper
+#> Project created: /tmp/RtmpaorZQx/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
 #>   3. render_html()      # see ?render for every command
@@ -84,11 +86,4 @@ add_journal("my-journal", path = dir, repo = repo)
 list_journals(dir)
 #> [1] "journal-of-ecology" "my-journal"        
 unlink(c(dir, repo), recursive = TRUE)
-
-if (FALSE) { # \dontrun{
-# The usual way, from the root of a project. Needs a connection.
-add_journal("ecology-letters")     # then: render_docx("ecology-letters")
-add_journal("plos-one")
-add_journal("https://www.zotero.org/styles/nature")
-} # }
 ```

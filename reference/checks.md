@@ -9,25 +9,26 @@ a render, only what is not.
 ## Usage
 
 ``` r
-check_citations(path = ".")
+check_citations(path = NULL)
 
-check_crossrefs(quiet = FALSE, path = ".")
+check_crossrefs(quiet = FALSE, path = NULL)
 
-check_packages(path = ".")
+check_packages(path = NULL)
 
-check_title(quiet = FALSE, path = ".")
+check_title(quiet = FALSE, path = NULL)
 
-check_data(quiet = FALSE, path = ".")
+check_data(quiet = FALSE, path = NULL)
 
-check_renv(quiet = FALSE, path = ".")
+check_renv(quiet = FALSE, path = NULL)
 ```
 
 ## Arguments
 
 - path:
 
-  The project, or any folder inside it. The working directory by
-  default, which is the project root once its `.Rproj` is open.
+  The project, or any folder inside it. Left out, the project the
+  working directory is in – its root once its `.Rproj` is open. They
+  only read, so they never ask.
 
 - quiet:
 
@@ -86,7 +87,7 @@ which runs every one of these first.
 ``` r
 dir <- file.path(tempdir(), "my_paper")
 create_paper(dir, title = "Ant colonies", git = FALSE)
-#> Project created: /tmp/RtmpyulCis/my_paper
+#> Project created: /tmp/RtmpaorZQx/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
 #>   3. render_html()      # see ?render for every command

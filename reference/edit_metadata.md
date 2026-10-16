@@ -16,7 +16,7 @@ what is left is what no machine can guess.
 ``` r
 edit_metadata(
   what = c("attributes", "biblio", "creators", "access", "write"),
-  path = "."
+  path = NULL
 )
 ```
 
@@ -29,8 +29,10 @@ edit_metadata(
 
 - path:
 
-  The project, or any folder inside it. The working directory by
-  default, which is the project root once its `.Rproj` is open.
+  The project, or any folder inside it. Left out, the project the
+  working directory is in – its root once its `.Rproj` is open – and,
+  since this writes into it, in an interactive session the first such
+  call asks you to allow it, once a session; in a script, name it.
 
 ## Value
 
@@ -58,23 +60,23 @@ and <https://docs.ropensci.org/dataspice/> for what each field means.
 ``` r
 dir <- file.path(tempdir(), "my_paper")
 create_paper(dir, git = FALSE)
-#> Project created: /tmp/RtmpyulCis/my_paper
+#> Project created: /tmp/RtmpaorZQx/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
 #>   3. render_html()      # see ?render for every command
 write.csv(head(iris), file.path(dir, "data", "iris.csv"), row.names = FALSE)
 
 edit_metadata("write", path = dir)   # dataspice.json and its web page
-#> Written: /tmp/RtmpyulCis/my_paper/data/metadata/dataspice.json
-#>          /tmp/RtmpyulCis/my_paper/data/metadata/index_metadata.html
+#> Written: /tmp/RtmpaorZQx/my_paper/data/metadata/dataspice.json
+#>          /tmp/RtmpaorZQx/my_paper/data/metadata/index_metadata.html
 list.files(file.path(dir, "data", "metadata"))
 #> [1] "access.csv"          "attributes.csv"      "biblio.csv"         
 #> [4] "creators.csv"        "dataspice.json"      "index_metadata.html"
-unlink(dir, recursive = TRUE)
 
-if (FALSE) { # \dontrun{
-# Inside a project, with its .Rproj open. The editors are interactive.
-edit_metadata("attributes")   # units and descriptions of every variable
-edit_metadata("biblio")       # what the dataset is, when and where
-} # }
+# The editors open in an interactive session.
+if (interactive()) {
+  edit_metadata("attributes", path = dir)
+  edit_metadata("biblio", path = dir)
+}
+unlink(dir, recursive = TRUE)
 ```

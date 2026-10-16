@@ -56,7 +56,8 @@ written. The functions of the package then build it:
 
 Every function works on the project the working directory is in – the
 project root, once its `.Rproj` is open – or on the one its `path`
-argument names.
+argument names. One that writes into the project asks first, the first
+time in an interactive session; in a script, `path` names the project.
 
 ## Settings
 

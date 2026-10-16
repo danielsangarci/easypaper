@@ -3,9 +3,10 @@
 Writes `submission/<label>/`: the manuscript split the way journals with
 double-blind review ask for – a title page, and a main text that opens
 with the title and names nobody – or, signed, the main text alone; the
-supplement as its own document, every figure on its own at 600 dpi, a
-cover letter – dated, with the title of the manuscript, signed by the
-corresponding author, and with the DOI of the data once
+supplement as its own document, every figure on its own, named with its
+resolution and printed size, a cover letter – dated, with the title of
+the manuscript, signed by the corresponding author, and with the DOI of
+the data once
 [`deposit_zenodo()`](https://danielsangarci.github.io/easypaper/reference/deposit_zenodo.md)
 has reserved it; for a second journal, the text of the last letter with
 those brought up to date – a checklist of what is left to do by hand,
@@ -27,7 +28,8 @@ make_submission(
   line_numbers = TRUE,
   line_spacing = 2,
   suppl_line_spacing = 1.5,
-  path = "."
+  figure_dpi = NULL,
+  path = NULL
 )
 ```
 
@@ -99,10 +101,19 @@ make_submission(
   The line spacing of the supplement: `1.5` (the default), `1` or `2`.
   Its lines are not numbered.
 
+- figure_dpi:
+
+  The resolution the figures are drawn at, in dpi, for this call: `NULL`
+  (the default) keeps the `dpi` of the knitr block of `_quarto.yml`, 600
+  in a new project. The standalone figures are named with it and with
+  the size they print at: `Figure_1_600dpi_180x120mm.tiff`.
+
 - path:
 
-  The project, or any folder inside it. The working directory by
-  default, which is the project root once its `.Rproj` is open.
+  The project, or any folder inside it. Left out, the project the
+  working directory is in – its root once its `.Rproj` is open – and,
+  since this writes into it, in an interactive session the first such
+  call asks you to allow it, once a session; in a script, name it.
 
 ## Value
 
@@ -148,10 +159,21 @@ for the documents alone.
 ## Examples
 
 ``` r
+dir <- file.path(tempdir(), "my_paper")
+create_paper(dir, title = "Ant colonies", authors = "Ada Lovelace",
+             git = FALSE)
+#> Project created: /tmp/RtmpaorZQx/my_paper
+#>   1. open my_paper.Rproj
+#>   2. library(easypaper)
+#>   3. render_html()      # see ?render for every command
+
+# It renders the manuscript, so it needs Quarto (https://quarto.org).
 if (FALSE) { # \dontrun{
-# Inside a project, with its .Rproj open:
-make_submission()                               # -> submission/JournalofEcology/
-make_submission()                               # again: JournalofEcology_v2/
-make_submission("ecology-letters", figure_format = "png", blind = FALSE)
+make_submission(path = dir)
+make_submission(path = dir)
+make_submission("ecology-letters", figure_format = "png", blind = FALSE,
+                path = dir)
+list.files(file.path(dir, "submission"))
 } # }
+unlink(dir, recursive = TRUE)
 ```

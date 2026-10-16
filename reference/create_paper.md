@@ -117,7 +117,7 @@ create_paper(dir,
              title   = "Manuscript title here",
              authors = c("Charles Darwin", "Alfred Russel Wallace"),
              git     = FALSE)
-#> Project created: /tmp/RtmpyulCis/my_paper
+#> Project created: /tmp/RtmpaorZQx/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
 #>   3. render_html()      # see ?render for every command
@@ -128,11 +128,4 @@ list.files(dir)
 #> [10] "manuscript.qmd"    "my_paper.Rproj"    "output"           
 #> [13] "references"        "supplementary.qmd"
 unlink(dir, recursive = TRUE)
-
-if (FALSE) { # \dontrun{
-# A real project, with its git history started for you:
-create_paper("my_paper",
-             title   = "Manuscript title here",
-             authors = c("Charles Darwin", "Alfred Russel Wallace"))
-} # }
 ```

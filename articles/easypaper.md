@@ -56,8 +56,14 @@ make_submission()        # the journal's folder, double-blind
 | [5. Submit](#submit) | [`make_preprint()`](https://danielsangarci.github.io/easypaper/reference/make_preprint.md), [`deposit_zenodo()`](https://danielsangarci.github.io/easypaper/reference/deposit_zenodo.md), [`make_submission()`](https://danielsangarci.github.io/easypaper/reference/make_submission.md) | The preprint and its data deposit, the DOI of the data, and the folder a journal asks for, into `submission/` |
 
 Every function works on the project the working directory is in, from
-any folder inside it, or on the one its `path` argument names. Each has
-a help page with its arguments explained:
+any folder inside it, or on the one its `path` argument names. A
+function that writes into the project asks first, the first time in a
+session:
+[`render_html()`](https://danielsangarci.github.io/easypaper/reference/render.md)
+in RStudio says where it is about to write, and a yes holds until the
+session ends. A script, where nobody can answer, names the project:
+`render_all(path = ".")`. Each function has a help page with its
+arguments explained:
 [`?create_paper`](https://danielsangarci.github.io/easypaper/reference/create_paper.md),
 [`?render`](https://danielsangarci.github.io/easypaper/reference/render.md),
 [`?make_submission`](https://danielsangarci.github.io/easypaper/reference/make_submission.md),
@@ -112,7 +118,7 @@ by Condit et al. 2002, *Science* 295: 666–669\]: species richness by
 habitat with a Poisson GLM, and the composition of the tree assemblages
 with a PERMANOVA, a test of the homogeneity of their dispersions
 (PERMDISP) and an NMDS. It needs vegan, for the data and the analysis,
-and offers to install it when it is missing. Each section shows one
+and says what to install when it is missing. Each section shows one
 thing done the way the package expects it:
 
 | Where | What it shows |
@@ -284,7 +290,8 @@ Three rules follow, and they are the ones worth holding onto:
 reports what is sitting in `data/` that the analysis never reads — it
 travels to the repository all the same.
 [`convert_data()`](https://danielsangarci.github.io/easypaper/reference/convert_data.md)
-works in any folder, whether or not easypaper created it.
+works in any folder, whether or not easypaper created it: outside a
+project, `to` says where the results go.
 
 ## 3. Write and check
 
@@ -392,8 +399,8 @@ An id that is not in the list stops the render: it is a typo, and would
 otherwise reach the journal. An affiliation no author names, or one
 still from the template, gets a warning. The ORCID iD goes in `orcid:`,
 which the template writes empty under every author: it puts the ORCID
-icon, linked to the record, beside the name in the project’s
-`README.md`, and reaches the metadata of the data and the Zenodo
+icon, linked to the record, beside the name in the project’s `README.md`
+and in every `.pdf`, and reaches the metadata of the data and the Zenodo
 deposit.
 
 Quarto cannot do this on its own: in a `.docx` it prints the names
@@ -490,13 +497,17 @@ the render loads before the first line of text:
 | `fit_flextable_to_page(ft, pgwidth = 5.5)` | `autofit()` plus a ceiling. The table keeps the width its content needs and is only scaled down if it would run off the page; it is never stretched to fill the line, because Quarto puts a captioned table in a container 5.5 inches wide and a wider one reaches Word out of line |
 | `stars_pval(p)` | significance stars, as the `suffix` of `colformat_double()` so the p-value stays a number and is formatted rather than pasted together as text |
 
-Every render writes the figures to `figures/png/` at 600 dpi, and copies
-them to `figures/jpg/` and `figures/tiff/` — which is what a journal
-asks for on acceptance, and what
+Every render writes the figures to `figures/png/` at the `dpi` of the
+`knitr:` block of `_quarto.yml` — 600 in a new project — and copies them
+to `figures/jpg/` and `figures/tiff/` at that resolution, which is what
+a journal asks for on acceptance.
 [`make_submission()`](https://danielsangarci.github.io/easypaper/reference/make_submission.md)
-renumbers into `Figure_1.tiff` in the order the reader meets them.
+renumbers them in the order the reader meets them, and names each with
+its resolution and the size it prints at:
+`Figure_1_600dpi_180x120mm.tiff`; `make_submission(figure_dpi = 300)`
+draws them at another resolution for that call.
 [`export_figure_formats()`](https://danielsangarci.github.io/easypaper/reference/export_figure_formats.md)
-makes those copies on its own, from the PNGs already there.
+makes the copies on its own, from the PNGs already there.
 
 How a caption starts — *Figure 1.*, *Fig. 1:*, *Figure 1 \|* — is set
 once for the paper, or for one render; see [How figures and tables are
@@ -511,10 +522,13 @@ Two kinds, told apart by what the file contains — nothing to declare:
   `stbl` div. They are numbered `Figure S1`, `Table S1`, on a counter of
   their own, so a supplementary figure never advances the numbering of
   `Figure 1`. They are the same chunks as above, with `sfig-` and
-  `stbl-` labels.
+  `stbl-` labels, cited as `@sfig-map` (*Figure S1*) or, for the number
+  alone, `-@sfig-map` (*S1*: *Figures S1 and S2*).
 - **Text** (an extended Methods, say): a supplementary file with no
   floats. It always leaves as its own document, which is the point — its
-  reference list is independent from the main text’s.
+  reference list is independent from the main text’s. A supplement that
+  cites nothing has no reference list at all, and no “References”
+  heading over an empty page.
 
 The supplement is also rendered as **a document of its own** — by
 [`render_docx()`](https://danielsangarci.github.io/easypaper/reference/render.md),
@@ -756,6 +770,13 @@ them, and the line spacing, belong to what you send: they are arguments
 of [`make_preprint()`](#the-preprint-deposit) and
 [`make_submission()`](#submitting-to-a-journal).
 
+The `.pdf` sets the title, the authors and their ORCID icons flush left,
+and the captions justified; a Greek letter typed in the text or written
+by inline R — *β*, *α*, *Ω* — prints, though LaTeX’s font has none: it
+is taken from the maths font. The supplement opens with “Supporting
+Information” and, under it, the reference of the paper it belongs to, in
+the `.pdf` and the `.docx` alike.
+
 One thing worth reading once: **the manuscript and its supplement are
 never joined into a single file**. Each render writes one document per
 section, into `output/`, each with its own reference list. Joining them
@@ -807,7 +828,7 @@ make_preprint(line_numbers = FALSE, line_spacing = 2)  # unnumbered, double-spac
       manuscript/
         preprint_bioRxiv.pdf        the manuscript, signed
         supporting_information_bioRxiv.pdf
-        figures/Figure_1.tiff ...
+        figures/Figure_1_600dpi_180x120mm.tiff ...
       data_and_code/                data, metadata, analysis_code.R, renv.lock
       data_and_code.zip             for Zenodo or Dryad
 
@@ -817,7 +838,9 @@ Its sibling for the journal is
 point. The manuscript comes out as **one signed PDF**, not a blinded
 pair of Word files: a preprint is not reviewed blind, and hiding the
 authors would defeat the reason for posting it. And there is no cover
-letter, because there is no editor to address.
+letter, because there is no editor to address. Its supplement names the
+server where the journal’s would name the journal — “Preprint,
+*bioRxiv*” — since the paper is in no journal yet.
 
 Everything else is the same machinery — standalone figures, the
 compendium, the lockfile — because a deposit has to stand on its own
@@ -837,7 +860,7 @@ other defaults where a preprint differs:
 | `line_numbers` | `TRUE` | Numbers every line of the manuscript, continuously, as in a submission: what readers cite in their comments. `FALSE` leaves them unnumbered |
 | `line_spacing` | `NULL` | `NULL` keeps the `linestretch` of the `pdf:` format in `_quarto.yml` (1.5 in the template); `1`, `1.5` or `2` set it for this call |
 | `suppl_line_spacing` | `NULL` | The same, for the supplement |
-| `journal`, `caption_style`, `figure_format`, `snapshot`, `suppl_figures` | as in [`make_submission()`](https://danielsangarci.github.io/easypaper/reference/make_submission.md) |  |
+| `journal`, `caption_style`, `figure_format`, `figure_dpi`, `snapshot`, `suppl_figures` | as in [`make_submission()`](https://danielsangarci.github.io/easypaper/reference/make_submission.md) |  |
 
 ### Reserving the DOI on Zenodo
 
@@ -881,11 +904,13 @@ title of the manuscript and the keywords written under its abstract
 authors as the creators of the data — with their affiliations, the email
 of the corresponding author and their ORCID, from the YAML of
 `manuscript.qmd` — the licence of the data, from the project’s
-`LICENSE.txt` (CC BY 4.0 in a new project), and the variable names from
-the data files themselves. It only ever adds, so the descriptions and
-the units you write by hand are never overwritten — and what no machine
-can guess — what each column means, its units, the dates and places the
-data cover — stays yours, and
+`LICENSE.txt` (CC BY 4.0 in a new project), every file of `data/`, and
+the variable names of each table — a `.csv` read with its own separator,
+the `;` a spreadsheet writes in a language with a decimal comma
+included, and a `.tsv`. It only ever adds, so the descriptions and the
+units you write by hand are never overwritten — and what no machine can
+guess — what each column means, its units, the dates and places the data
+cover — stays yours, and
 [`edit_metadata()`](https://danielsangarci.github.io/easypaper/reference/edit_metadata.md)
 opens an editor for it:
 
@@ -925,7 +950,7 @@ That builds, from what is already in the project:
         title_JournalofEcology.docx           title, authors, affiliations; double-blind only
         main_JournalofEcology.docx            the title, then the Abstract on, no names
         supporting_information_*.docx
-        figures/Figure_1.tiff ...             600 dpi, renumbered in order
+        figures/Figure_1_600dpi_180x120mm.tiff ...   renumbered in order
       data_and_code/                          data, metadata, analysis_code.R, renv.lock
       data_and_code.zip                       for Zenodo or Dryad
       data_and_code_blinded/                  the same, naming nobody; double-blind only
@@ -940,7 +965,7 @@ What it does that a render does not:
 | The authors | on the front | double-blind: only on the title page, the main text is built without them. Signed: on the front |
 | Line numbers and spacing | as the Word template sets them | numbered and double-spaced by default, or as you ask |
 | The supplement | its own file, signed, cited as *Figure S1* from the main text | the same, and without the authors when double-blind |
-| The figures | embedded in the document | also on their own, at 600 dpi and renumbered in order |
+| The figures | embedded in the document | also on their own, renumbered in order and named with their resolution and printed size |
 | Data and code | — | the compendium and its `.zip`, `renv.lock` included; double-blind, also a copy that names nobody, for the reviewers |
 | Also writes | — | a cover letter, dated, with the title and the corresponding author’s signature — or the last one written, brought up to date — and a `CHECKLIST.md` |
 | `renv.lock` | rewritten, to describe this render | rewritten, and copied into the compendium |
@@ -951,6 +976,7 @@ What it does that a render does not:
 | `label` | the journal’s name | Names the folder inside `submission/` and every file in it. Left alone it is the journal’s own name with the spaces taken out, so `"ecology-letters"` lands in `submission/EcologyLetters/`. A submission is never overwritten: when the folder is already there, the next version is built beside it, `submission/JournalofEcology_v2/`, then `_v3`, with every file named the same way (`main_JournalofEcology_v2.docx`). Pass your own label for a trial you want to keep apart |
 | `caption_style` | `"default"` | As in the renders |
 | `figure_format` | `"tiff"` | The standalone figures the journal uploads: `"tiff"`, `"png"` or `"jpg"`. TIFF unless they say otherwise — JPEG is lossy and poor for line art |
+| `figure_dpi` | `NULL` | The resolution the figures are drawn at for this call, in dpi. `NULL` keeps the `dpi` of `_quarto.yml`, 600 in a new project |
 | `blind` | `TRUE` | Splits title page from main text the way double-blind review asks: the main text opens with the title alone, the author block is dropped and so are the affiliations, so no name travels in it. `FALSE` when the journal wants them in: one signed main text, and no title page, which would only repeat it |
 | `snapshot` | `TRUE` | Runs [`renv::snapshot()`](https://rstudio.github.io/renv/reference/snapshot.html) first, so the `renv.lock` that travels in the compendium describes the environment *this* submission came out of. The renders record it too, but a submission is the one you will be asked about. `FALSE` if you keep the lockfile by hand |
 | `suppl_figures` | `"separate"` | Whether the supplementary figures and tables go out on their own or at the end of the main text. Either way they are cited from the main text |
@@ -1075,7 +1101,7 @@ variable labels of an `.sav` or a `.dta` — says so when it happens.
 | Argument | Default | What it decides |
 |----|----|----|
 | `path` | — | The file or folder to read, relative to the working directory — the project root, once its `.Rproj` is open — or absolute. A folder is read whole, subfolders included. The originals are only ever read |
-| `to` | `data/` | Where the results go: the `data/` of the project the working directory is in, or of the working directory itself when it is in none |
+| `to` | `data/` | Where the results go: the `data/` of the project the working directory is in. Outside a project there is none, and `to` has to be given |
 | `overwrite` | `FALSE` | `FALSE` writes only what is missing from `data/` or older than its original, so a file you corrected by hand stays as it is until the original changes. `TRUE` rebuilds the lot |
 | `also` | none | Extensions to treat as already open for this call, with or without the dot. For good: list them under `open-formats:` in `_quarto.yml` |
 
@@ -1179,14 +1205,17 @@ that file is used as the page: the affiliations go where it writes
 ### How figures and tables are named
 
 Every journal writes the start of a caption its own way: *Figure 1.*,
-*Figure 1:*, *Fig. 1.*, *Fig. 1:*, *Figure 1 \|*. Four things decide it,
-and all four come together wherever you set them:
+*Figure 1:*, *Fig. 1.*, *Fig. 1:*, *Figure 1 \|*. And some cite with
+another word in the text: *Figure 1.* under the figure, *Fig. 1* in the
+text. These things decide it, and they come together wherever you set
+them:
 
 | What | Key in `crossref:` | Key in `caption-styles:` | Example |
 |----|----|----|----|
-| The word of a figure, in its caption and where the text cites it | `fig-title`, `fig-prefix` | `fig` | `"Figure"`, `"Fig."` |
-| The word of a table, in its heading and where the text cites it | `tbl-title`, `tbl-prefix` | `tbl` | `"Table"`, `"Tab."` |
-| The same in the supplement, with the S | `reference-prefix` of `sfig` and `stbl` | `sfig`, `stbl` | `"Figure S"`, `"Fig. S"` |
+| The word of a figure, in its caption | `fig-title` | `fig` | `"Figure"`, `"Fig."` |
+| The word of a table, in its heading | `tbl-title` | `tbl` | `"Table"`, `"Tab."` |
+| The same in the supplement, with the S | `caption-prefix` of `sfig` and `stbl` | `sfig`, `stbl` | `"Figure S"`, `"Fig. S"` |
+| The word the text cites them with, when it is not the caption’s | `fig-prefix`, `tbl-prefix`, and `reference-prefix` of `sfig` and `stbl` | `fig-text`, `tbl-text`, `sfig-text`, `stbl-text` | `"Fig."`, `"Fig. S"` |
 | What follows the number, for figures and tables alike | `title-delim` | `delim` | `"."`, `":"`, or a space and a vertical rule |
 
 For figures and tables, side by side:
@@ -1204,11 +1233,14 @@ The word is set apart for figures (`fig-title`) and for tables
 one, `title-delim`, for both: Quarto has no `tbl-delim`, so a figure and
 a table always end their number the same way.
 
-The text cites with the same word and no delimiter: with `fig: "Fig."`
-and `delim: ":"`, the caption reads *Fig. 1: Ordination of…* and the
-text *as shown in Fig. 1*. There is always a space between the word and
-the number, except after the S of the supplement (*Fig. S1*): Quarto
-writes no *Fig1*.
+The text cites with no delimiter, and with the caption’s word unless it
+is given one of its own: with `fig: "Fig."` and `delim: ":"`, the
+caption reads *Fig. 1: Ordination of…* and the text *as shown in Fig.
+1*; with `fig: "Figure"` and `fig-text: "Fig."`, the caption reads
+*Figure 1.* and the text *Fig. 1*. There is always a space between the
+word and the number, except after the S of the supplement (*Fig. S1*):
+Quarto writes no *Fig1*. To cite the number alone, as in *Figures 1 and
+2*, write `-@fig-a`; in the supplement `-@sfig-a` gives *S1*.
 
 There are two places to set them, for two different needs.
 
@@ -1233,20 +1265,24 @@ crossref:
   custom:
     - kind: float
       key: sfig
-      reference-prefix: "Fig. S"     # the supplement: "Fig. S1"
+      caption-prefix: "Fig. S"       # the caption: "Fig. S1: ..."
+      reference-prefix: "Fig. S"     # in the text: "Fig. S1"
       latex-env: sfig
       space-before-numbering: false
     - kind: float
       key: stbl
-      reference-prefix: "Table S"    # the supplement: "Table S1"
+      caption-prefix: "Table S"      # the heading: "Table S1: ..."
+      reference-prefix: "Table S"    # in the text: "Table S1"
       latex-env: stbl
       space-before-numbering: false
       caption-location: top
 ```
 
-Leave the other lines of the block as they are:
-`space-before-numbering: false` is what keeps the S and the number
-together.
+For *Figure 1.* under the figure and *Fig. 1* in the text, keep
+`fig-title: "Figure"` and write `fig-prefix: "Fig."`; in the supplement,
+`caption-prefix: "Figure S"` and `reference-prefix: "Fig. S"`. Leave the
+other lines of the block as they are: `space-before-numbering: false` is
+what keeps the S and the number together.
 
 **For one render: `caption_style`.** To see the manuscript as another
 journal would print it, or to send it to two journals that want
@@ -1270,8 +1306,9 @@ The package comes with five, ready to use in any project:
 | `"nature"` | *Figure 1 \|* | *Table 1 \|* | *Figure S1 \|*, *Table S1 \|* |
 
 These are the captions. The text cites with the same word and no
-delimiter: *Fig. 1*, *Table S1*. `"nature"` is named after the journal
-that writes its captions that way; the others after what they do.
+delimiter — *Fig. 1*, *Table S1* — unless the `crossref:` block gives it
+a word of its own. `"nature"` is named after the journal that writes its
+captions that way; the others after what they do.
 
 None of them comes with a journal. The `.csl` of `references/` writes
 the citations and the reference list, and nothing about figures or
@@ -1302,8 +1339,9 @@ styles as it needs, one per line — one for each journal you send papers
 to, say, named after it.
 
 A style writes only what it changes. Its keys are the ones of the table
-at the top of this section, and each one it leaves out is taken from the
-`crossref:` block. So in a new project
+at the top of this section — `fig-text` and its siblings too, for a word
+of the text’s own: `{fig: "Figure", fig-text: "Fig."}` — and each one it
+leaves out is taken from the `crossref:` block. So in a new project
 
 ``` yaml
     figs: {fig: "Fig.", sfig: "Fig. S"}
@@ -1346,7 +1384,7 @@ installed together with easypaper. The one exception is `trackdown`, for
 from GitHub. Two more are needed only by the function that uses them:
 vegan by
 [`create_example_paper()`](https://danielsangarci.github.io/easypaper/reference/create_example_paper.md),
-which offers to install it, and curl by
+which says what to install when it is missing, and curl by
 [`deposit_zenodo()`](https://danielsangarci.github.io/easypaper/reference/deposit_zenodo.md).
 
 ### Known traps
@@ -1365,7 +1403,8 @@ which offers to install it, and curl by
 - **`~/.Rprofile` is loaded in every R session.** If the manuscript uses
   something defined there without you noticing, it will not reproduce on
   another machine. When in doubt:
-  `R --vanilla -e 'easypaper::render_all()'`.
+  `R --vanilla -e 'easypaper::render_all(path = ".")'`, from the
+  project’s folder.
 - **renv does not capture Quarto.** It is an external binary.
   [`export_code()`](https://danielsangarci.github.io/easypaper/reference/export_code.md)
   records its version in `output/sessionInfo.txt`; give it in the

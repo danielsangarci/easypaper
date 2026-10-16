@@ -70,7 +70,8 @@ formats, <code><a href="sync_metadata.html">sync_metadata()</a></code> and <code
 deposit, and <code><a href="add_journal.html">add_journal()</a></code> fetches any journal's citation style.</p></li>
 </ul><p>Every function works on the project the working directory is in – the
 project root, once its <code>.Rproj</code> is open – or on the one its <code>path</code>
-argument names.</p>
+argument names. One that writes into the project asks first, the first
+time in an interactive session; in a script, <code>path</code> names the project.</p>
     </div>
     <div class="section level2">
     <h2 id="settings">Settings<a class="anchor" aria-label="anchor" href="#settings"></a></h2>
