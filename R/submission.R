@@ -1595,12 +1595,8 @@ AFFILIATIONS_SLOT <- "^\\s*<!--\\s*affiliations\\s*-->\\s*$"
   prev <- prev[which.max(file.mtime(prev))]
   md <- tempfile(fileext = ".md")
   on.exit(unlink(md), add = TRUE)
-  ok <- tryCatch({
-    rmarkdown::pandoc_convert(normalizePath(prev), to = "markdown-smart",
-                              output = md,
-                              options = c("--standalone", "--wrap=none"))
-    TRUE
-  }, error = function(e) FALSE)
+  ok <- .pandoc_run(c(shQuote(normalizePath(prev)), "-t", "markdown-smart",
+                      "-o", shQuote(md), "--standalone", "--wrap=none"))
   if (!ok || !file.exists(md)) return(NULL)
   l <- readLines(md, warn = FALSE, encoding = "UTF-8")
   b <- .yaml_bounds(l)

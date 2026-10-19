@@ -230,7 +230,7 @@ test_that("the cover letter fills in what the project knows", {
   in_project(p, .write_cover_letter(f, "Journal of Ecology"))
   plain <- function(f) {
     out <- tempfile(fileext = ".txt")
-    rmarkdown::pandoc_convert(f, to = "plain", output = out)
+    expect_true(.pandoc_run(c(shQuote(f), "-t", "plain", "-o", shQuote(out))))
     paste(readLines(out), collapse = " ")
   }
   txt <- plain(f)
@@ -292,8 +292,8 @@ test_that("a second submission starts its cover letter from the first one", {
                 nzchar(Sys.which("quarto")), "Quarto is not available")
   plain <- function(f) {
     out <- tempfile(fileext = ".txt")
-    rmarkdown::pandoc_convert(normalizePath(f), to = "plain", output = out,
-                              options = "--wrap=none")
+    expect_true(.pandoc_run(c(shQuote(normalizePath(f)), "-t", "plain",
+                              "-o", shQuote(out), "--wrap=none")))
     paste(readLines(out), collapse = " ")
   }
   p <- new_project(title = "Chemical mimicry in ants",

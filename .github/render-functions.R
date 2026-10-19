@@ -1,23 +1,50 @@
-# Every function of easypaper on Windows, with Quarto, on a project in a folder
-# whose path has a space and an accent -- the way a Windows user's folders are
-# named. R CMD check renders nothing, because CRAN has no Quarto: this is where
-# a render that only fails on Windows shows up. Run by windows-render.yaml.
+# Every function of easypaper, with Quarto, on a project in a folder whose
+# path has a space and an accent -- the way many users' folders are named.
+# R CMD check renders nothing, because CRAN has no Quarto: this is where a
+# render that only fails on one system shows up. Run by render.yaml, on
+# Windows and macOS, once on the worked example and once on the blank
+# template:
+#
+#   Rscript .github/render-functions.R example
+#   Rscript .github/render-functions.R template
 
 library(easypaper)
+source(".github/annotate.R")
 
-home <- file.path(Sys.getenv("USERPROFILE"), "Documents", "Ana López Pérez")
+kind <- commandArgs(TRUE)[1]
+if (is.na(kind)) kind <- "example"
+# USERPROFILE is the home on Windows; elsewhere it is not set.
+home <- file.path(Sys.getenv("USERPROFILE", path.expand("~")), "Documents", "Ana L\u00f3pez P\u00e9rez")
 dir.create(home, recursive = TRUE, showWarnings = FALSE)
-p <- create_example_paper(file.path(home, "mi paper"), git = FALSE)
+p <- switch(kind,
+  example  = create_example_paper(file.path(home, "mi paper"), git = FALSE),
+  template = create_paper(file.path(home, "mi plantilla"),
+                          title = "Habitat and ant nuptial flights",
+                          authors = c("Ana L\u00f3pez P\u00e9rez", "Roi Santiago"),
+                          git = FALSE),
+  stop("Give `example` or `template`.", call. = FALSE))
 cat("Project:", p, "\n")
 
 failed <- character(0)
+# What a step prints -- Quarto's log among it -- is kept, so that a failure
+# can carry its end in the annotation, where the error is.
 step <- function(label, code) {
   cat("\n==== ", label, "\n", sep = "")
-  ok <- tryCatch({ force(code); TRUE }, error = function(e) {
-    cat("FAILED: ", conditionMessage(e), "\n", sep = "")
-    FALSE
-  })
-  if (!ok) failed <<- c(failed, label)
+  log <- character(0)
+  keep <- function(m) {
+    log <<- c(log, conditionMessage(m))
+  }
+  out <- utils::capture.output(ok <- withCallingHandlers(
+    tryCatch({ force(code); TRUE }, error = function(e) {
+      log <<- c(log, paste("FAILED:", conditionMessage(e)))
+      FALSE
+    }),
+    message = keep, warning = keep))
+  cat(out, sep = "\n")
+  if (!ok) {
+    failed <<- c(failed, label)
+    annotate(label, c(out, log))
+  }
   invisible(ok)
 }
 
@@ -59,6 +86,6 @@ cat("\n==== What was written\n")
 print(list.files(p, recursive = TRUE, pattern = "[.](docx|pdf|html|zip|tiff|png)$"))
 
 if (length(failed)) {
-  stop("Failed on Windows: ", paste(failed, collapse = ", "), call. = FALSE)
+  stop("Failed on ", kind, ": ", paste(failed, collapse = ", "), call. = FALSE)
 }
-cat("\nEverything ran on Windows.\n")
+cat("\nEverything ran on the ", kind, ".\n", sep = "")

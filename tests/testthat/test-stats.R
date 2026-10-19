@@ -1,7 +1,7 @@
 # How long the manuscript is: the counts a journal asks for, and its limits.
 
 test_that("words are counted the way Word counts the rendered text", {
-  skip_if_not(rmarkdown::pandoc_available(), "pandoc is not available")
+  skip_if_no_pandoc()
   p <- new_project()
   in_project(p, {
     # Code, comments, shortcodes and markup are not words; inline R is one.
@@ -24,7 +24,7 @@ test_that("words are counted the way Word counts the rendered text", {
 })
 
 test_that("manuscript_stats() counts what a submission form asks for", {
-  skip_if_not(rmarkdown::pandoc_available(), "pandoc is not available")
+  skip_if_no_pandoc()
   p <- new_project(title = "Chemical mimicry in ants")
   s <- file.path(p, "_sections")
   writeLines(c("Ants live in colonies.", "",
@@ -107,7 +107,7 @@ test_that("the main text leaves out the statements, whatever they are called", {
   y <- readLines(file.path(p, "_quarto.yml"))
   writeLines(y[!grepl("^    - (Acknowledgements|Data availability)", y)],
              file.path(p, "_quarto.yml"))
-  skip_if_not(rmarkdown::pandoc_available(), "pandoc is not available")
+  skip_if_no_pandoc()
   before <- manuscript_stats(quiet = TRUE, path = p)[["main_words"]]
   writeLines("We thank many many people here.",
              file.path(p, "_sections", "06_acknowledgements.qmd"))
@@ -166,7 +166,7 @@ test_that("every render and every make prints the length, once", {
 })
 
 test_that("the summary counts the short title when there is one", {
-  skip_if_not(rmarkdown::pandoc_available(), "pandoc is not available")
+  skip_if_no_pandoc()
   p <- new_project(title = "Chemical mimicry in ants")
   ms <- readLines(file.path(p, "manuscript.qmd"))
   writeLines(sub("^# short-title: .*$", 'short-title: "Mimicry in ants"', ms),

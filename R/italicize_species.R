@@ -491,6 +491,19 @@ italicize_species <- function(input,
   gsub(paste0(field, '"((?:[^"\\\\]|\\\\.)*)"'), "\\1\\2{{\\3}}", txt, perl = TRUE)
 }
 
+#' Run pandoc with `args`; TRUE when it ran and succeeded, FALSE when it
+#' failed or there is none. Every pandoc the package calls outside a render
+#' goes through here: rmarkdown finds RStudio's only inside RStudio, and from
+#' Positron or a terminal the one there is may be Quarto's alone.
+#' @noRd
+.pandoc_run <- function(args) {
+  p <- tryCatch(.sp_find_pandoc(), error = function(e) NULL)
+  if (is.null(p)) return(FALSE)
+  status <- suppressWarnings(system2(p$cmd, c(p$pre, args),
+                                     stdout = FALSE, stderr = FALSE))
+  identical(as.integer(status), 0L)
+}
+
 #' pandoc: the one rmarkdown finds (RStudio's, or on the PATH), or the one
 #' Quarto carries, called through `quarto pandoc`.
 #' @noRd

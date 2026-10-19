@@ -36,7 +36,8 @@ test_that("an independent style lands in references/, beside the .bib", {
   r <- fake_repo()
   expect_message(out <- add_journal("APA.csl", path = p, repo = r),
                  "Added references/apa.csl \\(American Psychological")
-  expect_identical(out, file.path(normalizePath(p), "references", "apa.csl"))
+  expect_identical(out, file.path(normalizePath(p, winslash = "/"), "references",
+                                   "apa.csl"))
   expect_true("apa" %in% list_journals(p))
   expect_identical(readLines(out), readLines(file.path(r, "apa.csl")))
 })

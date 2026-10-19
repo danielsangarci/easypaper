@@ -14,11 +14,6 @@ copy_cache <- function() {
   f
 }
 
-skip_if_no_pandoc <- function() {
-  ok <- tryCatch({ easypaper:::.sp_find_pandoc(); TRUE }, error = function(e) FALSE)
-  skip_if_not(ok, "pandoc is not available")
-}
-
 # What a title has in italics, one element per italic run.
 italics <- function(s) {
   s <- gsub("</?span[^>]*>", "", s)

@@ -212,8 +212,8 @@ test_that("a render that fails says so, not what cli made of its log", {
   # {.short-title} of the title broke it.
   local_mocked_bindings(
     quarto_render = function(...) {
-      cli::cli_abort(c("Error running quarto CLI from R.",
-                       " " = "title: 'A [Short]{.short-title}'"))
+      # What cli says when it meets {.short-title} in the log.
+      stop("Invalid cli literal: `{.short-ti...}` starts with a dot.")
     },
     .package = "quarto")
   expect_error(.quarto_render("tmp_main_text.qmd"),

@@ -239,7 +239,6 @@ manuscript_stats <- function(quiet = FALSE, path = NULL) {
 #' NULL when pandoc is not there.
 #' @noRd
 .pandoc_plain <- function(txt, bibliography = FALSE) {
-  if (!rmarkdown::pandoc_available()) return(NULL)
   bib <- .bib_paths()
   bib <- bib[file.exists(bib)]
   csl <- tryCatch(.csl_path(.resolve_journal(NULL)), error = function(e) NULL)
@@ -254,8 +253,6 @@ manuscript_stats <- function(quiet = FALSE, path = NULL) {
               if (!bibliography) "--metadata=suppress-bibliography:true")
     if (!is.null(csl) && file.exists(csl)) args <- c(args, paste0("--csl=", shQuote(csl)))
   }
-  status <- suppressWarnings(system2(rmarkdown::pandoc_exec(), args,
-                                     stdout = FALSE, stderr = FALSE))
-  if (!identical(as.integer(status), 0L) || !file.exists(out)) return(NULL)
+  if (!.pandoc_run(args) || !file.exists(out)) return(NULL)
   readLines(out, warn = FALSE, encoding = "UTF-8")
 }

@@ -32,3 +32,10 @@ allow_writes <- function(env = parent.frame()) {
           envir = env)
   invisible(TRUE)
 }
+
+# Any pandoc the package can call: RStudio's, one on the PATH, or Quarto's,
+# which is all there is outside RStudio.
+skip_if_no_pandoc <- function() {
+  ok <- tryCatch({ easypaper:::.sp_find_pandoc(); TRUE }, error = function(e) FALSE)
+  skip_if_not(ok, "pandoc is not available")
+}
