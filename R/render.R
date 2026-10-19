@@ -125,7 +125,7 @@ render_docx <- function(journal = NULL, caption_style = "default",
   f <- .render("docx", journal, caption_style, "docx",
                suppl_figures = suppl_figures)
   dest <- .out(.output_name("manuscript", journal, "docx"))
-  file.rename(f, dest)
+  .move(f, dest)
   message("Written: ", dest)
   .record_env()
   if (outer) .report_length(force = TRUE)
@@ -144,7 +144,7 @@ render_pdf <- function(journal = NULL, caption_style = "default",
   f <- .render("pdf", journal, caption_style, "pdf",
                suppl_figures = suppl_figures)
   dest <- .out(.output_name("manuscript", journal, "pdf"))
-  file.rename(f, dest)
+  .move(f, dest)
   message("Written: ", dest)
   .record_env()
   if (outer) .report_length(force = TRUE)
@@ -158,7 +158,7 @@ render_html <- function(journal = NULL, caption_style = "default", path = NULL) 
   journal <- .resolve_journal(journal)
   f <- .render("html", journal, caption_style, "html")
   dest <- .out(.output_name("manuscript", journal, "html"))
-  file.rename(f, dest)
+  .move(f, dest)
   message("Written: ", dest)
   .report_length()
   invisible(dest)
@@ -214,7 +214,7 @@ render_supplementary <- function(journal = NULL, caption_style = "default",
     # Position among the files that carry figures, which is what the S1.1
     # prefix counts. A text-only appendix gets the plain block.
     fk <- match(files[k], floats)
-    quarto::quarto_render(
+    .quarto_render(
       input         = input,
       output_format = output_format,
       metadata      = c(list(csl = csl, bibliography = bib,
@@ -235,9 +235,7 @@ render_supplementary <- function(journal = NULL, caption_style = "default",
                          part = if (n > 1L) .suppl_name(files[k]))
     # A deliverable takes it into its own folder and names it itself.
     dest <- if (is.null(.ep$suppl_dir)) .out(name) else file.path(.ep$suppl_dir, name)
-    if (!file.rename(produced, dest)) {
-      stop("Could not move ", produced, " to ", dest, call. = FALSE)
-    }
+    .move(produced, dest)
     dests <- c(dests, dest)
     if (is.null(.ep$suppl_dir)) message("Written: ", dest)
   }
@@ -290,6 +288,34 @@ preview <- function(path = NULL) {
   invisible(v)
 }
 
+#' Move a file Quarto produced to where it belongs, or stop saying why not.
+#' On Windows a file open in Word cannot be replaced, and file.rename() only
+#' warns: the old file stayed, and the message said the new one was written.
+#' @noRd
+.move <- function(from, to) {
+  if (file.exists(to)) unlink(to)
+  if (!file.rename(from, to)) {
+    stop("Could not write ", to, ". If it is open -- in Word, or in a PDF ",
+         "reader -- close it and run this again.", call. = FALSE)
+  }
+  invisible(to)
+}
+
+#' quarto_render(), with an error that can be read. The quarto package puts
+#' Quarto's log into a cli message, and cli takes the `{.short-title}` of the
+#' title there for markup of its own and fails over it: what reached the user
+#' was cli's complaint, not why the render failed. The log is printed above
+#' the error, so that is where to look.
+#' @noRd
+.quarto_render <- function(input, ...) {
+  tryCatch(quarto::quarto_render(input, ...), error = function(e) {
+    if (!grepl("literal", conditionMessage(e), fixed = TRUE)) stop(e)
+    stop("Quarto could not render ", basename(input), ". Its log, above, ",
+         "says why: look for the first line that says ERROR or not found.",
+         call. = FALSE)
+  })
+}
+
 #' Common wrapper. Returns the path of the file produced.
 #'
 #' The main text comes out WITHOUT the supplementary material and with its
@@ -334,15 +360,13 @@ preview <- function(path = NULL) {
   on.exit(unlink(input), add = TRUE)
   # as_job = FALSE: otherwise RStudio launches it in the background and the
   # function returns before the file exists.
-  quarto::quarto_render(input, output_format = fmt, as_job = FALSE)
+  .quarto_render(input, output_format = fmt, as_job = FALSE)
   produced <- sub("\\.qmd$", paste0(".", ext), input)
   if (whole && file.exists(produced)) {
     # Where the manuscript rendered whole has always been written.
     dest <- .p("output", paste0("manuscript.", ext))
     dir.create(dirname(dest), showWarnings = FALSE)
-    if (!file.rename(produced, dest)) {
-      stop("Could not move ", produced, " to ", dest, call. = FALSE)
-    }
+    .move(produced, dest)
     produced <- dest
   }
   if (identical(ext, "docx")) .repair_docx(produced)
@@ -389,8 +413,11 @@ preview <- function(path = NULL) {
 #' @noRd
 .bibliography <- function() {
   bib <- .bib_paths()
-  if (!isTRUE(.config("italicize-species", TRUE))) return(as.list(bib))
-  as.list(vapply(bib, .italic_bibliography, character(1), USE.NAMES = FALSE))
+  if (isTRUE(.config("italicize-species", TRUE))) {
+    bib <- vapply(bib, .italic_bibliography, character(1), USE.NAMES = FALSE)
+  }
+  # The italic copies are in tempdir(), which on Windows has backslashes.
+  as.list(.slashes(bib))
 }
 
 #' The bibliography files the manuscript names -- or, failing that,

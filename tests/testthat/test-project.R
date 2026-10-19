@@ -3,7 +3,7 @@
 
 test_that("the project is found from any folder inside it", {
   p <- new_project()
-  root <- normalizePath(p)
+  root <- normalizePath(p, winslash = "/")
   expect_identical(.find_root(p), root)
   expect_identical(.find_root(file.path(p, "_sections")), root)
   expect_identical(.find_root(file.path(p, "data", "metadata")), root)
@@ -39,7 +39,7 @@ test_that("a nested call keeps the project of the call that made it", {
     }
     inner()
   }
-  expect_identical(outer(p), normalizePath(p))
+  expect_identical(outer(p), normalizePath(p, winslash = "/"))
   # And the project is forgotten when the outermost call ends, error or not.
   expect_null(.ep$root)
   expect_error(outer(file.path(tempdir(), "no-such-paper")))
@@ -82,7 +82,8 @@ test_that("nothing is written into the working directory's project unasked", {
     expect_error(export_code(), "Nothing was written"))
   expect_length(asked, 1L)
   expect_identical(asked, "Allow it for this session?")
-  expect_match(paste(msgs, collapse = ""), normalizePath(p), fixed = TRUE)
+  expect_match(paste(msgs, collapse = ""), normalizePath(p, winslash = "/"),
+               fixed = TRUE)
   expect_false(dir.exists(file.path(p, "output")))
   # A yes holds for the session: the next calls, nested ones too, do not ask.
   answer <- TRUE
@@ -95,7 +96,8 @@ test_that("nothing is written into the working directory's project unasked", {
   setwd(q)
   msgs <- testthat::capture_messages(export_code())
   expect_length(asked, 3L)
-  expect_match(paste(msgs, collapse = ""), normalizePath(q), fixed = TRUE)
+  expect_match(paste(msgs, collapse = ""), normalizePath(q, winslash = "/"),
+               fixed = TRUE)
 })
 
 test_that("a call says which Quarto it uses once, however many renders it runs", {
@@ -165,7 +167,8 @@ test_that("the Word templates ship with the package, and a project's own win", {
             file.path(p, "format", "word_cover_letter.docx"))
   in_project(p, {
     expect_identical(.word_template("letter"),
-                     file.path(normalizePath(p), "format", "word_cover_letter.docx"))
+                     file.path(normalizePath(p, winslash = "/"), "format",
+                               "word_cover_letter.docx"))
     expect_identical(dirname(.word_template("manuscript")),
                      system.file("word", package = "easypaper"))
   })
@@ -178,10 +181,46 @@ test_that("citation styles are read from references/", {
   in_project(p, {
     expect_identical(list_journals(), c("ecology", "journal-of-ecology"))
     expect_identical(.csl_path("ecology"),
-                     file.path(normalizePath(p), "references", "ecology.csl"))
+                     file.path(normalizePath(p, winslash = "/"), "references",
+                               "ecology.csl"))
     expect_error(.csl_path("nature"), "add_journal\\(\"nature\"\\)")
     expect_error(.csl_path("nature"), "Available: ecology, journal-of-ecology")
   })
+})
+
+test_that("the paths handed to Quarto have no backslash", {
+  # Pandoc reads a backslash in the metadata as an escape: on Windows
+  # C:\Users\Ana Lopez\paper/references/x.csl reached it as C:Lopez... and
+  # the render stopped, the .csl not found.
+  expect_identical(.slashes("C:\\Users\\Ana Lopez\\paper/references/x.csl"),
+                   "C:/Users/Ana Lopez/paper/references/x.csl")
+  p <- new_project()
+  in_project(p, {
+    expect_false(grepl("\\", .p(), fixed = TRUE))
+    expect_false(grepl("\\", .csl_path("journal-of-ecology"), fixed = TRUE))
+    # The italic copies go to tempdir(), which on Windows has backslashes.
+    local_mocked_bindings(.italic_bibliography = function(f) {
+      "C:\\Temp\\Rtmp1\\references_italic.json"
+    })
+    expect_identical(.bibliography()[[1]],
+                     "C:/Temp/Rtmp1/references_italic.json")
+  })
+})
+
+test_that("a render that fails says so, not what cli made of its log", {
+  # The quarto package puts Quarto's log into a cli message, and the
+  # {.short-title} of the title broke it.
+  local_mocked_bindings(
+    quarto_render = function(...) {
+      cli::cli_abort(c("Error running quarto CLI from R.",
+                       " " = "title: 'A [Short]{.short-title}'"))
+    },
+    .package = "quarto")
+  expect_error(.quarto_render("tmp_main_text.qmd"),
+               "Quarto could not render tmp_main_text.qmd")
+  local_mocked_bindings(quarto_render = function(...) stop("No such file"),
+                        .package = "quarto")
+  expect_error(.quarto_render("x.qmd"), "No such file")
 })
 
 test_that("a style the manuscript names somewhere else is found there", {
@@ -277,4 +316,19 @@ test_that("every exported function works on the project `path` names", {
   expect_setequal(setdiff(getNamespaceExports("easypaper"), builds),
                   c("create_paper", "create_example_paper", "convert_data",
                     "italicize_species", "write_packages_bib"))
+})
+
+test_that("a file that cannot be moved into place stops the call", {
+  # On Windows a .docx open in Word cannot be replaced: file.rename() only
+  # warned, and "Written:" named a file that was the old one.
+  d <- tempfile("move_")
+  dir.create(d)
+  on.exit(unlink(d, recursive = TRUE), add = TRUE)
+  to <- file.path(d, "manuscript.docx")
+  expect_error(suppressWarnings(.move(file.path(d, "missing.docx"), to)),
+               "If it is open")
+  writeLines("new", f <- file.path(d, "tmp.docx"))
+  writeLines("old", to)
+  expect_identical(.move(f, to), to)
+  expect_identical(readLines(to), "new")
 })

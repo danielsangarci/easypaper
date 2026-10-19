@@ -103,7 +103,7 @@ create_paper <- function(path, title = NULL, authors = NULL,
   }
   # Resolved once, so "." and a trailing slash give the project its real name
   # and the path returned is the one every later call can use.
-  path <- normalizePath(path)
+  path <- normalizePath(path, winslash = "/")
   name <- basename(path)
 
   .copy_template(path, name)

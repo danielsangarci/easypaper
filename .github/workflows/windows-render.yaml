@@ -1,0 +1,50 @@
+# R CMD check renders nothing: CRAN has no Quarto, so the tests that render
+# skip. This runs the package for real on Windows -- Quarto, TinyTeX, a
+# project in a folder with a space and an accent -- with the Quarto that
+# RStudio ships and with the latest one.
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+name: Windows render
+
+permissions: read-all
+
+jobs:
+  windows-render:
+    runs-on: windows-latest
+
+    name: Windows, Quarto ${{ matrix.quarto }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        quarto: ['1.7.32', 'release']
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: ${{ matrix.quarto }}
+          tinytex: true
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::pkgload, any::readxl, local::.
+          needs: check
+
+      - name: Tests, with Quarto
+        run: Rscript -e "testthat::test_local(stop_on_failure = TRUE)"
+
+      - name: Every function on a project
+        run: Rscript .github/windows-render.R

@@ -21,15 +21,18 @@
 #' @noRd
 .find_root <- function(path = ".") {
   .check_string(path, "path")
-  start <- normalizePath(path.expand(path), mustWork = FALSE)
+  start <- normalizePath(path.expand(path), winslash = "/", mustWork = FALSE)
   if (!dir.exists(start)) {
     stop("`", path, "` is not a folder.", call. = FALSE)
   }
   d <- start
   repeat {
-    # normalizePath() again: on Windows dirname() rewrites "\\" to "/", and
-    # the root must be the same string whichever folder it was found from.
-    if (.is_project(d)) return(normalizePath(d))
+    # normalizePath() again, the root must be the same string whichever
+    # folder it was found from. Forward slashes, also on Windows: the paths
+    # built on the root reach Pandoc in the metadata, which reads every
+    # backslash as an escape -- C:\Users\Ana Lopez\paper came out as
+    # C:Lopez, and the render did not find the .csl.
+    if (.is_project(d)) return(normalizePath(d, winslash = "/"))
     up <- dirname(d)
     if (identical(up, d)) break
     d <- up
@@ -38,6 +41,11 @@
        "project is the folder holding _quarto.yml and manuscript.qmd: open its ",
        ".Rproj, or pass its folder as `path`.", call. = FALSE)
 }
+
+#' A path with forward slashes, the only ones Pandoc's metadata takes as they
+#' are: a backslash there is an escape. Windows reads both.
+#' @noRd
+.slashes <- function(x) gsub("\\", "/", x, fixed = TRUE)
 
 #' @noRd
 .is_project <- function(d) {
@@ -241,7 +249,7 @@ list_journals <- function(path = NULL) {
 .csl_path <- function(journal) {
   for (d in .csl_dirs()) {
     f <- file.path(d, paste0(journal, ".csl"))
-    if (file.exists(f)) return(f)
+    if (file.exists(f)) return(.slashes(f))
   }
   # The manuscript may name a style kept somewhere else altogether.
   declared <- .declared_csl()
@@ -249,7 +257,7 @@ list_journals <- function(path = NULL) {
       identical(sub("[.]csl$", "", basename(declared)), journal)) {
     f <- if (grepl("^(/|~|[A-Za-z]:)", declared)) path.expand(declared)
          else .p(declared)
-    if (file.exists(f)) return(f)
+    if (file.exists(f)) return(.slashes(f))
   }
   have <- list_journals()
   stop("There is no citation style called '", journal, "' in references/. ",

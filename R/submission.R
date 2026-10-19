@@ -157,7 +157,7 @@ make_submission <- function(journal = NULL, label = NULL,
                blinded = blind, suppl_figures = suppl_figures,
                supplement = FALSE)
   main_file <- file.path(man, sprintf("main_%s.docx", label))
-  file.rename(f, main_file)
+  .move(f, main_file)
   .docx_layout(main_file, line_numbers, line_spacing)
 
   # 2) title page, with title and authors taken from the manuscript. Only a
@@ -175,12 +175,12 @@ make_submission <- function(journal = NULL, label = NULL,
     # its code above the title.
     cfg <- yaml::read_yaml(.p("_quarto.yml"))
     .rendering()
-    quarto::quarto_render(tp, output_format = "docx",
-                          metadata = c(list(author = .render_author(own),
-                                            `reference-doc` = .word_template("manuscript")),
-                                       cfg[intersect(c("execute", "knitr"),
-                                                     names(cfg))]),
-                          as_job = FALSE)
+    .quarto_render(tp, output_format = "docx",
+                   metadata = c(list(author = .render_author(own),
+                                     `reference-doc` = .word_template("manuscript")),
+                                cfg[intersect(c("execute", "knitr"),
+                                              names(cfg))]),
+                   as_job = FALSE)
     .repair_docx(sub("[.]qmd$", ".docx", tp))
     # Not in the render: list, so Quarto leaves the output next to the input.
     file.copy(sub("[.]qmd$", ".docx", tp), title_file, overwrite = TRUE)
@@ -203,7 +203,7 @@ make_submission <- function(journal = NULL, label = NULL,
     nm <- if (length(sup) == 1L) sprintf("supporting_information_%s.docx", label)
           else sprintf("supporting_information_%s_%s.docx",
                        .suppl_name(to_render[i]), label)
-    file.rename(sup[i], file.path(man, nm))
+    .move(sup[i], file.path(man, nm))
     .docx_layout(file.path(man, nm), line_spacing = suppl_line_spacing)
   }
 
@@ -328,7 +328,7 @@ make_preprint <- function(journal = NULL, label = "bioRxiv",
   f <- .render("pdf", journal, caption_style, "pdf",
                blinded = FALSE, suppl_figures = suppl_figures,
                supplement = FALSE, short_title = FALSE)
-  file.rename(f, file.path(man, sprintf("preprint_%s.pdf", label)))
+  .move(f, file.path(man, sprintf("preprint_%s.pdf", label)))
 
   # 2) the supplement(s), also as PDF: a server takes one file per document.
   all_suppl <- .suppl_files()
@@ -344,7 +344,7 @@ make_preprint <- function(journal = NULL, label = "bioRxiv",
     nm <- if (length(sup) == 1L) sprintf("supporting_information_%s.pdf", label)
           else sprintf("supporting_information_%s_%s.pdf",
                        .suppl_name(to_render[i]), label)
-    file.rename(sup[i], file.path(man, nm))
+    .move(sup[i], file.path(man, nm))
   }
 
   # 3) figures on their own, the code, and the environment they ran in
@@ -1549,9 +1549,9 @@ AFFILIATIONS_SLOT <- "^\\s*<!--\\s*affiliations\\s*-->\\s*$"
   body <- .letter_from_previous(dest, journal_name, title, data)
   if (!is.null(body)) {
     writeLines(c("---", .as_yaml(yml), "---", "", body), tmp)
-    quarto::quarto_render(tmp, output_format = "docx", as_job = FALSE,
-                          quiet = TRUE)
-    file.rename(sub("\\.qmd$", ".docx", tmp), dest)
+    .quarto_render(tmp, output_format = "docx", as_job = FALSE,
+                   quiet = TRUE)
+    .move(sub("\\.qmd$", ".docx", tmp), dest)
     message("Cover letter written from ", attr(body, "from"), ", with the ",
             "date, the journal, the title and the DOI brought up to date: ",
             "read it again before you send it.")
@@ -1573,8 +1573,8 @@ AFFILIATIONS_SLOT <- "^\\s*<!--\\s*affiliations\\s*-->\\s*$"
     "Suggested reviewers: [Name, affiliation, e-mail] (x3).", "",
     "Yours sincerely,", "", .signature(own)
   ), tmp)
-  quarto::quarto_render(tmp, output_format = "docx", as_job = FALSE, quiet = TRUE)
-  file.rename(sub("\\.qmd$", ".docx", tmp), dest)
+  .quarto_render(tmp, output_format = "docx", as_job = FALSE, quiet = TRUE)
+  .move(sub("\\.qmd$", ".docx", tmp), dest)
   invisible(dest)
 }
 

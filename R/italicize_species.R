@@ -503,7 +503,8 @@ italicize_species <- function(input,
   }
   quarto <- c(Sys.getenv("QUARTO_PATH"),
               if (nzchar(Sys.getenv("QUARTO_BIN_PATH")))
-                file.path(Sys.getenv("QUARTO_BIN_PATH"), "quarto"),
+                file.path(Sys.getenv("QUARTO_BIN_PATH"),
+                          c("quarto", "quarto.exe")),
               unname(Sys.which("quarto")))
   quarto <- quarto[nzchar(quarto) & file.exists(quarto)]
   if (length(quarto)) return(list(cmd = quarto[1], pre = "pandoc"))

@@ -31,7 +31,7 @@ test_that("it writes the project of create_paper(), with the study in it", {
   p <- tempfile("trees")
   expect_message(out <- create_example_paper(p, git = FALSE),
                  "Example project created")
-  expect_identical(out, normalizePath(p))
+  expect_identical(out, normalizePath(p, winslash = "/"))
   # The same structure, the .Rproj named after each project, and the results
   # sections renamed after their analyses...
   blank <- tempfile("paper")
