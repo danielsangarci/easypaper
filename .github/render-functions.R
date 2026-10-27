@@ -26,21 +26,26 @@ p <- switch(kind,
 cat("Project:", p, "\n")
 
 failed <- character(0)
-# What a step prints -- Quarto's log among it -- is kept, so that a failure
-# can carry its end in the annotation, where the error is.
+# What a step prints -- Quarto's log among it -- is shown as it comes, so a
+# step that hangs still says where, and kept, so that a failure can carry its
+# end in the annotation, where the error is.
 step <- function(label, code) {
   cat("\n==== ", label, "\n", sep = "")
   log <- character(0)
   keep <- function(m) {
     log <<- c(log, conditionMessage(m))
   }
-  out <- utils::capture.output(ok <- withCallingHandlers(
+  out <- character(0)
+  con <- textConnection("out", "w", local = TRUE)
+  sink(con, split = TRUE)
+  ok <- withCallingHandlers(
     tryCatch({ force(code); TRUE }, error = function(e) {
       log <<- c(log, paste("FAILED:", conditionMessage(e)))
       FALSE
     }),
-    message = keep, warning = keep))
-  cat(out, sep = "\n")
+    message = keep, warning = keep)
+  sink()
+  close(con)
   if (!ok) {
     failed <<- c(failed, label)
     annotate(label, c(out, log))

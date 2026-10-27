@@ -86,10 +86,14 @@ jobs:
 
       # These run even when the tests failed, but not without R and the
       # package: then they could only fail, and say nothing.
+      # Each with a limit of its own: one that hangs fails, and the next
+      # still runs.
       - name: Every function on the example of create_example_paper()
         if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        timeout-minutes: 25
         run: Rscript .github/render-functions.R example
 
       - name: Every function on the template of create_paper()
         if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        timeout-minutes: 25
         run: Rscript .github/render-functions.R template
