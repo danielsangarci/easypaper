@@ -1,8 +1,9 @@
 # R CMD check renders nothing: CRAN has no Quarto, so the tests that render
-# skip. This runs the package for real on Windows and macOS -- Quarto, TinyTeX, the
-# worked example and the blank template in a folder with a space and an
-# accent -- with the Quarto that RStudio ships and with the latest one. Each
-# step runs even when one before it failed, so one run says all that fails.
+# skip. This runs the package for real on Windows and macOS -- Quarto,
+# TinyTeX, the worked example and the blank template in a folder with a space
+# and an accent -- with the Quarto that RStudio ships and with the latest
+# one. The renders run even when the tests failed, so one run says all that
+# fails.
 on:
   push:
     branches: [main, master]
@@ -12,9 +13,18 @@ name: Render
 
 permissions: read-all
 
+# A push cancels the run of the one before it: only the latest code counts.
+concurrency:
+  group: render-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   render:
     runs-on: ${{ matrix.os }}
+    # A run takes about 20 minutes. A render waiting on the network -- GBIF,
+    # Wikipedia, a TeX package -- is stopped here rather than after the six
+    # hours GitHub allows.
+    timeout-minutes: 60
 
     name: ${{ matrix.os }}, Quarto ${{ matrix.quarto }}
 
@@ -40,8 +50,19 @@ jobs:
           version: ${{ matrix.quarto }}
 
       # A step of its own, so that the step that fails says which it was.
+      # The setup has been seen to succeed and leave no quarto on the PATH
+      # (Quarto 1.7.32 on macOS), so look in the folder its installer uses.
       - name: Install TinyTeX
-        run: quarto install tinytex --no-prompt
+        shell: bash
+        run: |
+          q=$(command -v quarto || ls /Applications/quarto/bin/quarto 2>/dev/null || true)
+          if [ -z "$q" ]; then
+            echo "::error title=Quarto not found::the setup step left no quarto on the PATH"
+            exit 1
+          fi
+          dirname "$q" >> "$GITHUB_PATH"
+          "$q" --version
+          "$q" install tinytex --no-prompt
 
       # flextable -> gdtools: its macOS binary links the X11 libraries of
       # XQuartz (/opt/X11), which the runners do not have.
@@ -55,6 +76,7 @@ jobs:
           use-public-rspm: true
 
       - uses: r-lib/actions/setup-r-dependencies@v2
+        id: deps
         with:
           extra-packages: any::pkgload, any::readxl, local::.
           needs: check
@@ -62,10 +84,12 @@ jobs:
       - name: Tests, with Quarto
         run: Rscript .github/render-tests.R
 
+      # These run even when the tests failed, but not without R and the
+      # package: then they could only fail, and say nothing.
       - name: Every function on the example of create_example_paper()
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
         run: Rscript .github/render-functions.R example
 
       - name: Every function on the template of create_paper()
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
         run: Rscript .github/render-functions.R template
