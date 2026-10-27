@@ -21,14 +21,11 @@ code_of <- function(fn) {
   gsub("[[:space:]]+", " ", paste(deparse(fn), collapse = " "))
 }
 
-# Answer yes when a call asks to write into the project the working directory
-# is in, as a user would in an interactive session, until the calling test
-# ends; and forget the permissions given, so each test starts with none.
-allow_writes <- function(env = parent.frame()) {
-  .ep$allowed <- NULL
-  local_mocked_bindings(.interactive = function() TRUE,
-                        .ask_yes_no = function(q) TRUE, .env = env)
-  do.call(base::on.exit, list(quote(.ep$allowed <- NULL), add = TRUE),
+# Name the project with set_paper(), as a user does once a session, until the
+# calling test ends; then whatever was named before is named again.
+name_paper <- function(path, env = parent.frame()) {
+  old <- suppressMessages(set_paper(path))
+  do.call(base::on.exit, list(bquote(set_paper(.(old))), add = TRUE),
           envir = env)
   invisible(TRUE)
 }

@@ -26,10 +26,10 @@
 #'
 #' @param journal The style's name in the repository, with or without `.csl`,
 #'   or the URL of a `.csl` file.
-#' @param path The project, or any folder inside it. Left out, the project
-#'   the working directory is in -- its root once its `.Rproj` is open -- and,
-#'   since this writes into it, in an interactive session the first such call
-#'   asks you to allow it, once a session; in a script, name it.
+#' @param path The project, or any folder inside it. Left out, the one
+#'   [set_paper()] named; with none named, this stops before writing: it
+#'   writes into the project, and easypaper never takes the working directory
+#'   for it.
 #' @param overwrite Replace a style the project already has. `FALSE` (the
 #'   default) leaves it and says so.
 #' @param repo Where to fetch from: the official repository by default.

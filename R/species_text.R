@@ -56,10 +56,10 @@
 #' @param exclude Pairs of words that look like a name and are not one, or
 #'   names to leave alone: `"Pinus pinea"`.
 #' @param quiet `TRUE` returns what it found without printing it.
-#' @param path The project, or any folder inside it. Left out, the project
-#'   the working directory is in -- its root once its `.Rproj` is open -- and,
-#'   since this writes into it, in an interactive session the first such call
-#'   asks you to allow it, once a session; in a script, name it.
+#' @param path The project, or any folder inside it. Left out, the one
+#'   [set_paper()] named; with none named, this stops before writing: it
+#'   writes into the project, and easypaper never takes the working directory
+#'   for it.
 #' @return A data frame, invisibly when printed, with one row per thing to
 #'   look at: `file`, `line`, `name` as it is written, `problem`, and `fix`,
 #'   what to write instead. The species found are its `species` attribute.

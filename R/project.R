@@ -2,9 +2,11 @@
 # The project a function works on.
 #
 # Every function that builds a manuscript works on one project: the folder
-# holding its _quarto.yml and manuscript.qmd. It is found from `path` -- the
-# working directory by default, which is the project root once its .Rproj is
-# open -- by walking up, so a call made from R/ or _sections/ finds it too.
+# holding its _quarto.yml and manuscript.qmd. It is found from `path`, or
+# from the folder set_paper() named, by walking up, so a call made from R/ or
+# _sections/ finds it too. A function that writes never takes the working
+# directory for it: CRAN's policy, a package writes only where it is told to.
+# One that only reads does, when it is told nothing.
 #
 # Nested calls share it. render_docx() calls render_supplementary(), which
 # calls .bibliography(), and none of them passes the root along:
@@ -56,12 +58,11 @@
 #' Make `path`'s project the one every helper reads, until the calling
 #' function returns.
 #'
-#' `path = NULL`, every function's default, is the project the working
-#' directory is in. A function that writes -- `writes = TRUE` -- writes there
-#' only with permission: asked once a session in an interactive one, refused
-#' elsewhere, where the project has to be named. A `path` given is the
-#' permission. A nested call with no path of its own stays in its caller's
-#' project, which already has it.
+#' `path = NULL`, every function's default, is the project set_paper() named.
+#' With none named, a function that writes -- `writes = TRUE` -- stops before
+#' writing anything, and one that only reads takes the project the working
+#' directory is in. A nested call with no path of its own stays in its
+#' caller's project.
 #'
 #' The reset is registered in the caller's frame, the way withr::defer() does
 #' it, so the exported function needs one line and no on.exit() of its own.
@@ -72,10 +73,13 @@
     .find_root(path)
   } else if (!is.null(old)) {
     old
+  } else if (!is.null(.ep$paper)) {
+    # Found again each time: the folder may have gone since it was named.
+    .find_root(.ep$paper)
+  } else if (writes) {
+    .no_paper(.caller_name(sys.call(-1)))
   } else {
-    r <- .find_root(".")
-    if (writes) .allow_writing(r, .caller_name(sys.call(-1)))
-    r
+    .find_root(".")
   }
   .ep$root <- root
   do.call(base::on.exit, list(bquote(.ep$root <- .(old)), add = TRUE),
@@ -89,36 +93,88 @@
   invisible(root)
 }
 
-#' Permission to write into the project the working directory is in, when
-#' no `path` names it. CRAN's policy: a package writes outside tempdir() only
-#' where it is told to, or, in an interactive session, with the user's
-#' confirmation. So the first call that writes asks, once a session for each
-#' project; a script, where nobody can answer, names the project instead.
+#' Stop a function that would write with no project named: easypaper never
+#' takes the working directory for the place to write.
 #' @noRd
-.allow_writing <- function(root, fn = "this function") {
-  if (root %in% .ep$allowed) return(invisible(TRUE))
-  call <- paste0(fn, "(path = \".\")")
-  if (!.interactive()) {
-    stop(fn, "() writes into a project, and none was named.\n",
-         "  Give it as `path`, e.g. ", call, " from the project's folder:\n",
-         "  without `path` easypaper asks first, which needs an interactive ",
-         "session.", call. = FALSE)
+.no_paper <- function(fn = "this function") {
+  stop(fn, "() writes into a project, and none is named.\n",
+       "  Name it once a session, from the project's folder: set_paper(\".\")\n",
+       "  or in this call: ", fn, "(path = \".\")", call. = FALSE)
+}
+
+#' Name the paper to work on
+#'
+#' The functions that write into a project -- the renders, the submissions,
+#' [convert_data()] and the rest -- write into the one you name: here, once a
+#' session, or with `path` in each call. easypaper never takes the working
+#' directory for it: with neither, a function that writes stops before
+#' writing anything. The functions that only read, such as
+#' [check_citations()] or [manuscript_stats()], use the project named here
+#' too, and otherwise the one the working directory is in.
+#'
+#' Once the project's `.Rproj` is open, the working directory is its root, so
+#' `set_paper(".")` names it. The project stays named until the session ends
+#' or you name another; `path` in a call works on that project for that call
+#' alone.
+#'
+#' @param path The project, or any folder inside it: `"."` from the project's
+#'   folder. `NULL` forgets the one named, and then nothing is written until a
+#'   project is named again.
+#' @return The project named before, invisibly -- `NULL` if none was -- so
+#'   that it can be put back.
+#' @seealso [get_paper()], which says which project is named, and
+#'   [create_paper()], which makes one.
+#' @export
+#' @examples
+#' dir <- file.path(tempdir(), "my_paper")
+#' create_paper(dir, git = FALSE)
+#' old <- set_paper(dir)
+#' get_paper()
+#' list_journals()
+#' set_paper(old)
+#' unlink(dir, recursive = TRUE)
+set_paper <- function(path) {
+  if (missing(path)) {
+    stop("`path` is missing: give the project's folder, e.g. set_paper(\".\") ",
+         "from it.", call. = FALSE)
   }
-  # What easypaper says is a message, and only the question is the prompt:
-  # the console colours a prompt as what the user types. Short lines, the
-  # folder on one of its own: a long path pushed the end out of sight. A
-  # blank line sets the folder and the question apart.
-  message("easypaper is about to write into this project:\n",
-          "  ", root, "\n\n",
-          "It writes into output/, submission/, README.md, data/metadata/ ...\n",
-          "now and in every later call that writes into it.\n")
-  ok <- .ask_yes_no("Allow it for this session?")
-  if (!isTRUE(ok)) {
-    stop("Nothing was written. easypaper writes into a project only with ",
-         "your permission,\n  or where `path` says: ", call, ".", call. = FALSE)
+  old <- .ep$paper
+  if (is.null(path)) {
+    .ep$paper <- NULL
+    return(invisible(old))
   }
-  .ep$allowed <- union(.ep$allowed, root)
-  invisible(TRUE)
+  .ep$paper <- .find_root(path)
+  message("Working on ", .ep$paper)
+  invisible(old)
+}
+
+#' Which paper is named
+#'
+#' The project [set_paper()] named for this session: the one every function
+#' works on when it is given no `path`.
+#'
+#' @return The project's root, or `NULL` when none is named; printed in a
+#'   sentence when called from the console, and returned invisibly then.
+#' @seealso [set_paper()]
+#' @export
+#' @examples
+#' get_paper()   # NULL: none named yet
+#'
+#' dir <- file.path(tempdir(), "my_paper")
+#' create_paper(dir, git = FALSE)
+#' old <- set_paper(dir)
+#' get_paper()
+#' set_paper(old)
+#' unlink(dir, recursive = TRUE)
+get_paper <- function() {
+  root <- .ep$paper
+  if (is.null(root)) {
+    message("No project is named. Name it once a session, from its folder: ",
+            "set_paper(\".\")")
+  } else {
+    message("Working on ", root)
+  }
+  invisible(root)
 }
 
 #' The name of the exported function a call is, for a message: "render_html"
@@ -226,9 +282,9 @@
 #' functions take: the file name without `.csl`. [add_journal()] fetches any
 #' other journal's style.
 #'
-#' @param path The project, or any folder inside it. Left out, the project
-#'   the working directory is in -- its root once its `.Rproj` is open. This
-#'   only reads, so it never asks.
+#' @param path The project, or any folder inside it. Left out, the one
+#'   [set_paper()] named, or else the project the working directory is in:
+#'   this only reads.
 #' @return A character vector of journal names, sorted.
 #' @seealso [add_journal()], and the `journal` argument of [render_docx()] and
 #'   [make_submission()].

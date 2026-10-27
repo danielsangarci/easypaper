@@ -7,9 +7,9 @@
 list_journals(path = NULL)
 }
 \arguments{
-\item{path}{The project, or any folder inside it. Left out, the project
-the working directory is in -- its root once its \code{.Rproj} is open. This
-only reads, so it never asks.}
+\item{path}{The project, or any folder inside it. Left out, the one
+\code{\link[=set_paper]{set_paper()}} named, or else the project the working directory is in:
+this only reads.}
 }
 \value{
 A character vector of journal names, sorted.

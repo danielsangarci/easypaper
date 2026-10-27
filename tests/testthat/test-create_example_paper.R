@@ -125,17 +125,12 @@ test_that("the data are written as a paper names them", {
 })
 
 test_that("without its packages it stops before writing anything", {
-  # It says what to install, and installs nothing: not even when it could
-  # ask, in an interactive session.
-  asked <- FALSE
-  local_mocked_bindings(.has_pkg = function(pkg) FALSE,
-                        .interactive = function() TRUE,
-                        .ask_yes_no = function(q) { asked <<- TRUE; TRUE })
+  # It says what to install, and installs nothing.
+  local_mocked_bindings(.has_pkg = function(pkg) FALSE)
   p <- tempfile("trees")
   expect_error(create_example_paper(p, git = FALSE),
                "needs vegan (its data and its analysis), not installed. Install it first: install.packages(\"vegan\")",
                fixed = TRUE)
-  expect_false(asked)
   expect_false(dir.exists(p))
   expect_error(create_example_paper(), "`path` is missing")
   expect_false(exists(".install_packages", envir = asNamespace("easypaper")))

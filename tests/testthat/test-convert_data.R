@@ -2,9 +2,10 @@ test_that("convert_data() converts, copies and reports, into one folder", {
   p <- tempfile("cd")
   dir.create(file.path(p, "originals", "deep"), recursive = TRUE)
   old <- setwd(p); on.exit(setwd(old), add = TRUE)
-  # Outside a project there is no data/ to mean: `to` says where.
+  # With no project named there is no data/ to mean: `to` says where. The
+  # working directory is never taken for it.
   dir.create("originals_x")
-  expect_error(convert_data("originals_x"), "say where the results go with `to`")
+  expect_error(convert_data("originals_x"), "Say where the results go with `to`")
   expect_false(dir.exists("data"))
 
   utils::write.csv(data.frame(a = 1:2), "originals/plain.csv", row.names = FALSE)
@@ -139,15 +140,19 @@ test_that("names that differ only in case are one name", {
   expect_length(list.files("data"), 1L)
 })
 
-test_that("inside a project, data/ is the project's, from any folder in it", {
+test_that("with no `to`, data/ is the named project's, never the working directory's", {
   p <- new_project()
   dir.create(file.path(p, "originals"))
   utils::write.csv(data.frame(a = 1), file.path(p, "originals", "a.csv"),
                    row.names = FALSE)
   old <- setwd(file.path(p, "_sections"))
   on.exit(setwd(old), add = TRUE)
-  # Writing into the project needs permission: asked, here answered yes.
-  allow_writes()
+  # Inside the project, but none named: nothing is written.
+  expect_error(convert_data(file.path(p, "originals")), "set_paper")
+  expect_false(dir.exists(file.path(p, "data")) &&
+                 length(list.files(file.path(p, "data"), "[.]csv$")))
+  # Named from any folder in it, data/ is the project's.
+  name_paper(".")
   suppressMessages(convert_data(file.path(p, "originals")))
   expect_true(file.exists(file.path(p, "data", "a.csv")))
   expect_false(dir.exists(file.path(p, "_sections", "data")))
@@ -159,7 +164,7 @@ test_that("a project's own open formats are copied, for good", {
   file.create(file.path(p, "originals", "cloud.las"))
   old <- setwd(p)
   on.exit(setwd(old), add = TRUE)
-  allow_writes()
+  name_paper(p)
   said <- capture_messages(convert_data("originals"))
   expect_true(any(grepl("cloud.las", said)))
   expect_false(file.exists(file.path(p, "data", "cloud.las")))

@@ -268,7 +268,9 @@ affiliations <- function(path = NULL) {
     return(invisible(NULL))
   }
   if (knitting) path <- dirname(input)
-  if (is.null(path)) path <- "."
+  # Outside a render: the project set_paper() named, or the working
+  # directory's. This only reads.
+  if (is.null(path)) path <- if (is.null(.ep$paper)) "." else .ep$paper
   own <- rmarkdown::yaml_front_matter(file.path(.find_root(path),
                                                 "manuscript.qmd"))
   tb <- .title_block(own)

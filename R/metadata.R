@@ -14,10 +14,10 @@
 #'
 #' @param year The year of the copyright line. This year by default.
 #' @param quiet `TRUE` says nothing.
-#' @param path The project, or any folder inside it. Left out, the project
-#'   the working directory is in -- its root once its `.Rproj` is open -- and,
-#'   since this writes into it, in an interactive session the first such call
-#'   asks you to allow it, once a session; in a script, name it.
+#' @param path The project, or any folder inside it. Left out, the one
+#'   [set_paper()] named; with none named, this stops before writing: it
+#'   writes into the project, and easypaper never takes the working directory
+#'   for it.
 #' @return The holders as written, invisibly.
 #' @seealso [sync_metadata()], which does the same for the data deposit.
 #' @export
@@ -150,10 +150,10 @@ sync_licenses <- function(year = format(Sys.Date(), "%Y"), quiet = FALSE,
 #' [edit_metadata()].
 #'
 #' @param quiet `TRUE` says nothing.
-#' @param path The project, or any folder inside it. Left out, the project
-#'   the working directory is in -- its root once its `.Rproj` is open -- and,
-#'   since this writes into it, in an interactive session the first such call
-#'   asks you to allow it, once a session; in a script, name it.
+#' @param path The project, or any folder inside it. Left out, the one
+#'   [set_paper()] named; with none named, this stops before writing: it
+#'   writes into the project, and easypaper never takes the working directory
+#'   for it.
 #' @return What was filled in, as a character vector, invisibly.
 #' @seealso [edit_metadata()] for the rest.
 #' @export
@@ -364,10 +364,10 @@ sync_metadata <- function(quiet = FALSE, path = NULL) {
 #'
 #' @param what Which file to edit: `"attributes"` (the default), `"biblio"`,
 #'   `"creators"` or `"access"`; or `"write"` to compile them.
-#' @param path The project, or any folder inside it. Left out, the project
-#'   the working directory is in -- its root once its `.Rproj` is open -- and,
-#'   since this writes into it, in an interactive session the first such call
-#'   asks you to allow it, once a session; in a script, name it.
+#' @param path The project, or any folder inside it. Left out, the one
+#'   [set_paper()] named; with none named, this stops before writing: it
+#'   writes into the project, and easypaper never takes the working directory
+#'   for it.
 #' @return The metadata folder, invisibly.
 #' @seealso [sync_metadata()], and <https://docs.ropensci.org/dataspice/> for
 #'   what each field means.

@@ -1,6 +1,24 @@
 ## Resubmission
 
-This is a resubmission. Thank you for the review. In this version:
+This is a second resubmission. Thank you for the review, which still saw
+functions writing by default, e.g. in `convert_data()`. In this version no
+function has a default path to write into, and none asks for confirmation
+any more:
+
+* A function that writes into a project writes only into the one the user
+  names: in the call, with `path`, or once a session with the new
+  `set_paper()`, which takes the folder and has no default
+  (`set_paper(".")` from the project's folder). With neither, it stops
+  before writing anything, interactive session or not. The working
+  directory is never taken for the place to write.
+* `convert_data()` writes into `to`; without `to`, into the `data/` folder
+  of the project `set_paper()` named, and with none named it stops. It no
+  longer looks at the working directory.
+* `set_paper()` follows `usethis::proj_set()`: the user states the project
+  once, and the calls after it work there.
+* The examples, the tests and the vignette write only to `tempdir()`.
+
+The points of the first review, fixed in the first resubmission:
 
 * The single quotes around the acronyms CSL and GBIF in the Description are
   gone; they remain only around the names of software ('Quarto', 'renv',
@@ -26,29 +44,8 @@ This is a resubmission. Thank you for the review. In this version:
   converts `readxl::readxl_example("datasets.xlsx")`), and the interactive
   editors of `edit_metadata()` are wrapped in `if (interactive())`.
 * Nothing is written by default in the user's home filespace or in the
-  working directory:
-  * No function has a default path any more: `path = NULL`. Given a `path`,
-    a function works on the project there. Without one, a function that
-    writes refuses to in a non-interactive session, and in an interactive
-    one it asks for confirmation before writing into the project the
-    working directory is in -- once a session, with `utils::menu()`,
-    naming the folder -- as the CRAN policy allows. Only the functions that
-    merely read (`check_citations()`, `list_journals()`,
-    `manuscript_stats()`...) use that project without asking.
-  * `convert_data()` writes into a project's `data/` under the same rule,
-    and outside a project requires `to`.
-  * `italicize_species()` requires `output`; it no longer writes beside its
-    input by default.
-  * The examples, the tests and the vignette write only to `tempdir()`.
-
-  Asking once a session is meant to keep the package practical while
-  following the policy: the user works inside the project of the paper the
-  whole time, calling `render_all()` or `make_submission()` there again and
-  again, so a single confirmation spares giving `path` in every call.
-  easypaper writes only into a folder that is an easypaper project (holding
-  `_quarto.yml` and `manuscript.qmd`, as created by `create_paper()`), never
-  into an arbitrary working directory or the home filespace; anywhere else,
-  it stops.
+  working directory: see above. `italicize_species()` requires `output`; it
+  no longer writes beside its input by default.
 * No function installs packages: `create_example_paper()` no longer offers
   to install vegan (in `Suggests`); it stops and says what to install.
 * `installed.packages()` is no longer used; the base packages are listed.
@@ -57,6 +54,13 @@ Besides the points of the review, this version fixes defects and adds a few
 features found since the first submission, so that you know everything that
 changed:
 
+* Fixed, since the first resubmission: on Windows a render could not find
+  the citation style, because the paths handed to Pandoc had backslashes; a
+  render that failed reported an error of cli's instead of Quarto's; a file
+  open in Word was silently left in place of the new one; and outside
+  RStudio the cover letter and `manuscript_stats()` did not find Pandoc.
+  Everything now renders on Windows and macOS, checked with Quarto 1.7.32
+  and the latest release.
 * Fixed: the description of the data deposit read every `.csv` as
   comma-separated, so a `;`-separated one (what spreadsheets write in a
   language with a decimal comma) came out as one column, and it read images
@@ -85,9 +89,13 @@ changed:
 ## Test environments
 
 * local macOS 27 (aarch64), R 4.5.0
+* local Windows 11 (aarch64, in a virtual machine), R 4.6.1: R CMD check,
+  and every function run with Quarto 1.10.18 on a project in a folder whose
+  path has spaces and accents
 * win-builder: Windows, R-devel (2026-10-14 r90673 ucrt)
 * GitHub Actions: Ubuntu (R-devel, R-release, R-oldrel-1), macOS
-  (R-release), Windows (R-release)
+  (R-release), Windows (R-release); and, rendering with Quarto 1.7.32 and
+  with the latest release, Windows and macOS
 
 ## R CMD check results
 

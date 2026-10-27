@@ -31,10 +31,12 @@ formats, \code{\link[=sync_metadata]{sync_metadata()}} and \code{\link[=edit_met
 deposit, and \code{\link[=add_journal]{add_journal()}} fetches any journal's citation style.
 }
 
-Every function works on the project the working directory is in -- the
-project root, once its \code{.Rproj} is open -- or on the one its \code{path}
-argument names. One that writes into the project asks first, the first
-time in an interactive session; in a script, \code{path} names the project.
+Every function works on the project you name: once a session with
+\code{\link[=set_paper]{set_paper()}} -- \code{set_paper(".")} once its \code{.Rproj} is open -- or in a
+call with its \code{path} argument. A function that writes never takes the
+working directory for the project: with none named, it stops before
+writing. One that only reads takes the working directory's project when
+none is named.
 }
 \section{Settings}{
 

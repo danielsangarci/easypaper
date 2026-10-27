@@ -71,9 +71,8 @@
 #'   `.Rproj` -- or absolute. A folder is read whole, subfolders included. The
 #'   originals are only ever read.
 #' @param to Where the results go. Left out, the `data/` folder of the project
-#'   the working directory is in -- in an interactive session, the first
-#'   call that writes into a project asks you to allow it -- and outside a
-#'   project it has to be given.
+#'   [set_paper()] named; with no project named, it has to be given. There is
+#'   no default folder: easypaper never takes the working directory for it.
 #' @param overwrite `FALSE` (the default) writes only what is missing from
 #'   `to` or older than its original; `TRUE` rewrites the lot.
 #' @param also Extensions to treat as already open for this call, with or
@@ -111,35 +110,36 @@ convert_data <- function(path, to = NULL, overwrite = FALSE,
          call. = FALSE)
   }
 
-  # The project the working directory is in, if any: from R/ or _sections/,
-  # data/ is still the project's. Its _quarto.yml may name more open formats.
-  proj <- tryCatch(.find_root("."), error = function(e) NULL)
-  root <- .cd_norm(if (is.null(proj)) getwd() else proj)
-  if (!is.null(proj)) {
-    own <- tryCatch(yaml::read_yaml(file.path(proj, "_quarto.yml"))$easypaper,
-                    error = function(e) NULL)
-    if (is.list(own)) also <- c(also, as.character(unlist(own[["open-formats"]])))
-  }
   from <- path.expand(path)
   if (!file.exists(from)) {
     stop("There is nothing at ", from, call. = FALSE)
   }
   from <- .cd_norm(from)
-  # No `to`: the data/ of the project the working directory is in, with the
-  # permission every function that writes into a project asks for. Outside
-  # a project there is no data/ to mean, so `to` has to say where.
+  # No `to`: the data/ of the project set_paper() named. With none named
+  # there is no data/ to mean, and the working directory is never taken for
+  # it: `to` has to say where.
   if (is.null(to)) {
-    if (is.null(proj)) {
-      stop("The working directory is in no easypaper project, so there is no ",
-           "data/ to write into: say where the results go with `to`.",
-           call. = FALSE)
+    if (is.null(.ep$paper)) {
+      stop("No project is named, so there is no data/ to write into. Say ",
+           "where the results go with `to`, or name the project first: ",
+           "set_paper(\".\") from its folder.", call. = FALSE)
     }
-    .allow_writing(proj, "convert_data")
+    to <- file.path(.find_root(.ep$paper), "data")
+  } else {
+    to <- path.expand(to)
   }
-  to   <- if (is.null(to)) file.path(root, "data") else path.expand(to)
   if (!dir.exists(to)) dir.create(to, recursive = TRUE, showWarnings = FALSE)
   if (!dir.exists(to)) stop("Could not create ", to, call. = FALSE)
   to <- .cd_norm(to)
+  # The project `to` is in, if any: its _quarto.yml may name more open
+  # formats, and the report names `to` from its root.
+  proj <- tryCatch(.find_root(to), error = function(e) NULL)
+  root <- if (is.null(proj)) dirname(to) else proj
+  if (!is.null(proj)) {
+    own <- tryCatch(yaml::read_yaml(file.path(proj, "_quarto.yml"))$easypaper,
+                    error = function(e) NULL)
+    if (is.list(own)) also <- c(also, as.character(unlist(own[["open-formats"]])))
+  }
 
   is_dir <- dir.exists(from)
   src <- if (is_dir) list.files(from, full.names = TRUE, recursive = TRUE) else from

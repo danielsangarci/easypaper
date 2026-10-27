@@ -37,10 +37,10 @@
 #'   of `_quarto.yml`, or the root of the Drive.
 #' @param hide_code `TRUE` (the default) hides the code chunks in the Google
 #'   Doc, so co-authors see prose.
-#' @param path The project, or any folder inside it. Left out, the project
-#'   the working directory is in -- its root once its `.Rproj` is open -- and,
-#'   since this writes into it, in an interactive session the first such call
-#'   asks you to allow it, once a session; in a script, name it.
+#' @param path The project, or any folder inside it. Left out, the one
+#'   [set_paper()] named; with none named, this stops before writing: it
+#'   writes into the project, and easypaper never takes the working directory
+#'   for it.
 #' @return Whatever trackdown returns, invisibly.
 #' @name trackdown
 #' @examples

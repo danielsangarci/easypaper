@@ -26,9 +26,9 @@
 #' value of inline R code is not known until it runs, and counts as one word.
 #'
 #' @param quiet `TRUE` returns the counts without printing them.
-#' @param path The project, or any folder inside it. Left out, the project
-#'   the working directory is in -- its root once its `.Rproj` is open. This
-#'   only reads, so it never asks.
+#' @param path The project, or any folder inside it. Left out, the one
+#'   [set_paper()] named, or else the project the working directory is in:
+#'   this only reads.
 #' @return A named integer vector, invisibly when printed: `title_chars`,
 #'   `title_chars_no_spaces`, `short_title_chars` and
 #'   `short_title_chars_no_spaces` (`NA` without one),

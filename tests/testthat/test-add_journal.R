@@ -42,13 +42,14 @@ test_that("an independent style lands in references/, beside the .bib", {
   expect_identical(readLines(out), readLines(file.path(r, "apa.csl")))
 })
 
-test_that("with no path it works on the working directory's project", {
-  # The way it is used, from the project, once writing there is allowed.
+test_that("with no path it works on the project set_paper() named", {
+  # The way it is used: the project named once, from any folder in it.
   p <- project()
   r <- fake_repo()
   old <- setwd(file.path(p, "_sections"))
   on.exit(setwd(old), add = TRUE)
-  allow_writes()
+  expect_error(add_journal("apa", repo = r), "none is named")
+  name_paper(".")
   suppressMessages(add_journal("apa", repo = r))
   expect_true(file.exists(file.path(p, "references", "apa.csl")))
   expect_true("apa" %in% list_journals())

@@ -153,20 +153,6 @@ EXAMPLE_PACKAGES <- c(vegan = "its data and its analysis")
        " first: ", cmd, call. = FALSE)
 }
 
-#' Is the session interactive, and the user's answer to a yes/no question:
-#' functions of their own, so the tests can answer for the user.
-#'
-#' The question is a message and the answers a menu, as devtools asks: the
-#' console colours a prompt as what the user types, so only "Selection:" is.
-#' TRUE for yes, FALSE for no, NA when the menu is left with 0.
-#' @noRd
-.interactive <- function() interactive()
-#' @noRd
-.ask_yes_no <- function(question) {
-  message(question)
-  c(NA, TRUE, FALSE)[utils::menu(c("yes", "no")) + 1L]
-}
-
 #' The BCI data of vegan: `abund`, the trees of each species in each plot,
 #' and `env`, the habitat and the place of each plot.
 #' @noRd

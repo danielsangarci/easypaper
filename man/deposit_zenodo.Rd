@@ -15,10 +15,10 @@ newest \code{data_and_code.zip} in \verb{submission/}.}
 \item{token}{The personal access token. \code{NULL}, the default, reads
 \code{ZENODO_TOKEN}, or \code{ZENODO_SANDBOX_TOKEN} with \code{sandbox = TRUE}.}
 
-\item{path}{The project, or any folder inside it. Left out, the project
-the working directory is in -- its root once its \code{.Rproj} is open -- and,
-since this writes into it, in an interactive session the first such call
-asks you to allow it, once a session; in a script, name it.}
+\item{path}{The project, or any folder inside it. Left out, the one
+\code{\link[=set_paper]{set_paper()}} named; with none named, this stops before writing: it
+writes into the project, and easypaper never takes the working directory
+for it.}
 }
 \value{
 A list with the deposit's \code{id}, the reserved \code{doi} and the \code{url}

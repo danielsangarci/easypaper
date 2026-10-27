@@ -23,9 +23,9 @@ check_data(quiet = FALSE, path = NULL)
 check_renv(quiet = FALSE, path = NULL)
 }
 \arguments{
-\item{path}{The project, or any folder inside it. Left out, the project
-the working directory is in -- its root once its \code{.Rproj} is open. They
-only read, so they never ask.}
+\item{path}{The project, or any folder inside it. Left out, the one
+\code{\link[=set_paper]{set_paper()}} named, or else the project the working directory is in:
+they only read.}
 
 \item{quiet}{\code{TRUE} keeps the notes to yourself and only stops or warns on
 what is wrong.}

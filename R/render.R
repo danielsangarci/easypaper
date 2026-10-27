@@ -85,10 +85,10 @@
 #'   with `suppl` in their name, `12.1_suppl_material.qmd` in the template.
 #' @param blind `TRUE` leaves the authors off the supplement, for one that
 #'   travels with a double-blind submission.
-#' @param path The project, or any folder inside it. Left out, the project
-#'   the working directory is in -- its root once its `.Rproj` is open -- and,
-#'   since this writes into it, in an interactive session the first such call
-#'   asks you to allow it, once a session; in a script, name it.
+#' @param path The project, or any folder inside it. Left out, the one
+#'   [set_paper()] named; with none named, this stops before writing: it
+#'   writes into the project, and easypaper never takes the working directory
+#'   for it.
 #' @return The path of the file written, invisibly: several for
 #'   `render_supplementary()` when there are several supplements. `render_all()`
 #'   returns the `output/` folder, and `preview()` nothing useful.
@@ -474,10 +474,10 @@ preview <- function(path = NULL) {
 #' looked up again. `italicize-species: false` in the `easypaper:` block of
 #' `_quarto.yml` turns the italics off.
 #'
-#' @param path The project, or any folder inside it. Left out, the project
-#'   the working directory is in -- its root once its `.Rproj` is open -- and,
-#'   since this writes into it, in an interactive session the first such call
-#'   asks you to allow it, once a session; in a script, name it.
+#' @param path The project, or any folder inside it. Left out, the one
+#'   [set_paper()] named; with none named, this stops before writing: it
+#'   writes into the project, and easypaper never takes the working directory
+#'   for it.
 #' @return The bibliography files a render would hand Quarto, invisibly.
 #' @seealso [italicize_species()], the same for any bibliography outside a
 #'   project.
@@ -653,10 +653,10 @@ FIG_FORMATS <- c("png", "jpg", "tiff")
 #' TIFF.
 #'
 #' @param quiet `TRUE` says nothing.
-#' @param path The project, or any folder inside it. Left out, the project
-#'   the working directory is in -- its root once its `.Rproj` is open -- and,
-#'   since this writes into it, in an interactive session the first such call
-#'   asks you to allow it, once a session; in a script, name it.
+#' @param path The project, or any folder inside it. Left out, the one
+#'   [set_paper()] named; with none named, this stops before writing: it
+#'   writes into the project, and easypaper never takes the working directory
+#'   for it.
 #' @return The PNG files converted, invisibly.
 #' @export
 #' @examples
@@ -982,10 +982,10 @@ LINE_SPACINGS <- c("1" = 240L, "1.5" = 360L, "2" = 480L)
 #' one. [render_all()] and [make_submission()] run it on their own; the
 #' submission compendium carries what it writes.
 #'
-#' @param path The project, or any folder inside it. Left out, the project
-#'   the working directory is in -- its root once its `.Rproj` is open -- and,
-#'   since this writes into it, in an interactive session the first such call
-#'   asks you to allow it, once a session; in a script, name it.
+#' @param path The project, or any folder inside it. Left out, the one
+#'   [set_paper()] named; with none named, this stops before writing: it
+#'   writes into the project, and easypaper never takes the working directory
+#'   for it.
 #' @return The path of `analysis_code.R`, invisibly.
 #' @export
 #' @examples
@@ -1080,10 +1080,10 @@ export_code <- function(path = NULL) {
 #' runs every chunk again. It deletes `cache/`, `_freeze/` and `.quarto/`,
 #' which are regenerable and in `.gitignore`.
 #'
-#' @param path The project, or any folder inside it. Left out, the project
-#'   the working directory is in -- its root once its `.Rproj` is open -- and,
-#'   since this writes into it, in an interactive session the first such call
-#'   asks you to allow it, once a session; in a script, name it.
+#' @param path The project, or any folder inside it. Left out, the one
+#'   [set_paper()] named; with none named, this stops before writing: it
+#'   writes into the project, and easypaper never takes the working directory
+#'   for it.
 #' @return The project's root, invisibly.
 #' @export
 #' @examples

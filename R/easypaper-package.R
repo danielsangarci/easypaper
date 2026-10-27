@@ -22,10 +22,12 @@
 #'   formats, [sync_metadata()] and [edit_metadata()] describe the data
 #'   deposit, and [add_journal()] fetches any journal's citation style.
 #'
-#' Every function works on the project the working directory is in -- the
-#' project root, once its `.Rproj` is open -- or on the one its `path`
-#' argument names. One that writes into the project asks first, the first
-#' time in an interactive session; in a script, `path` names the project.
+#' Every function works on the project you name: once a session with
+#' [set_paper()] -- `set_paper(".")` once its `.Rproj` is open -- or in a
+#' call with its `path` argument. A function that writes never takes the
+#' working directory for the project: with none named, it stops before
+#' writing. One that only reads takes the working directory's project when
+#' none is named.
 #'
 #' @section Settings:
 #' What a project wants done differently is written in the `easypaper:` block

@@ -42,9 +42,9 @@
 #'
 #' @param quiet `TRUE` keeps the notes to yourself and only stops or warns on
 #'   what is wrong.
-#' @param path The project, or any folder inside it. Left out, the project
-#'   the working directory is in -- its root once its `.Rproj` is open. They
-#'   only read, so they never ask.
+#' @param path The project, or any folder inside it. Left out, the one
+#'   [set_paper()] named, or else the project the working directory is in:
+#'   they only read.
 #' @return `check_citations()`, `check_crossrefs()` and `check_packages()`
 #'   return `TRUE` invisibly and stop with an error naming what is missing.
 #'   `check_title()` and `check_data()` return `TRUE` or `FALSE` invisibly,

@@ -44,6 +44,8 @@ create_paper("my_paper")
 Open the `.Rproj` it creates, write in `_sections/`, and:
 
 ```r
+set_paper(".")           # once a session: the project to work on
+
 # while you write
 render_html()            # the manuscript, in seconds
 preview()                # live: reloads every time you save
@@ -60,9 +62,10 @@ make_submission()        # the journal's folder, double-blind
 ```
 
 `render_*()` makes documents to read, as often as you like; `make_*()`
-assembles what you send, a few times per paper. The first call that writes
-into the project asks you to allow it, once a session; in a script, name the
-project instead: `render_all(path = ".")`.
+assembles what you send, a few times per paper. They write only into the
+project you name, with `set_paper()` once a session or with `path` in a
+call -- `render_all(path = ".")` -- never into whatever the working directory
+happens to be. `get_paper()` says which project is named.
 
 To see a finished paper first, `create_example_paper("example_paper")` writes
 the same project with a small study in it, ready to render.

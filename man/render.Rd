@@ -62,10 +62,10 @@ figures and tables in the supplement, and rewrites their citations in the
 main text: \verb{@sfig-map} becomes "Figure S1", and \verb{-@sfig-map}, the number
 alone, "S1". \code{"main"} keeps them at the end of the manuscript instead.}
 
-\item{path}{The project, or any folder inside it. Left out, the project
-the working directory is in -- its root once its \code{.Rproj} is open -- and,
-since this writes into it, in an interactive session the first such call
-asks you to allow it, once a session; in a script, name it.}
+\item{path}{The project, or any folder inside it. Left out, the one
+\code{\link[=set_paper]{set_paper()}} named; with none named, this stops before writing: it
+writes into the project, and easypaper never takes the working directory
+for it.}
 
 \item{output_format}{\code{"docx"}, \code{"pdf"} or \code{"html"}.}
 

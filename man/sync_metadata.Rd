@@ -9,10 +9,10 @@ sync_metadata(quiet = FALSE, path = NULL)
 \arguments{
 \item{quiet}{\code{TRUE} says nothing.}
 
-\item{path}{The project, or any folder inside it. Left out, the project
-the working directory is in -- its root once its \code{.Rproj} is open -- and,
-since this writes into it, in an interactive session the first such call
-asks you to allow it, once a session; in a script, name it.}
+\item{path}{The project, or any folder inside it. Left out, the one
+\code{\link[=set_paper]{set_paper()}} named; with none named, this stops before writing: it
+writes into the project, and easypaper never takes the working directory
+for it.}
 }
 \value{
 What was filled in, as a character vector, invisibly.

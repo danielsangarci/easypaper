@@ -48,10 +48,10 @@
 #' @param sandbox `TRUE` deposits on <https://sandbox.zenodo.org>, to try it.
 #' @param token The personal access token. `NULL`, the default, reads
 #'   `ZENODO_TOKEN`, or `ZENODO_SANDBOX_TOKEN` with `sandbox = TRUE`.
-#' @param path The project, or any folder inside it. Left out, the project
-#'   the working directory is in -- its root once its `.Rproj` is open -- and,
-#'   since this writes into it, in an interactive session the first such call
-#'   asks you to allow it, once a session; in a script, name it.
+#' @param path The project, or any folder inside it. Left out, the one
+#'   [set_paper()] named; with none named, this stops before writing: it
+#'   writes into the project, and easypaper never takes the working directory
+#'   for it.
 #' @return A list with the deposit's `id`, the reserved `doi` and the `url`
 #'   of the draft, invisibly.
 #' @export

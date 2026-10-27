@@ -43,6 +43,7 @@ package [easypaper](https://danielsangarci.github.io/easypaper/). Open the
 
 ```r
 library(easypaper)   # install.packages("easypaper"), once
+set_paper(".")       # the project to work on, once a session
 render_html()        # the working copy, in seconds
 render_all()         # the .docx and the .pdf, with the supplement, in output/
 make_preprint()      # the preprint and its data deposit, in submission/

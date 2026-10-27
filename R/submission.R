@@ -100,10 +100,10 @@
 #'   page: `2` (the default, double), `1.5` or `1`.
 #' @param suppl_line_spacing The line spacing of the supplement: `1.5` (the
 #'   default), `1` or `2`. Its lines are not numbered.
-#' @param path The project, or any folder inside it. Left out, the project
-#'   the working directory is in -- its root once its `.Rproj` is open -- and,
-#'   since this writes into it, in an interactive session the first such call
-#'   asks you to allow it, once a session; in a script, name it.
+#' @param path The project, or any folder inside it. Left out, the one
+#'   [set_paper()] named; with none named, this stops before writing: it
+#'   writes into the project, and easypaper never takes the working directory
+#'   for it.
 #' @return The path of the submission folder, invisibly.
 #' @seealso [make_preprint()] for a preprint server, and [render_docx()] for
 #'   the documents alone.

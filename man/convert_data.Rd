@@ -13,9 +13,8 @@ working directory -- the project root, when you have opened the project's
 originals are only ever read.}
 
 \item{to}{Where the results go. Left out, the \verb{data/} folder of the project
-the working directory is in -- in an interactive session, the first
-call that writes into a project asks you to allow it -- and outside a
-project it has to be given.}
+\code{\link[=set_paper]{set_paper()}} named; with no project named, it has to be given. There is
+no default folder: easypaper never takes the working directory for it.}
 
 \item{overwrite}{\code{FALSE} (the default) writes only what is missing from
 \code{to} or older than its original; \code{TRUE} rewrites the lot.}

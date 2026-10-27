@@ -27,6 +27,8 @@ reference:
     contents:
       - create_paper
       - create_example_paper
+      - set_paper
+      - get_paper
       - affiliations
   - title: Rendering
     desc: >

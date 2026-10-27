@@ -47,57 +47,67 @@ test_that("a nested call keeps the project of the call that made it", {
   expect_identical(list_journals(), "journal-of-ecology")
 })
 
-test_that("nothing is written into the working directory's project unasked", {
-  # CRAN's policy: a package writes where it is told to, or, in an
-  # interactive session, with the user's confirmation.
+test_that("nothing is written into a project that was not named", {
+  # CRAN's policy: a package writes only where it is told to. The working
+  # directory is never taken for the project to write into, interactive
+  # session or not; what only reads still uses it.
   p <- new_project()
   old <- setwd(p)
   on.exit(setwd(old), add = TRUE)
-  .ep$allowed <- NULL
-  on.exit(.ep$allowed <- NULL, add = TRUE)
+  old_paper <- suppressMessages(set_paper(NULL))
+  on.exit(suppressMessages(set_paper(old_paper)), add = TRUE)
   ls_out <- function() list.files(file.path(p, "output"))
 
-  # A script: nobody to ask, so the project has to be named, and nothing is
-  # written meanwhile.
-  local_mocked_bindings(.interactive = function() FALSE,
-                        .ask_yes_no = function(q) stop("asked"))
-  expect_error(export_code(), 'export_code\\(\\) writes into a project.*export_code\\(path = "."\\)')
+  # In the project's folder, nothing named: it stops, saying how to name it.
+  expect_error(export_code(),
+               'export_code\\(\\) writes into a project, and none is named.*set_paper\\("."\\).*export_code\\(path = "."\\)')
   expect_error(easypaper::export_code(), "export_code\\(\\) writes into a project")
   expect_length(ls_out(), 0L)
-  # Named, it writes, without asking; and what only reads never asks.
-  suppressMessages(export_code(path = "."))
-  expect_true("analysis_code.R" %in% ls_out())
   expect_identical(list_journals(), "journal-of-ecology")
   expect_no_error(suppressMessages(check_citations()))
 
-  # An interactive session: asked once, the project named, and a no writes
-  # nothing.
+  # Named in the call, it writes there, for that call.
+  suppressMessages(export_code(path = "."))
+  expect_true("analysis_code.R" %in% ls_out())
+
+  # Named once with set_paper(), from any folder in it: every call, nested
+  # ones too, writes there, and set_paper() says which project it is.
   unlink(file.path(p, "output"), recursive = TRUE)
-  asked <- character()
-  answer <- FALSE
-  local_mocked_bindings(.interactive = function() TRUE,
-                        .ask_yes_no = function(q) { asked <<- c(asked, q); answer })
-  # The project is named in a message, and the prompt is the question alone.
-  msgs <- testthat::capture_messages(
-    expect_error(export_code(), "Nothing was written"))
-  expect_length(asked, 1L)
-  expect_identical(asked, "Allow it for this session?")
-  expect_match(paste(msgs, collapse = ""), normalizePath(p, winslash = "/"),
-               fixed = TRUE)
-  expect_false(dir.exists(file.path(p, "output")))
-  # A yes holds for the session: the next calls, nested ones too, do not ask.
-  answer <- TRUE
+  setwd(file.path(p, "_sections"))
+  expect_message(prev <- set_paper("."), normalizePath(p, winslash = "/"),
+                 fixed = TRUE)
+  expect_null(prev)
+  expect_message(got <- get_paper(), "Working on", fixed = TRUE)
+  expect_identical(got, normalizePath(p, winslash = "/"))
   suppressMessages(export_code())
   suppressMessages(export_figure_formats())
-  expect_length(asked, 2L)
   expect_true("analysis_code.R" %in% ls_out())
-  # Another project is asked about on its own.
+
+  # The working directory does not override it: from another project, the
+  # named one is still the one written into.
   q <- new_project()
   setwd(q)
-  msgs <- testthat::capture_messages(export_code())
-  expect_length(asked, 3L)
-  expect_match(paste(msgs, collapse = ""), normalizePath(q, winslash = "/"),
-               fixed = TRUE)
+  suppressMessages(export_code())
+  expect_false(file.exists(file.path(q, "output", "analysis_code.R")))
+  # But `path` does, for that call.
+  suppressMessages(export_code(path = q))
+  expect_true(file.exists(file.path(q, "output", "analysis_code.R")))
+
+  # Naming another returns the one before, and NULL forgets it.
+  expect_identical(suppressMessages(set_paper(q)), normalizePath(p, winslash = "/"))
+  expect_identical(set_paper(NULL), normalizePath(q, winslash = "/"))
+  expect_error(export_code(), "none is named")
+  expect_message(got <- get_paper(), 'No project is named.*set_paper\\("."\\)')
+  expect_null(got)
+  expect_error(set_paper(), "`path` is missing")
+  expect_error(set_paper(file.path(tempdir(), "no-such-paper")), "not a folder")
+
+  # A project named and then gone stops the call; it is not written again.
+  r <- new_project()
+  suppressMessages(set_paper(r))
+  unlink(r, recursive = TRUE)
+  expect_error(export_code(), "not a folder")
+  set_paper(NULL)
 })
 
 test_that("a call says which Quarto it uses once, however many renders it runs", {
@@ -314,8 +324,8 @@ test_that("every exported function works on the project `path` names", {
     expect_null(f$path, info = fn)
   }
   expect_setequal(setdiff(getNamespaceExports("easypaper"), builds),
-                  c("create_paper", "create_example_paper", "convert_data",
-                    "italicize_species", "write_packages_bib"))
+                  c("create_paper", "create_example_paper", "set_paper", "get_paper",
+                    "convert_data", "italicize_species", "write_packages_bib"))
 })
 
 test_that("a file that cannot be moved into place stops the call", {
