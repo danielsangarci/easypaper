@@ -49,10 +49,9 @@ jobs:
         with:
           version: ${{ matrix.quarto }}
 
-      # A step of its own, so that the step that fails says which it was.
       # The setup has been seen to succeed and leave no quarto on the PATH
       # (Quarto 1.7.32 on macOS), so look in the folder its installer uses.
-      - name: Install TinyTeX
+      - name: Find Quarto
         shell: bash
         run: |
           q=$(command -v quarto || ls /Applications/quarto/bin/quarto 2>/dev/null || true)
@@ -62,7 +61,28 @@ jobs:
           fi
           dirname "$q" >> "$GITHUB_PATH"
           "$q" --version
-          "$q" install tinytex --no-prompt
+
+      # Not `quarto install tinytex`: it asks GitHub's API for the latest
+      # release without a token, and the runners, sharing their addresses,
+      # are turned away (403). This downloads it directly, and a fuller
+      # bundle, so that a PDF has fewer LaTeX packages to fetch while it
+      # renders.
+      - uses: r-lib/actions/setup-tinytex@v2
+
+      # Every LaTeX package a PDF of easypaper loads, read from the files
+      # XeLaTeX opens on the worked example. Missing one, Quarto installs it
+      # mid-render, and first updates tlmgr: on Windows that hangs.
+      - name: Install the LaTeX packages of the PDFs
+        shell: bash
+        run: >
+          tlmgr install
+          amsfonts amsmath bigintcalc bitset bookmark booktabs caption
+          colortbl etoolbox float fontspec geometry gettitlestring graphics
+          graphics-cfg graphics-def hycolor hyperref iftex infwarerr intcalc
+          kvdefinekeys kvoptions kvsetkeys l3backend l3kernel l3packages
+          lineno lm lm-math ltxcmds mdwtools multirow newunicodechar parskip
+          pdfescape pdftexcmds pgf refcount rerunfilecheck setspace stringenc
+          tools ulem unicode-math uniquecounter url wrapfig xcolor
 
       # flextable -> gdtools: its macOS binary links the X11 libraries of
       # XQuartz (/opt/X11), which the runners do not have.

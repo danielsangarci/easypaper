@@ -302,14 +302,16 @@ preview <- function(path = NULL) {
 }
 
 #' quarto_render(), with an error that can be read. The quarto package puts
-#' Quarto's log into a cli message, and cli takes the `{.short-title}` of the
-#' title there for markup of its own and fails over it: what reached the user
-#' was cli's complaint, not why the render failed. The log is printed above
-#' the error, so that is where to look.
+#' Quarto's log into a cli message, and cli takes the braces of the title
+#' there -- `{.short-title}`, `{=latex}` -- for markup of its own and fails
+#' over them: what reached the user was cli's complaint, not why the render
+#' failed. The log is printed above the error, so that is where to look.
 #' @noRd
 .quarto_render <- function(input, ...) {
   tryCatch(quarto::quarto_render(input, ...), error = function(e) {
-    if (!grepl("literal", conditionMessage(e), fixed = TRUE)) stop(e)
+    cli_failed <- "Invalid cli literal|Could not parse cli|cli `\\{\\}` expression"
+    msgs <- c(conditionMessage(e), if (!is.null(e$parent)) conditionMessage(e$parent))
+    if (!any(grepl(cli_failed, msgs))) stop(e)
     stop("Quarto could not render ", basename(input), ". Its log, above, ",
          "says why: look for the first line that says ERROR or not found.",
          call. = FALSE)

@@ -228,6 +228,14 @@ test_that("a render that fails says so, not what cli made of its log", {
     .package = "quarto")
   expect_error(.quarto_render("tmp_main_text.qmd"),
                "Quarto could not render tmp_main_text.qmd")
+  # And when cli cannot parse the {=latex} of a PDF's title.
+  local_mocked_bindings(
+    quarto_render = function(...) {
+      stop("Could not parse cli `{}` expression: `` \\large{}`{=latex}Sh... ``.")
+    },
+    .package = "quarto")
+  expect_error(.quarto_render("tmp_main_text.qmd"),
+               "Quarto could not render tmp_main_text.qmd")
   local_mocked_bindings(quarto_render = function(...) stop("No such file"),
                         .package = "quarto")
   expect_error(.quarto_render("x.qmd"), "No such file")
