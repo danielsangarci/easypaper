@@ -86,7 +86,9 @@
 <span><span class="fu"><a href="reference/create_paper.html">create_paper</a></span><span class="op">(</span><span class="st">"my_paper"</span><span class="op">)</span></span></code></pre></div>
 <p>Open the <code>.Rproj</code> it creates, write in <code>_sections/</code>, and:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># while you write</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/set_paper.html">set_paper</a></span><span class="op">(</span><span class="st">"."</span><span class="op">)</span>           <span class="co"># once a session: the project to work on</span></span>
+<span></span>
+<span><span class="co"># while you write</span></span>
 <span><span class="fu"><a href="reference/render.html">render_html</a></span><span class="op">(</span><span class="op">)</span>            <span class="co"># the manuscript, in seconds</span></span>
 <span><span class="fu"><a href="reference/render.html">preview</a></span><span class="op">(</span><span class="op">)</span>                <span class="co"># live: reloads every time you save</span></span>
 <span></span>
@@ -99,7 +101,7 @@
 <span><span class="co"># what you send, in submission/</span></span>
 <span><span class="fu"><a href="reference/make_preprint.html">make_preprint</a></span><span class="op">(</span><span class="op">)</span>          <span class="co"># the preprint and its data deposit</span></span>
 <span><span class="fu"><a href="reference/make_submission.html">make_submission</a></span><span class="op">(</span><span class="op">)</span>        <span class="co"># the journal's folder, double-blind</span></span></code></pre></div>
-<p><code>render_*()</code> makes documents to read, as often as you like; <code>make_*()</code> assembles what you send, a few times per paper. The first call that writes into the project asks you to allow it, once a session; in a script, name the project instead: <code>render_all(path = ".")</code>.</p>
+<p><code>render_*()</code> makes documents to read, as often as you like; <code>make_*()</code> assembles what you send, a few times per paper. They write only into the project you name, with <code><a href="reference/set_paper.html">set_paper()</a></code> once a session or with <code>path</code> in a call – <code>render_all(path = ".")</code> – never into whatever the working directory happens to be. <code><a href="reference/get_paper.html">get_paper()</a></code> says which project is named.</p>
 <p>To see a finished paper first, <code>create_example_paper("example_paper")</code> writes the same project with a small study in it, ready to render.</p>
 <p><strong>Next:</strong> <a href="https://danielsangarci.github.io/easypaper/articles/easypaper.html">Get started</a> walks through a paper from the first line to the submission, and <code><a href="reference/easypaper-package.html">?easypaper</a></code> lists every function.</p>
 </div>

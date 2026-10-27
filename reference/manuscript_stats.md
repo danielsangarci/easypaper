@@ -22,9 +22,10 @@ manuscript_stats(quiet = FALSE, path = NULL)
 
 - path:
 
-  The project, or any folder inside it. Left out, the project the
-  working directory is in – its root once its `.Rproj` is open. This
-  only reads, so it never asks.
+  The project, or any folder inside it. Left out, the one
+  [`set_paper()`](https://danielsangarci.github.io/easypaper/reference/set_paper.md)
+  named, or else the project the working directory is in: this only
+  reads.
 
 ## Value
 
@@ -53,7 +54,7 @@ R code is not known until it runs, and counts as one word.
 ``` r
 dir <- file.path(tempdir(), "my_paper")
 create_paper(dir, title = "Ant colonies", git = FALSE)
-#> Project created: /tmp/RtmpoHtVq9/my_paper
+#> Project created: /tmp/RtmpFXzpSf/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
 #>   3. render_html()      # see ?render for every command

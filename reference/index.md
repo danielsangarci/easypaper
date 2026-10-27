@@ -9,6 +9,10 @@ The project holds the paper; everything below builds it.
 - [`create_example_paper()`](https://danielsangarci.github.io/easypaper/reference/create_example_paper.md)
   : Create an example project: a small study, written as an easypaper
   paper
+- [`set_paper()`](https://danielsangarci.github.io/easypaper/reference/set_paper.md)
+  : Name the paper to work on
+- [`get_paper()`](https://danielsangarci.github.io/easypaper/reference/get_paper.md)
+  : Which paper is named
 - [`affiliations()`](https://danielsangarci.github.io/easypaper/reference/affiliations.md)
   : The affiliations of the manuscript, under the authors
 

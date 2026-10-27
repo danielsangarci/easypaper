@@ -26,9 +26,10 @@ check_renv(quiet = FALSE, path = NULL)
 
 - path:
 
-  The project, or any folder inside it. Left out, the project the
-  working directory is in – its root once its `.Rproj` is open. They
-  only read, so they never ask.
+  The project, or any folder inside it. Left out, the one
+  [`set_paper()`](https://danielsangarci.github.io/easypaper/reference/set_paper.md)
+  named, or else the project the working directory is in: they only
+  read.
 
 - quiet:
 
@@ -87,7 +88,7 @@ which runs every one of these first.
 ``` r
 dir <- file.path(tempdir(), "my_paper")
 create_paper(dir, title = "Ant colonies", git = FALSE)
-#> Project created: /tmp/RtmpoHtVq9/my_paper
+#> Project created: /tmp/RtmpFXzpSf/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
 #>   3. render_html()      # see ?render for every command

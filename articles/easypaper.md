@@ -30,6 +30,8 @@ All of them at once, in the order a paper meets them:
 
 ``` r
 
+set_paper(".")           # once a session: the project to work on
+
 # while you write
 render_html()            # the manuscript, in seconds
 preview()                # live: reloads every time you save
@@ -55,15 +57,14 @@ make_submission()        # the journal's folder, double-blind
 | [4. Render](#render) | [`render_docx()`](https://danielsangarci.github.io/easypaper/reference/render.md), [`render_pdf()`](https://danielsangarci.github.io/easypaper/reference/render.md), [`render_supplementary()`](https://danielsangarci.github.io/easypaper/reference/render.md), [`render_all()`](https://danielsangarci.github.io/easypaper/reference/render.md) | The documents to read, in a journal’s style, into `output/` |
 | [5. Submit](#submit) | [`make_preprint()`](https://danielsangarci.github.io/easypaper/reference/make_preprint.md), [`deposit_zenodo()`](https://danielsangarci.github.io/easypaper/reference/deposit_zenodo.md), [`make_submission()`](https://danielsangarci.github.io/easypaper/reference/make_submission.md) | The preprint and its data deposit, the DOI of the data, and the folder a journal asks for, into `submission/` |
 
-Every function works on the project the working directory is in, from
-any folder inside it, or on the one its `path` argument names. A
-function that writes into the project asks first, the first time in a
-session:
-[`render_html()`](https://danielsangarci.github.io/easypaper/reference/render.md)
-in RStudio says where it is about to write, and a yes holds until the
-session ends. A script, where nobody can answer, names the project:
-`render_all(path = ".")`. Each function has a help page with its
-arguments explained:
+Every function works on the project you name: once a session with
+`set_paper(".")`, from the project’s folder, or in a call with its
+`path` argument, `render_all(path = ".")`. A function that writes never
+takes the working directory for the project: with none named, it stops
+before writing and says how to name it. One that only reads, such as
+[`check_citations()`](https://danielsangarci.github.io/easypaper/reference/checks.md),
+takes the working directory’s project when none is named. Each function
+has a help page with its arguments explained:
 [`?create_paper`](https://danielsangarci.github.io/easypaper/reference/create_paper.md),
 [`?render`](https://danielsangarci.github.io/easypaper/reference/render.md),
 [`?make_submission`](https://danielsangarci.github.io/easypaper/reference/make_submission.md),
@@ -95,9 +96,19 @@ filled in (see [Authors and affiliations](#authors-and-affiliations)).
 The other arguments are in the [technical
 details](#the-arguments-of-create_paper).
 
-Then open the `.Rproj` it leaves behind, and
-[`library(easypaper)`](https://github.com/danielsangarci/easypaper).
-Every function works on the project the working directory is in.
+Then open the `.Rproj` it leaves behind, and name it as the project to
+work on, once a session:
+
+``` r
+
+library(easypaper)
+set_paper(".")
+```
+
+From then on every function works on that project, from any folder
+inside it;
+[`get_paper()`](https://danielsangarci.github.io/easypaper/reference/get_paper.md)
+says which one it is.
 
 ### An example to read first
 
@@ -134,12 +145,13 @@ thing done the way the package expects it:
 | `12.1_suppl_material.qmd` | a supplementary figure and a supplementary table, which read their own data |
 | `data/` | the two tables of `BCI` as `.csv`, species named as a paper names them |
 
+`set_paper("example_paper")` and then
 [`render_html()`](https://danielsangarci.github.io/easypaper/reference/render.md)
-in it gives the study, with every number computed from the data. Its
-authors are borrowed from the history of the field — Charles Darwin and
-Alfred Russel Wallace, who never wrote it — and their affiliations,
-emails and ORCID iDs are made up; the data are Condit et al.’s. It takes
-the same `path`, `overwrite`, `git` and `open` as
+give the study, with every number computed from the data. Its authors
+are borrowed from the history of the field — Charles Darwin and Alfred
+Russel Wallace, who never wrote it — and their affiliations, emails and
+ORCID iDs are made up; the data are Condit et al.’s. It takes the same
+`path`, `overwrite`, `git` and `open` as
 [`create_paper()`](https://danielsangarci.github.io/easypaper/reference/create_paper.md);
 the title and the authors are the example’s own.
 
@@ -1101,7 +1113,7 @@ variable labels of an `.sav` or a `.dta` — says so when it happens.
 | Argument | Default | What it decides |
 |----|----|----|
 | `path` | — | The file or folder to read, relative to the working directory — the project root, once its `.Rproj` is open — or absolute. A folder is read whole, subfolders included. The originals are only ever read |
-| `to` | `data/` | Where the results go: the `data/` of the project the working directory is in. Outside a project there is none, and `to` has to be given |
+| `to` | `data/` | Where the results go: the `data/` of the project [`set_paper()`](https://danielsangarci.github.io/easypaper/reference/set_paper.md) named. With no project named, `to` has to be given |
 | `overwrite` | `FALSE` | `FALSE` writes only what is missing from `data/` or older than its original, so a file you corrected by hand stays as it is until the original changes. `TRUE` rebuilds the lot |
 | `also` | none | Extensions to treat as already open for this call, with or without the dot. For good: list them under `open-formats:` in `_quarto.yml` |
 

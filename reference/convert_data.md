@@ -23,10 +23,10 @@ convert_data(path, to = NULL, overwrite = FALSE, also = character(0))
 
 - to:
 
-  Where the results go. Left out, the `data/` folder of the project the
-  working directory is in – in an interactive session, the first call
-  that writes into a project asks you to allow it – and outside a
-  project it has to be given.
+  Where the results go. Left out, the `data/` folder of the project
+  [`set_paper()`](https://danielsangarci.github.io/easypaper/reference/set_paper.md)
+  named; with no project named, it has to be given. There is no default
+  folder: easypaper never takes the working directory for it.
 
 - overwrite:
 
@@ -103,11 +103,11 @@ write.csv(head(iris), file.path(src, "iris.csv"), row.names = FALSE)
 out <- file.path(tempdir(), "data")
 
 convert_data(src, to = out)   # copied: a .csv is already open
-#> /tmp/RtmpoHtVq9/data/ updated: 1 file(s) -- iris.csv
+#> data/ updated: 1 file(s) -- iris.csv
 
 # A workbook: one .csv per sheet.
 convert_data(readxl::readxl_example("datasets.xlsx"), to = out)
-#> /tmp/RtmpoHtVq9/data/ updated: 3 file(s) -- datasets_mtcars.csv, datasets_chickwts.csv, datasets_quakes.csv
+#> data/ updated: 3 file(s) -- datasets_mtcars.csv, datasets_chickwts.csv, datasets_quakes.csv
 list.files(out)
 #> [1] "datasets_chickwts.csv" "datasets_mtcars.csv"   "datasets_quakes.csv"  
 #> [4] "iris.csv"             
@@ -115,7 +115,7 @@ list.files(out)
 # An extension it does not know, copied as it is when named in `also`.
 writeLines("x y z", file.path(src, "points.las"))
 convert_data(file.path(src, "points.las"), to = out, also = "las")
-#> /tmp/RtmpoHtVq9/data/ updated: 1 file(s) -- points.las
+#> data/ updated: 1 file(s) -- points.las
 list.files(out)
 #> [1] "datasets_chickwts.csv" "datasets_mtcars.csv"   "datasets_quakes.csv"  
 #> [4] "iris.csv"              "points.las"           

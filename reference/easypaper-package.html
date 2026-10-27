@@ -68,10 +68,12 @@ double-blind review and a data and code compendium;</p></li>
 <li><p>keep it in step: <code><a href="convert_data.html">convert_data()</a></code> brings data into <code>data/</code> in open
 formats, <code><a href="sync_metadata.html">sync_metadata()</a></code> and <code><a href="edit_metadata.html">edit_metadata()</a></code> describe the data
 deposit, and <code><a href="add_journal.html">add_journal()</a></code> fetches any journal's citation style.</p></li>
-</ul><p>Every function works on the project the working directory is in – the
-project root, once its <code>.Rproj</code> is open – or on the one its <code>path</code>
-argument names. One that writes into the project asks first, the first
-time in an interactive session; in a script, <code>path</code> names the project.</p>
+</ul><p>Every function works on the project you name: once a session with
+<code><a href="set_paper.html">set_paper()</a></code> – <code>set_paper(".")</code> once its <code>.Rproj</code> is open – or in a
+call with its <code>path</code> argument. A function that writes never takes the
+working directory for the project: with none named, it stops before
+writing. One that only reads takes the working directory's project when
+none is named.</p>
     </div>
     <div class="section level2">
     <h2 id="settings">Settings<a class="anchor" aria-label="anchor" href="#settings"></a></h2>

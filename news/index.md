@@ -25,10 +25,11 @@ First release.
   but the preprint, and counted.
 - Settings go in the `easypaper:` block of `_quarto.yml`, so they travel
   with the paper.
-- Every function works on the project the working directory is in, or on
-  the one `path` names. One that writes into it without a `path` asks
-  first, once a session; in a script, where nobody can answer, `path`
-  names the project.
+- Every function works on the project you name: once a session with
+  `set_paper(".")`, or in a call with `path`. One that writes never
+  takes the working directory for the project: with none named, it stops
+  before writing. One that only reads takes the working directory’s
+  project when none is named.
 - The project’s `README.md`, what a repository shows first, carries the
   title, the authors with their affiliations and ORCID, the keywords and
   the licence notice from the first commit, and the DOI of the data once

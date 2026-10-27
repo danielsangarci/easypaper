@@ -44,7 +44,7 @@
 <li>Authors and affiliations are written in the YAML of <code>manuscript.qmd</code>, the way Quarto documents them; every render numbers the affiliations and prints the authors on one line, as a paper does (<code><a href="../reference/affiliations.html">affiliations()</a></code>).</li>
 <li>A short title in the YAML is printed under the title of every document but the preprint, and counted.</li>
 <li>Settings go in the <code>easypaper:</code> block of <code>_quarto.yml</code>, so they travel with the paper.</li>
-<li>Every function works on the project the working directory is in, or on the one <code>path</code> names. One that writes into it without a <code>path</code> asks first, once a session; in a script, where nobody can answer, <code>path</code> names the project.</li>
+<li>Every function works on the project you name: once a session with <code>set_paper(".")</code>, or in a call with <code>path</code>. One that writes never takes the working directory for the project: with none named, it stops before writing. One that only reads takes the working directory’s project when none is named.</li>
 <li>The project’s <code>README.md</code>, what a repository shows first, carries the title, the authors with their affiliations and ORCID, the keywords and the licence notice from the first commit, and the DOI of the data once it is reserved; every render keeps them in step with <code>manuscript.qmd</code>.</li>
 </ul></div>
 <div class="section level3">

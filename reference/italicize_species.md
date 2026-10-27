@@ -190,7 +190,8 @@ refs <- file.path(tempdir(), "refs.json")
 writeLines('[{"id": "perez2020", "type": "article-journal",
   "title": "Effects of fire on Pinus halepensis regeneration"}]', refs)
 out <- file.path(tempdir(), "refs_italic.json")
-italicize_species(refs, out, names = "Pinus halepensis", gbif = FALSE)
+italicize_species(refs, out, names = "Pinus halepensis", gbif = FALSE,
+                  cache = NULL)
 #> Scientific names in italics (1): Pinus halepensis
 jsonlite::read_json(out)[[1]]$title
 #> [1] "<span class=\"nocase\">Effects of fire on <i><span class=\"nocase\">Pinus halepensis</span></i> regeneration</span>"
@@ -202,7 +203,8 @@ writeLines(c("@article{perez2020, author = {Perez, A.}, year = {2020},",
              "  title = {Effects of fire on Pinus halepensis regeneration},",
              "  journal = {Forest Ecology}}"), bib)
 if (rmarkdown::pandoc_available()) {
-  italicize_species(bib, out, names = "Pinus halepensis", gbif = FALSE)
+  italicize_species(bib, out, names = "Pinus halepensis", gbif = FALSE,
+                    cache = NULL)
   jsonlite::read_json(out)[[1]]$title
 }
 #> Scientific names in italics (1): Pinus halepensis
