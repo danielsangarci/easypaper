@@ -92,7 +92,7 @@ changed:
 * local Windows 11 (aarch64, in a virtual machine), R 4.6.1: R CMD check,
   and every function run with Quarto 1.10.18 on a project in a folder whose
   path has spaces and accents
-* win-builder: Windows, R-devel (2026-10-14 r90673 ucrt)
+* win-builder: Windows, R-devel (2026-10-26 r90766 ucrt)
 * GitHub Actions: Ubuntu (R-devel, R-release, R-oldrel-1), macOS
   (R-release), Windows (R-release); and, rendering with Quarto 1.7.32 and
   with the latest release, Windows and macOS
