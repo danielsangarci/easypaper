@@ -69,21 +69,6 @@ jobs:
       # renders.
       - uses: r-lib/actions/setup-tinytex@v2
 
-      # Every LaTeX package a PDF of easypaper loads, read from the files
-      # XeLaTeX opens on the worked example. Missing one, Quarto installs it
-      # mid-render, and first updates tlmgr: on Windows that hangs.
-      - name: Install the LaTeX packages of the PDFs
-        shell: bash
-        run: >
-          tlmgr install
-          amsfonts amsmath bigintcalc bitset bookmark booktabs caption
-          colortbl etoolbox float fontspec geometry gettitlestring graphics
-          graphics-cfg graphics-def hycolor hyperref iftex infwarerr intcalc
-          kvdefinekeys kvoptions kvsetkeys l3backend l3kernel l3packages
-          lineno lm lm-math ltxcmds mdwtools multirow newunicodechar parskip
-          pdfescape pdftexcmds pgf refcount rerunfilecheck setspace stringenc
-          tools ulem unicode-math uniquecounter url wrapfig xcolor
-
       # flextable -> gdtools: its macOS binary links the X11 libraries of
       # XQuartz (/opt/X11), which the runners do not have.
       - name: Install XQuartz on macOS
@@ -98,8 +83,32 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         id: deps
         with:
-          extra-packages: any::pkgload, any::readxl, local::.
+          extra-packages: any::pkgload, any::readxl, any::tinytex, local::.
           needs: check
+
+      # Every LaTeX package a PDF of easypaper loads, read from the files
+      # XeLaTeX opens on the worked example. Missing one, Quarto installs it
+      # mid-render, and first updates tlmgr: on Windows that hangs. Through
+      # tinytex, which calls tlmgr the way each system needs (on Windows it
+      # is a .bat, which bash cannot run). tlmgr refuses to install anything
+      # while it is older than its repository -- when TeX Live turns a year,
+      # say -- so it is updated first, here and not mid-render.
+      - name: Install the LaTeX packages of the PDFs
+        timeout-minutes: 10
+        shell: Rscript {0}
+        run: |
+          tinytex::tlmgr(c("update", "--self"))
+          tinytex::tlmgr_install(c(
+            "amsfonts", "amsmath", "bigintcalc", "bitset", "bookmark",
+            "booktabs", "caption", "colortbl", "etoolbox", "float",
+            "fontspec", "geometry", "gettitlestring", "graphics",
+            "graphics-cfg", "graphics-def", "hycolor", "hyperref", "iftex",
+            "infwarerr", "intcalc", "kvdefinekeys", "kvoptions", "kvsetkeys",
+            "l3backend", "l3kernel", "l3packages", "lineno", "lm", "lm-math",
+            "ltxcmds", "mdwtools", "multirow", "newunicodechar", "parskip",
+            "pdfescape", "pdftexcmds", "pgf", "refcount", "rerunfilecheck",
+            "setspace", "stringenc", "tools", "ulem", "unicode-math",
+            "uniquecounter", "url", "wrapfig", "xcolor"))
 
       - name: Tests, with Quarto
         run: Rscript .github/render-tests.R
