@@ -50,14 +50,14 @@ which makes one.
 ``` r
 dir <- file.path(tempdir(), "my_paper")
 create_paper(dir, git = FALSE)
-#> Project created: /tmp/RtmpyULjkH/my_paper
+#> Project created: /tmp/Rtmp7WOf6b/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
 #>   3. render_html()      # see ?render for every command
 old <- set_paper(dir)
-#> Working on /tmp/RtmpyULjkH/my_paper
+#> Working on /tmp/Rtmp7WOf6b/my_paper
 get_paper()
-#> Working on /tmp/RtmpyULjkH/my_paper
+#> Working on /tmp/Rtmp7WOf6b/my_paper
 list_journals()
 #> [1] "journal-of-ecology"
 set_paper(old)
