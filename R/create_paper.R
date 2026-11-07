@@ -126,7 +126,8 @@ create_paper <- function(path, title = NULL, authors = NULL,
   message("Project created: ", path, "\n",
           "  1. open ", name, ".Rproj\n",
           "  2. library(easypaper)\n",
-          "  3. render_html()      # see ?render for every command")
+          "  3. set_paper(\".\")      # the project to work on, once a session\n",
+          "  4. render_html()      # see ?render for every command")
 
   if (open) {
     if (requireNamespace("rstudioapi", quietly = TRUE) &&

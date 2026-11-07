@@ -37,7 +37,10 @@ Words are counted the way Word counts them in the rendered document, not
 in the source: a citation counts as the text the journal's style prints
 for it -- \verb{[@smith2020]} as "(Smith 2020)" -- a cross-reference as "Figure
 1", and code, comments and markup not at all. The abstract is the
-\verb{# Abstract} section without its keywords line; the main text is every
+\verb{# Abstract} section without its keywords line -- or \verb{# Summary}, as the
+journals of the British Ecological Society call it, or \verb{# Resumen}; any
+other heading is named with \verb{abstract-heading:} in the \verb{easypaper:} block
+of \verb{_quarto.yml}. The main text is every
 section from the one after the abstract to the reference list, less the
 statements at the end -- acknowledgements, funding, author contributions,
 conflicts of interest, data availability, ethics -- whatever they are

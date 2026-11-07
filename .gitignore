@@ -13,3 +13,6 @@ inst/doc
 # Written by testthat when a test fails; never part of the package
 tests/testthat/_problems/
 tests/testthat/testthat-problems.rds
+
+# Ideas for functions to come: kept locally, not published
+dev/propuestas_funciones.md

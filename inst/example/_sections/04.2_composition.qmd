@@ -8,15 +8,15 @@
 ```{r}
 #| label: composition-model
 #| cache: true
-# n_perm permutations, set in 03_methods.qmd. They take a few seconds, once:
-# the chunk is cached.
+# n_perm permutations within the spatial blocks of perm_design, both set in
+# 03_methods.qmd. They take a few seconds, once: the chunk is cached.
 # Bray-Curtis dissimilarities between plots, on square-root abundances, so
 # that the few very abundant species do not decide everything.
 Y_sqrt <- sqrt(Y_counts)
 d_bray <- vegdist(Y_sqrt, method = "bray")
 
 # PERMANOVA: does the composition differ among habitats?
-perm     <- adonis2(d_bray ~ habitat, permutations = n_perm, by = "terms")
+perm     <- adonis2(d_bray ~ habitat, permutations = perm_design, by = "terms")
 tab_perm <- as.data.frame(perm)
 r2_hab   <- tab_perm["habitat", "R2"]
 f_hab    <- tab_perm["habitat", "F"]
@@ -24,7 +24,7 @@ pp_hab   <- tab_perm["habitat", "Pr(>F)"]
 
 # PERMDISP: do the habitats differ in how variable their composition is?
 disp   <- betadisper(d_bray, habitat)
-pdisp  <- permutest(disp, permutations = n_perm)
+pdisp  <- permutest(disp, permutations = perm_design)
 f_disp <- pdisp$tab["Groups", "F"]
 p_disp <- pdisp$tab["Groups", "Pr(>F)"]
 

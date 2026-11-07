@@ -265,7 +265,8 @@ check_species_text <- function(authority = TRUE, abbreviate = TRUE,
   }
 
   files <- .section_files()
-  abstract <- .section_block(master, "Abstract")
+  ah <- .abstract_heading(.top_headings(master))
+  abstract <- if (is.na(ah)) character(0) else .section_block(master, ah)
   abstract <- .p(trimws(gsub("^\\{\\{< *include +|>\\}\\}$", "",
     regmatches(abstract, regexpr("\\{\\{< *include +[^>]+? *>\\}\\}", abstract)))))
   suppl <- .suppl_files()

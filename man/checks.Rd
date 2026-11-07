@@ -35,7 +35,8 @@ what is wrong.}
 return \code{TRUE} invisibly and stop with an error naming what is missing.
 \code{check_title()} and \code{check_data()} return \code{TRUE} or \code{FALSE} invisibly,
 with a warning when \code{FALSE}. \code{check_renv()} returns \code{TRUE} in sync,
-\code{FALSE} not, \code{NA} when it cannot tell.
+\code{FALSE} not, with a warning naming what differs, and \code{NA} when it cannot
+tell.
 }
 \description{
 Every render runs these first -- all but \code{check_renv()}: a render writes
@@ -61,7 +62,10 @@ template's. It is written once, in the YAML of \code{manuscript.qmd}.
 \item \code{check_data()}: every file the analysis names is in \verb{data/}, and which
 files there nothing reads -- they would travel to the data repository all
 the same. It reports; it never removes.
-\item \code{check_renv()}: \code{renv.lock} is there and matches the library in use.
+\item \code{check_renv()}: \code{renv.lock} is there and matches the library in use,
+package by package: renv's own project library when the project has one
+(\code{renv::init()}), and otherwise the library R is using, which is the one
+easypaper records.
 }
 
 An e-mail address is not a citation, however it is written: an \code{@} glued to

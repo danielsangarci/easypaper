@@ -313,7 +313,7 @@ sync_metadata <- function(quiet = FALSE, path = NULL) {
   json <- file.path(md, "dataspice.json")
   .clean_spice(json)
   html <- file.path(md, "index_metadata.html")
-  suppressMessages(.spice_page(json, html))
+  .spice_page(json, html)
   invisible(c(json, html))
 }
 
@@ -358,7 +358,11 @@ sync_metadata <- function(quiet = FALSE, path = NULL) {
 #'
 #' `what = "write"` opens nothing: it compiles the four files into
 #' `data/metadata/dataspice.json`, the machine-readable description, and
-#' writes `data/metadata/index_metadata.html`, a page to read it. You need it
+#' writes `data/metadata/index_metadata.html`, a page to read it. The area
+#' the data cover, when `biblio.csv` gives its coordinates, is drawn on that
+#' page as a map inside it, which opens offline: it needs sf, maps and
+#' base64enc, and without them the page has no map, and says so: it never
+#' loads one from the internet. You need it
 #' only to look at them: [make_submission()] and [make_preprint()] compile
 #' them again before they build the data compendium, which carries both.
 #'
@@ -461,6 +465,15 @@ edit_metadata <- function(what = c("attributes", "biblio", "creators",
 #' with no dates or no coordinates, which .clean_spice() takes out when they
 #' were left blank, so the page is built from a copy that has them back, as
 #' blanks.
+#'
+#' The area the data cover is drawn as a static map, an image inside the
+#' page, and never as a Leaflet map, which fetches its tiles from
+#' OpenStreetMap every time the page is opened: the page travels in a
+#' deposit and should open offline, years later, sending nobody's browser
+#' anywhere. dataspice draws the static map with sf, maps and base64enc;
+#' without them the page has no map, the coordinates stay in its table, and
+#' the call says what to install. The page is written on a copy of
+#' dataspice's template without its Leaflet part (.spice_template()).
 #' @noRd
 .spice_page <- function(json, html) {
   j <- jsonlite::read_json(json)
@@ -470,11 +483,79 @@ edit_metadata <- function(what = c("attributes", "biblio", "creators",
     j$spatialCoverage <- list(`type` = "Place", name = NULL,
                               geo = list(`type` = "GeoShape", box = "NA NA NA NA"))
   }
+  static <- .spice_static_map(j$spatialCoverage$geo$box)
   tmp <- tempfile(fileext = ".json")
   on.exit(unlink(tmp), add = TRUE)
   jsonlite::write_json(j, tmp, auto_unbox = TRUE, pretty = TRUE, null = "null")
-  suppressWarnings(dataspice::build_site(path = tmp, out_path = html))
+  # Drawing the static map, dataspice draws on whatever graphics device is
+  # open, and with none open R opens the default one, which writes
+  # Rplots.pdf into the working directory. A device of our own that writes
+  # nothing takes it, for as long as the page is built.
+  if (static) {
+    before <- grDevices::dev.cur()
+    grDevices::pdf(NULL)
+    ours <- grDevices::dev.cur()
+    on.exit({
+      if (ours %in% grDevices::dev.list()) grDevices::dev.off(ours)
+      if (before > 1L && before %in% grDevices::dev.list()) grDevices::dev.set(before)
+    }, add = TRUE)
+  }
+  template <- .spice_template()
+  on.exit(unlink(template), add = TRUE)
+  # What dataspice says goes unsaid; what easypaper has to say is said above.
+  suppressMessages(suppressWarnings(
+    dataspice::build_site(path = tmp, template_path = template,
+                          out_path = html, static_map = static)))
   invisible(html)
+}
+
+#' dataspice's page template without its Leaflet map: the blocks it shows
+#' when there is no static map -- an empty map, and the scripts and tiles it
+#' loads from unpkg and OpenStreetMap -- go. Written to a temporary file,
+#' which the caller removes. A template that keeps any of it, from a
+#' dataspice that changed the blocks, stops: better no page than one that
+#' reaches the network.
+#' @noRd
+.spice_template <- function() {
+  src <- system.file("template.html5", package = "dataspice")
+  txt <- paste(readLines(src, warn = FALSE, encoding = "UTF-8"), collapse = "\n")
+  txt <- gsub("(?s)\\{\\{\\^staticmap\\}\\}.*?\\{\\{/staticmap\\}\\}", "", txt,
+              perl = TRUE)
+  if (grepl("leaflet|openstreetmap|unpkg", txt, ignore.case = TRUE)) {
+    stop("This version of dataspice writes its page with an online map ",
+         "easypaper cannot take out. Update dataspice: ",
+         "install.packages(\"dataspice\").", call. = FALSE)
+  }
+  out <- tempfile(fileext = ".html5")
+  writeLines(txt, out, useBytes = TRUE)
+  out
+}
+
+#' The packages dataspice draws a static map with.
+#' @noRd
+STATIC_MAP_PACKAGES <- c("sf", "maps", "base64enc")
+
+#' Whether the page gets a static map: only with a real box -- four numbers,
+#' south west north east -- since one of blanks has nothing to draw and a
+#' static map of it stops dataspice; and only with the packages that draw
+#' it, said once a call when one is missing.
+#' @noRd
+.spice_static_map <- function(box) {
+  v <- suppressWarnings(as.numeric(strsplit(trimws(paste(unlist(box),
+                                                          collapse = " ")),
+                                            "\\s+")[[1]]))
+  if (length(v) != 4L || anyNA(v)) return(FALSE)
+  missing <- STATIC_MAP_PACKAGES[!vapply(STATIC_MAP_PACKAGES, .has_pkg,
+                                         logical(1))]
+  if (length(missing)) {
+    .say_once("static-map",
+              "The page of the metadata has no map of the data's area: ",
+              "drawing one into the page needs ",
+              paste(missing, collapse = ", "), ". ",
+              .cd_install(missing))
+    return(FALSE)
+  }
+  TRUE
 }
 
 #' One name the way a reference writes it: "Ada Lovelace" -> "Lovelace, A."

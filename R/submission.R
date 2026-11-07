@@ -24,8 +24,9 @@
 #' Writes `submission/<label>/`: the manuscript split the way journals with
 #' double-blind review ask for -- a title page, and a main text that opens
 #' with the title and names nobody -- or, signed, the main text alone; the
-#' supplement as its own document, every
-#' figure on its own, named with its resolution and printed size, a cover
+#' supplement as its own document, every figure of the main text on its own,
+#' named with its resolution and printed size -- the supplementary figures
+#' stay inside the supplement, which is how journals take them -- a cover
 #' letter -- dated, with the title of
 #' the manuscript, signed by the corresponding author, and with the DOI of
 #' the data once [deposit_zenodo()] has reserved it; for a second journal,
@@ -35,8 +36,11 @@
 #' Zenodo or Dryad. Everything in it is rebuilt on every call except the cover
 #' letter, which is never overwritten.
 #'
-#' It records `renv.lock` first, so the compendium carries the environment this
-#' submission came out of -- the version of easypaper that built it included.
+#' It records `renv.lock` first: the project's records the environment this
+#' submission came out of, the version of easypaper that built it included,
+#' and the compendium gets one of its own, with the packages its analysis
+#' loads and what they need, and not easypaper, which the analysis does not
+#' run.
 #'
 #' Double-blind review also needs the sections that identify you off the main
 #' text. They move to the title page: by default the Acknowledgements, the
@@ -205,6 +209,16 @@ make_submission <- function(journal = NULL, label = NULL,
                        .suppl_name(to_render[i]), label)
     .move(sup[i], file.path(man, nm))
     .docx_layout(file.path(man, nm), line_spacing = suppl_line_spacing)
+  }
+
+  # What the reviewers read must name nobody: the main text and the
+  # supplement are read back, as text, for the authors' names, emails, ORCID,
+  # affiliations and accounts. What easypaper takes out it takes out; this
+  # finds what the text itself still says -- "in our earlier study (Smith
+  # 2019)", a URL to the authors' repository.
+  if (blind) {
+    .warn_named_in_documents(c(main_file, list.files(man, "^supporting_information_.*[.]docx$",
+                                                     full.names = TRUE)))
   }
 
   # 4) standalone figures and the compendium
@@ -581,8 +595,13 @@ SUPPL_LABEL <- "(?:\\{#|#\\|\\s*label:\\s*)(sfig|stbl)-[A-Za-z0-9_:.-]+"
 
   # The setup and the section go in here, so neither is written twice: the
   # setup is the manuscript's, and the section is included there.
+  # Blinded, with references to take out, the section goes in as its text,
+  # so its citations can be: an include would bring them back.
+  section_lines <- if (blinded && length(.blinded_drop_keys())) {
+    .drop_blinded_citations(.expand_includes_text(include))
+  } else include
   body <- c("", "```{r setup-suppl}", "#| include: false", "#| purl: false",
-            'source(here::here("R/setup.R"))', "```", "", include, "", body)
+            'source(here::here("R/setup.R"))', "```", "", section_lines, "", body)
   body <- .suppl_references(body, section, yml, fmt)
   # Quarto numbers the floats here; `-@sfig-x`, the number alone, is ours,
   # and so is every citation when the text has a word of its own for them.
@@ -793,6 +812,7 @@ AFFILIATIONS_SLOT <- "^\\s*<!--\\s*affiliations\\s*-->\\s*$"
 
   # 2) resolve the includes and replace the citations to the supplement
   body <- .expand_includes_text(txt)
+  if (blinded) body <- .drop_blinded_citations(body)
   if (!whole && !length(keep) && length(.suppl_include_lines(body))) {
     stop("The main text still includes a supplementary file. Check the ",
          "'# Supporting information' section of manuscript.qmd.", call. = FALSE)
@@ -852,7 +872,8 @@ AFFILIATIONS_SLOT <- "^\\s*<!--\\s*affiliations\\s*-->\\s*$"
     }
     # What only the sections moved to the title page cite stays in the
     # reference list: it is the paper's one list, and the title page has none.
-    yml$nocite <- .nocite(yml$nocite, moved)
+    # Not what blinded-drop-keys: takes out, which would name the authors.
+    yml$nocite <- .nocite(yml$nocite, setdiff(moved, .blinded_drop_keys()))
   }
 
   yml <- .with_dpi(yml)
@@ -873,6 +894,49 @@ AFFILIATIONS_SLOT <- "^\\s*<!--\\s*affiliations\\s*-->\\s*$"
   if (!length(blk)) return(character(0))
   k <- .at_keys_text(.expand_includes_text(blk))
   unique(k[!.is_crossref(k)])
+}
+
+#' The references a double-blind manuscript leaves out: `blinded-drop-keys:`
+#' in the easypaper: block of _quarto.yml. For the work of the authors that
+#' would name them -- their own software, their own data paper -- which the
+#' signed version cites as usual.
+#' @noRd
+.blinded_drop_keys <- function() {
+  k <- as.character(unlist(.config("blinded-drop-keys", character(0))))
+  sub("^@", "", trimws(k[nzchar(trimws(k))]))
+}
+
+#' The text with the citations of .blinded_drop_keys() taken out. Inside
+#' brackets, among others, a key goes alone: `[@a; @mine]` is `[@a]`.
+#' Alone, or written in the sentence, it becomes "(reference removed for
+#' review)", which is what a reviewer is used to reading there.
+#' @noRd
+.drop_blinded_citations <- function(body, keys = .blinded_drop_keys()) {
+  if (!length(keys)) return(body)
+  removed <- "(reference removed for review)"
+  esc <- function(k) gsub("([.+*?^$(){}|\\[\\]\\\\])", "\\\\\\1", k, perl = TRUE)
+  # A key, whole: pandoc's rule for where one starts, and no more of a longer
+  # one after it.
+  one <- paste0("(?<![\\w@\\\\])-?@(?:", paste(esc(keys), collapse = "|"),
+                ")(?![A-Za-z0-9_:.#$%&+?<>~/-]*[A-Za-z0-9_])")
+  for (i in seq_along(body)) {
+    x <- body[i]
+    if (!grepl("@", x, fixed = TRUE)) next
+    # Bracketed groups first: drop the key, keep the rest.
+    m <- gregexpr("\\[[^][]*@[^][]*\\]", x, perl = TRUE)
+    groups <- regmatches(x, m)[[1]]
+    if (length(groups)) {
+      regmatches(x, m) <- list(vapply(groups, function(g) {
+        parts <- strsplit(substr(g, 2L, nchar(g) - 1L), ";", fixed = TRUE)[[1]]
+        keep <- parts[!grepl(one, parts, perl = TRUE)]
+        if (length(keep) == length(parts)) return(g)
+        if (!length(keep)) return(removed)
+        paste0("[", trimws(paste(keep, collapse = ";")), "]")
+      }, "", USE.NAMES = FALSE))
+    }
+    body[i] <- gsub(one, removed, x, perl = TRUE)
+  }
+  body
 }
 
 #' A `nocite:` with these keys added to whatever it already lists.
@@ -1138,11 +1202,12 @@ AFFILIATIONS_SLOT <- "^\\s*<!--\\s*affiliations\\s*-->\\s*$"
   }
   # The project README documents the paper, not the deposit: the compendium
   # gets its own, written from what the folder actually holds.
-  for (f in c("LICENSE.txt", "LICENSE-CODE.txt", "renv.lock",
+  for (f in c("LICENSE.txt", "LICENSE-CODE.txt",
               list.files(.p(), "\\.Rproj$"))) {
     if (file.exists(.p(f))) file.copy(.p(f), dest, overwrite = TRUE)
   }
   check_renv(quiet = TRUE)   # warns if it is missing or out of sync
+  .analysis_lock(file.path(dest, "renv.lock"))
 
   .write_data_readme(dest, blinded = blinded)
 
@@ -1238,6 +1303,39 @@ AFFILIATIONS_SLOT <- "^\\s*<!--\\s*affiliations\\s*-->\\s*$"
   invisible(dest)
 }
 
+#' The renv.lock of a compendium: the packages its analysis loads, and what
+#' they need, and nothing else. The project's renv.lock also records
+#' easypaper, which built the documents, and with it its own dependencies --
+#' Quarto's R package, dataspice and its shiny, V8 needing system libraries
+#' on Linux -- none of which the analysis runs: a reader reproducing a vegan
+#' analysis had over a hundred packages to install. When renv cannot write
+#' that lockfile, the project's goes, without easypaper's record.
+#' @noRd
+.analysis_lock <- function(dest) {
+  pkgs <- setdiff(tryCatch(.analysis_packages(), error = function(e) character(0)),
+                  "easypaper")
+  ok <- requireNamespace("renv", quietly = TRUE) && length(pkgs) &&
+    isTRUE(tryCatch({
+      old <- options(renv.verbose = FALSE)
+      on.exit(options(old), add = TRUE)
+      utils::capture.output(suppressMessages(suppressWarnings(
+        renv::snapshot(project = .p(), lockfile = dest, packages = pkgs,
+                       prompt = FALSE, force = TRUE))))
+      file.exists(dest)
+    }, error = function(e) FALSE))
+  if (ok) return(invisible(dest))
+  if (!file.exists(.p("renv.lock"))) return(invisible(NULL))
+  file.copy(.p("renv.lock"), dest, overwrite = TRUE)
+  lock <- tryCatch(jsonlite::read_json(dest, simplifyVector = FALSE),
+                   error = function(e) NULL)
+  if (is.list(lock) && is.list(lock$Packages)) {
+    lock$Packages$easypaper <- NULL
+    jsonlite::write_json(lock, dest, auto_unbox = TRUE, pretty = TRUE,
+                         null = "null")
+  }
+  invisible(dest)
+}
+
 #' A renv.lock with the authors and maintainers of its packages taken out --
 #' `Author`, `Authors@R`, `Maintainer` -- and their pages, `URL` and
 #' `BugReports`, which name the GitHub account a package lives in; and
@@ -1302,14 +1400,52 @@ AFFILIATIONS_SLOT <- "^\\s*<!--\\s*affiliations\\s*-->\\s*$"
   unique(c(user, sub("^github[.]com[:/]", "", owner)))
 }
 
+#' The blinded documents a reviewer reads, read back as text, and a warning
+#' for each that still names an author: which file, and what in it.
+#' Nothing is changed: the text is the authors' to rewrite.
+#' @noRd
+.warn_named_in_documents <- function(files, ids = .identifiers()) {
+  files <- files[file.exists(files)]
+  if (!length(files) || !length(ids)) return(invisible(list()))
+  left <- list()
+  for (f in files) {
+    out <- tempfile(fileext = ".txt")
+    ok <- .pandoc_run(c(shQuote(f), "-t", "plain", "--wrap=none",
+                        "-o", shQuote(out)))
+    if (!ok || !file.exists(out)) next
+    txt <- readLines(out, warn = FALSE, encoding = "UTF-8")
+    unlink(out)
+    hit <- ids[vapply(.id_patterns(ids), function(p) {
+      any(grepl(p, txt, perl = TRUE))
+    }, logical(1))]
+    if (length(hit)) left[[basename(f)]] <- hit
+  }
+  if (length(left)) {
+    warning("The blinded manuscript still names the authors:\n",
+            paste0("  ", names(left), ": ",
+                   vapply(left, paste, "", collapse = ", "), collapse = "\n"),
+            "\nRewrite those passages -- a self-citation in the first person, ",
+            "a link to your repository -- or list a reference that names you ",
+            "under blinded-drop-keys: in the easypaper: block of _quarto.yml, ",
+            "and run make_submission() again.", call. = FALSE)
+  }
+  invisible(left)
+}
+
+#' The search for each of `ids` as a whole word.
+#' @noRd
+.id_patterns <- function(ids) {
+  paste0("(?<![[:alnum:]])",
+         gsub("([][{}()+*^$|\\\\?.])", "\\\\\\1", ids),
+         "(?![[:alnum:]])")
+}
+
 #' Which of `ids` each file of `dir` still holds, in its name or its text, as
 #' a whole word. Binary files are not read. A named list: file -> ids.
 #' @noRd
 .names_left <- function(dir, ids) {
   if (!length(ids)) return(list())
-  pats <- paste0("(?<![[:alnum:]])",
-                 gsub("([][{}()+*^$|\\\\?.])", "\\\\\\1", ids),
-                 "(?![[:alnum:]])")
+  pats <- .id_patterns(ids)
   files <- list.files(dir, recursive = TRUE, all.files = TRUE)
   out <- lapply(files, function(f) {
     path <- file.path(dir, f)

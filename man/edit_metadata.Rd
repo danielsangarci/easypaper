@@ -35,7 +35,11 @@ names -- so what is left is what no machine can guess.
 \details{
 \code{what = "write"} opens nothing: it compiles the four files into
 \code{data/metadata/dataspice.json}, the machine-readable description, and
-writes \code{data/metadata/index_metadata.html}, a page to read it. You need it
+writes \code{data/metadata/index_metadata.html}, a page to read it. The area
+the data cover, when \code{biblio.csv} gives its coordinates, is drawn on that
+page as a map inside it, which opens offline: it needs sf, maps and
+base64enc, and without them the page has no map, and says so: it never
+loads one from the internet. You need it
 only to look at them: \code{\link[=make_submission]{make_submission()}} and \code{\link[=make_preprint]{make_preprint()}} compile
 them again before they build the data compendium, which carries both.
 }

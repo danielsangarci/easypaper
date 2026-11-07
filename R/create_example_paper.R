@@ -81,13 +81,15 @@ create_example_paper <- function(path, overwrite = FALSE, git = TRUE,
   .example_front_matter(file.path(path, "manuscript.qmd"))
   .sync_new_project(path)
   .write_example_data(file.path(path, "data"), .example_bci())
+  .example_coverage(file.path(path, "data"))
 
   if (git) .git_init(path)
 
   message("Example project created: ", path, "\n",
           "  1. open ", basename(path), ".Rproj\n",
           "  2. library(easypaper)\n",
-          "  3. render_html()      # the study, rendered\n",
+          "  3. set_paper(\".\")      # the project to work on, once a session\n",
+          "  4. render_html()      # the study, rendered\n",
           "  The sections are in _sections/: read them to see how each part ",
           "is written.")
 
@@ -223,6 +225,27 @@ EXAMPLE_PACKAGES <- c(vegan = "its data and its analysis")
   utils::write.csv(a, file.path(dir, "tree_abundance.csv"), row.names = FALSE)
   utils::write.csv(e, file.path(dir, "plot_environment.csv"), row.names = FALSE)
   invisible(dir)
+}
+
+#' Where the example's data come from, in the metadata of its deposit: the
+#' 50-ha plot of Barro Colorado Island, its 10 x 5 grid of 1-ha plots,
+#' 1000 m by 500 m, in latitude and longitude -- the UTM coordinates of
+#' vegan's BCI.env, zone 17 N, widened by half a plot. The page of the
+#' metadata draws it as a map. The dates are left blank: vegan does not say
+#' them.
+#' @noRd
+.example_coverage <- function(dir) {
+  suppressMessages(dataspice::create_spice(dir = dir))
+  f <- file.path(dir, "metadata", "biblio.csv")
+  b <- .read_meta(f, colClasses = "character")
+  if (!nrow(b)) b[1, ] <- NA_character_
+  b$geographicDescription <- "The 50-ha forest dynamics plot of Barro Colorado Island, Panama"
+  b$northBoundCoord <- "9.15344"
+  b$southBoundCoord <- "9.14895"
+  b$eastBoundCoord  <- "-79.84683"
+  b$westBoundCoord  <- "-79.85594"
+  utils::write.csv(b, f, row.names = FALSE, na = "")
+  invisible(f)
 }
 
 #' "Abarema.macradenia" -> "Abarema macradenia";

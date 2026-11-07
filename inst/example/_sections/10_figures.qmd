@@ -9,7 +9,7 @@
 #| include: true
 #| fig-width: 7.09
 #| fig-height: 4.72
-#| fig-cap: "Number of tree species in each 1-ha plot, by habitat. Grey points are the plots; dark points and bars are the richness expected by the Poisson GLM and its 95% confidence interval."
+#| fig-cap: "Number of tree species in each 1-ha plot, by habitat. Grey points are the plots; dark points and bars are the richness expected by the quasi-Poisson GLM and its 95% confidence interval."
 x <- as.integer(habitat)
 k <- nlevels(habitat)
 par(mar = c(4.5, 4.5, 1, 1), las = 1)

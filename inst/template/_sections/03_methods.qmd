@@ -11,5 +11,5 @@
 
 The manuscript was written in Quarto, and its rendered documents and its data
 and code compendium were produced with easypaper [@R-easypaper]; the versions
-of the R packages were recorded with renv [@R-renv] and can be restored from
-`renv.lock`.
+of the R packages the analysis used are recorded, with renv [@R-renv], in the
+`renv.lock` of the compendium.

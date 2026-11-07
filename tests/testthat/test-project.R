@@ -350,3 +350,67 @@ test_that("a file that cannot be moved into place stops the call", {
   expect_identical(.move(f, to), to)
   expect_identical(readLines(to), "new")
 })
+
+test_that("Quarto is found in RStudio's folder when it is not on the PATH", {
+  # From Rscript or a terminal, RStudio's Quarto is not on the PATH, and the
+  # quarto package finds nothing: easypaper looks where RStudio, Positron
+  # and Quarto's installer put it, and lends it for the call alone.
+  fake <- file.path(tempfile("rstudio"), "quarto")
+  dir.create(dirname(fake))
+  file.create(fake)
+  old <- Sys.getenv("QUARTO_PATH", unset = NA)
+  Sys.unsetenv("QUARTO_PATH")
+  on.exit(if (is.na(old)) Sys.unsetenv("QUARTO_PATH")
+          else Sys.setenv(QUARTO_PATH = old), add = TRUE)
+  local_mocked_bindings(
+    quarto_path = function(...) {
+      p <- Sys.getenv("QUARTO_PATH", unset = NA)
+      if (is.na(p)) NULL else p
+    },
+    quarto_version = function(...) numeric_version("1.9.38"),
+    .package = "quarto")
+  local_mocked_bindings(.quarto_candidates = function() {
+    c(file.path(tempdir(), "nowhere", "quarto"), fake)
+  })
+  seen <- NULL
+  path_seen <- NULL
+  before <- Sys.getenv("PATH")
+  render <- function() {
+    .check_quarto()
+    seen <<- Sys.getenv("QUARTO_PATH")
+    path_seen <<- Sys.getenv("PATH")
+  }
+  expect_message(render(), "quarto 1.9.38", fixed = TRUE)
+  expect_identical(seen, normalizePath(fake, winslash = "/"))
+  # Its folder on the PATH too, first: the R inside the render finds pandoc
+  # beside it.
+  expect_true(startsWith(path_seen, dirname(normalizePath(fake, winslash = "/"))))
+  # Lent for the call alone: the session is as it was.
+  expect_true(is.na(Sys.getenv("QUARTO_PATH", unset = NA)))
+  expect_identical(Sys.getenv("PATH"), before)
+
+  # Nowhere at all: it says where it looked, and how to point at another.
+  local_mocked_bindings(.quarto_candidates = function() {
+    file.path(tempdir(), "nowhere", "quarto")
+  })
+  err <- expect_error(render(), "Cannot find the Quarto binary")
+  expect_match(conditionMessage(err), "nowhere", fixed = TRUE)
+  expect_match(conditionMessage(err), "QUARTO_PATH", fixed = TRUE)
+})
+
+test_that("RStudio's and Positron's folders are among those tried", {
+  tried <- .quarto_candidates()
+  expect_true(any(grepl("rstudio", tried, ignore.case = TRUE)))
+  expect_true(any(grepl("positron", tried, ignore.case = TRUE)))
+  if (Sys.info()[["sysname"]] == "Darwin") {
+    expect_true("/Applications/RStudio.app/Contents/Resources/app/quarto/bin/quarto" %in% tried)
+  }
+})
+
+test_that("a Quarto older than the oldest checked is refused, saying so", {
+  expect_error(.check_quarto_version("1.6.42"), "older than 1.7")
+  expect_true(.check_quarto_version("1.7.32"))
+  expect_true(.check_quarto_version("1.10.18"))
+  # A version it cannot read does not stop a render.
+  expect_true(.check_quarto_version("dev"))
+})

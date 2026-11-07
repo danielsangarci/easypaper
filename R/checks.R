@@ -33,7 +33,10 @@
 #' * `check_data()`: every file the analysis names is in `data/`, and which
 #'   files there nothing reads -- they would travel to the data repository all
 #'   the same. It reports; it never removes.
-#' * `check_renv()`: `renv.lock` is there and matches the library in use.
+#' * `check_renv()`: `renv.lock` is there and matches the library in use,
+#'   package by package: renv's own project library when the project has one
+#'   (`renv::init()`), and otherwise the library R is using, which is the one
+#'   easypaper records.
 #'
 #' An e-mail address is not a citation, however it is written: an `@` glued to
 #' a letter or a digit -- any letter, accented ones too -- is an address, and
@@ -49,7 +52,8 @@
 #'   return `TRUE` invisibly and stop with an error naming what is missing.
 #'   `check_title()` and `check_data()` return `TRUE` or `FALSE` invisibly,
 #'   with a warning when `FALSE`. `check_renv()` returns `TRUE` in sync,
-#'   `FALSE` not, `NA` when it cannot tell.
+#'   `FALSE` not, with a warning naming what differs, and `NA` when it cannot
+#'   tell.
 #' @seealso [check_species()] for the scientific names of the references, and
 #'   [render_docx()], which runs every one of these first.
 #' @name checks
@@ -373,14 +377,9 @@ check_renv <- function(quiet = FALSE, path = NULL) {
   # library. Without renv::init() there is no such library, and status would
   # report "not synchronized" for every project that simply keeps a lockfile
   # written from the user's own library -- which is how easypaper uses it.
+  # So that library is the one compared, package by package.
   if (!file.exists(.p("renv/activate.R")) && !dir.exists(.p("renv/library"))) {
-    if (!quiet) {
-      n <- tryCatch(length(jsonlite::read_json(.p("renv.lock"))$Packages),
-                    error = function(e) NA_integer_)
-      message("renv.lock present (", n, " packages), written from your own ",
-              "library. make_submission() refreshes it on every submission.")
-    }
-    return(invisible(NA))
+    return(.renv_against_library(quiet))
   }
   st <- tryCatch(suppressMessages(renv::status(project = .p())),
                  error = function(e) NULL)
@@ -438,4 +437,45 @@ TEMPLATE_TITLE   <- "Manuscript title here"
             "the README come from.", call. = FALSE, immediate. = TRUE)
   }
   invisible(length(leftovers) == 0)
+}
+
+#' renv.lock against the library R is using, package by package: the version
+#' recorded and the one installed. TRUE when every one matches, FALSE with a
+#' warning naming the differences, NA when the lockfile cannot be read.
+#' @noRd
+.renv_against_library <- function(quiet = FALSE) {
+  pkgs <- tryCatch(jsonlite::read_json(.p("renv.lock"))$Packages,
+                   error = function(e) NULL)
+  if (is.null(pkgs)) {
+    if (!quiet) message("renv.lock present, but it could not be read.")
+    return(invisible(NA))
+  }
+  recorded <- vapply(pkgs, function(p) as.character(p$Version %or% NA), "")
+  installed <- vapply(names(recorded), function(p) {
+    v <- suppressWarnings(utils::packageDescription(p, fields = "Version"))
+    if (is.null(v) || length(v) != 1L || is.na(v)) NA_character_ else v
+  }, "")
+  missing <- names(recorded)[is.na(installed)]
+  differ  <- names(recorded)[!is.na(installed) & installed != recorded]
+  if (!length(missing) && !length(differ)) {
+    if (!quiet) {
+      message("renv.lock in step with your library: all ", length(recorded),
+              " packages at the version recorded.")
+    }
+    return(invisible(TRUE))
+  }
+  show <- function(x, what) {
+    if (!length(x)) return(NULL)
+    shown <- utils::head(x, 10L)
+    paste0(what, ": ", paste(shown, collapse = ", "),
+           if (length(x) > 10L) paste0(" and ", length(x) - 10L, " more"))
+  }
+  warning("renv.lock does NOT describe the library in use. ",
+          paste(c(show(sprintf("%s (%s recorded, %s installed)", differ,
+                               recorded[differ], installed[differ]),
+                       "Other versions"),
+                  show(missing, "Not installed")), collapse = ". "),
+          ". The next render_docx() or make_submission() records the library ",
+          "as it is.", call. = FALSE, immediate. = TRUE)
+  invisible(FALSE)
 }

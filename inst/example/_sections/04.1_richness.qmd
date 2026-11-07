@@ -12,12 +12,16 @@
 ```{r}
 #| label: richness-model
 #| cache: true
-m_rich  <- glm(richness ~ habitat, family = poisson)
-lrt     <- anova(m_rich, test = "Chisq")
-chi_hab <- lrt["habitat", "Deviance"]
-df_hab  <- lrt["habitat", "Df"]
-p_hab   <- lrt["habitat", "Pr(>Chi)"]
-dispersion <- sum(residuals(m_rich, type = "pearson")^2) / df.residual(m_rich)
+# Quasi-Poisson: the dispersion is estimated, not fixed at 1 -- species
+# counts per plot vary less than a Poisson count would -- and the test of
+# habitat is an F test, which uses it.
+m_rich  <- glm(richness ~ habitat, family = quasipoisson)
+f_test  <- anova(m_rich, test = "F")
+f_rich  <- f_test["habitat", "F"]
+df_hab  <- f_test["habitat", "Df"]
+df_res  <- df.residual(m_rich)
+p_hab   <- f_test["habitat", "Pr(>F)"]
+dispersion <- summary(m_rich)$dispersion
 
 # The expected richness of each habitat, with its 95% confidence interval.
 nd   <- data.frame(habitat = factor(levels(habitat), levels = levels(habitat)))
@@ -36,8 +40,9 @@ The `r n_plots` plots held `r format(n_ind, big.mark = ",")` trees of
 `r n_species` species, between `r min(richness)` and `r max(richness)` species
 per plot (mean `r round(mean(richness), 1)`). Richness
 `r if (p_hab < 0.05) "differed" else "did not differ significantly"` among
-habitats (likelihood-ratio test, $\chi^2$ = `r round(chi_hab, 1)`,
-df = `r df_hab`, *P* `r fmt_p(p_hab)`; dispersion `r round(dispersion, 2)`;
+habitats (quasi-Poisson GLM, *F* = `r round(f_rich, 2)`,
+df = `r df_hab` and `r df_res`, *P* `r fmt_p(p_hab)`; dispersion
+`r round(dispersion, 2)`;
 @tbl-richness): it was highest in the
 `r hab_text(hab_max)` and lowest in the `r hab_text(hab_min)`
 (@fig-richness).

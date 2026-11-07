@@ -17,7 +17,10 @@
 #' in the source: a citation counts as the text the journal's style prints
 #' for it -- `[@smith2020]` as "(Smith 2020)" -- a cross-reference as "Figure
 #' 1", and code, comments and markup not at all. The abstract is the
-#' `# Abstract` section without its keywords line; the main text is every
+#' `# Abstract` section without its keywords line -- or `# Summary`, as the
+#' journals of the British Ecological Society call it, or `# Resumen`; any
+#' other heading is named with `abstract-heading:` in the `easypaper:` block
+#' of `_quarto.yml`. The main text is every
 #' section from the one after the abstract to the reference list, less the
 #' statements at the end -- acknowledgements, funding, author contributions,
 #' conflicts of interest, data availability, ethics -- whatever they are
@@ -50,10 +53,11 @@ manuscript_stats <- function(quiet = FALSE, path = NULL) {
   heads  <- .top_headings(master)
 
   title <- paste(own$title, collapse = " ")
-  abstract <- .section_text(master, "Abstract")
+  ah <- .abstract_heading(heads)
+  abstract <- if (is.na(ah)) character(0) else .section_text(master, ah)
   abstract <- abstract[!.is_keywords_line(abstract)]
-  i <- match("Abstract", heads)
-  j <- match("References", heads)
+  i <- match(ah, heads)
+  j <- match(.references_heading(heads), heads)
   if (is.na(j)) j <- length(heads) + 1L
   main <- if (is.na(i) || i + 1L >= j) character(0) else heads[(i + 1L):(j - 1L)]
   main <- main[!.not_main_text(main)]
@@ -170,6 +174,32 @@ manuscript_stats <- function(quiet = FALSE, path = NULL) {
                          bibliography = TRUE)
   if (is.null(plain)) return(0L)
   .words_of(plain)
+}
+
+#' The headings an abstract and a reference list go by. The template's are
+#' the first; a journal's may be another, and `abstract-heading:` or
+#' `references-heading:` in the easypaper: block of _quarto.yml names any
+#' other.
+#' @noRd
+ABSTRACT_HEADINGS   <- c("Abstract", "Summary", "Resumen", "Resum", "R\u00e9sum\u00e9")
+#' @noRd
+REFERENCES_HEADINGS <- c("References", "Literature cited", "Bibliography",
+                         "Referencias", "Bibliograf\u00eda")
+
+#' Which of the manuscript's top-level headings is the abstract, or the
+#' reference list: NA when none is. Case is ignored.
+#' @noRd
+.abstract_heading <- function(heads) {
+  .heading_among(heads, .config("abstract-heading", ABSTRACT_HEADINGS))
+}
+#' @noRd
+.references_heading <- function(heads) {
+  .heading_among(heads, .config("references-heading", REFERENCES_HEADINGS))
+}
+#' @noRd
+.heading_among <- function(heads, names) {
+  hit <- heads[tolower(heads) %in% tolower(as.character(unlist(names)))]
+  if (length(hit)) hit[1] else NA_character_
 }
 
 #' The top-level headings of manuscript.qmd, outside code chunks.

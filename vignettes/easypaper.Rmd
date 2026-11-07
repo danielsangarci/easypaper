@@ -544,9 +544,11 @@ td_update("02_introduction")     # your local version, over the Google Doc
 The chunks are hidden in the Google Doc, so they see prose. Download before
 you edit locally, and commit right after downloading: git then shows exactly
 what each co-author changed. The Drive folder is `trackdown-folder:` in
-`_quarto.yml`. trackdown has to be its development version, the only one that
-reads `.qmd`: `remotes::install_github("ClaudioZandonella/trackdown")`. Those
-who would rather read the typeset paper get the `.docx` from `output/`.
+`_quarto.yml`. These three are experimental: trackdown has to be its
+development version, the only one that reads `.qmd`
+(`remotes::install_github("ClaudioZandonella/trackdown")`), which has not
+reached CRAN, and while it has not they may change. Those who would rather
+read the typeset paper get the `.docx` from `output/`.
 
 ### Scientific names
 
@@ -941,9 +943,9 @@ for the reviewers: the same data and code, with the authors taken out of
 everything the package writes into it — the creators of the metadata
 (`creators.csv`, `dataspice.json` and its page), the copyright line of
 `LICENSE-CODE.txt`, the README, and the authors and the pages of the packages
-`renv.lock` records, which restoring it does not need. easypaper itself is
-taken out of that copy of the lockfile altogether: the analysis does not use
-it and, installed from GitHub, it names the account it came from. What it does not
+`renv.lock` records, which restoring it does not need. easypaper is in
+neither lockfile of the compendium: the analysis does not use it and,
+installed from GitHub, it names the account it came from. What it does not
 write, a comment in a script or a column of the data, it searches: a name,
 email, ORCID, affiliation or account of an author still in the copy is
 reported with the file it is in, to take out of the project before you run
@@ -1275,10 +1277,12 @@ block of _quarto.yml.
 A fix in easypaper reaches every project with `update.packages()`: the
 functions live in the package, not in the project. The project keeps only
 what is the paper's, and `renv.lock` records the version of easypaper that
-built each document, with every other package — so `renv::restore()` brings
-back the one a paper was built with, years later. The data and code
-compendium the reader downloads carries the analysis and that lockfile, and
-reproduces the results without easypaper at all.
+built each document, with every other package. The data and code
+compendium the reader downloads carries the analysis and a lockfile of its
+own, with only the packages the analysis loads and what they need: it
+reproduces the results without easypaper at all. A lockfile records the R
+packages; R itself, Quarto, pandoc and LaTeX are not in it, and are named in
+`sessionInfo.txt`.
 
 ### Requirements
 
@@ -1286,7 +1290,12 @@ R >= 4.1 and Quarto, which ships inside RStudio and Positron — nothing to
 install if you use either. Rendering the PDF also needs a LaTeX installation
 (`tinytex::install_tinytex()` is enough). The R packages a project needs for
 every step — rendering, figures, the data deposit's metadata, converting
-spreadsheets — are installed together with easypaper. The one exception is
+spreadsheets — are installed together with easypaper. Three of them,
+flextable, here and ragg, easypaper never calls itself: the project's own
+files do, inside the render — `R/setup.R` makes the tables with flextable,
+`manuscript.qmd` finds it with here, and `_quarto.yml` draws every figure
+with ragg. They are imports on purpose, so that a new computer does not find
+one missing a minute into its first render. The one exception is
 `trackdown`, for [co-authors in Google Docs](#writing-with-co-authors), which
 has to come from GitHub. Two more are needed only by the function that uses
 them: vegan by `create_example_paper()`, which says what to install when it
@@ -1357,8 +1366,8 @@ project already has it there, as the last paragraph of
 
 > The manuscript was written in Quarto, and its rendered documents and its
 > data and code compendium were produced with easypaper [@R-easypaper]; the
-> versions of the R packages were recorded with renv [@R-renv] and can be
-> restored from `renv.lock`.
+> versions of the R packages the analysis used are recorded, with renv
+> [@R-renv], in the `renv.lock` of the compendium.
 
 Keep it at the end of your Methods, after the software of your analysis.
 

@@ -50,9 +50,10 @@ downloading: git then shows exactly what each co-author changed. If they
 would rather read the typeset paper, send them the \code{.docx} from \verb{output/}
 and keep this for the sections they are actively editing.
 
-It needs the development version of trackdown, which reads \code{.qmd} files:
-\code{remotes::install_github("ClaudioZandonella/trackdown")}. The version on
-CRAN does not.
+\strong{Experimental.} These need the development version of trackdown, which
+reads \code{.qmd} files: \code{remotes::install_github("ClaudioZandonella/trackdown")}.
+The version on CRAN (1.1.1) does not, and trackdown has not been released
+since; while it is not, these may change, or go.
 }
 \examples{
 # It needs a Google account, authorised for trackdown, so it does not run

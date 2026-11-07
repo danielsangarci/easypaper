@@ -5,9 +5,11 @@
 # section each. The master file only holds the skeleton -- the includes -- so
 # uploading it would show co-authors no text at all.
 #
-# trackdown has to be the development version. CRAN's (1.1.1) and the latest
-# tagged release (v1.3.0) refuse .qmd files; Quarto support landed in 1.4.0,
-# which was never tagged, and the repository has not moved since May 2023.
+# trackdown has to be the development version. CRAN's (1.1.1, December 2021)
+# and the latest tagged release (v1.3.0) refuse .qmd files. Quarto support
+# landed in 1.4.0, which was never tagged; the development version on GitHub
+# is 1.5.1, last changed in May 2023, and installing it gives that one.
+# .td_ready() asks for 1.4.0 or later.
 # ---------------------------------------------------------------------------
 
 #' Edit a section with co-authors in Google Docs
@@ -26,9 +28,10 @@
 #' would rather read the typeset paper, send them the `.docx` from `output/`
 #' and keep this for the sections they are actively editing.
 #'
-#' It needs the development version of trackdown, which reads `.qmd` files:
-#' `remotes::install_github("ClaudioZandonella/trackdown")`. The version on
-#' CRAN does not.
+#' **Experimental.** These need the development version of trackdown, which
+#' reads `.qmd` files: `remotes::install_github("ClaudioZandonella/trackdown")`.
+#' The version on CRAN (1.1.1) does not, and trackdown has not been released
+#' since; while it is not, these may change, or go.
 #'
 #' @param section The section, by the start of its file name in `_sections/`:
 #'   `"02"` or `"02_introduction"`.
@@ -86,8 +89,7 @@ td_download <- function(section, gpath = NULL, path = NULL) {
 #' @noRd
 .td_section <- function(section) {
   .check_string(section, "section")
-  if (!requireNamespace("trackdown", quietly = TRUE) ||
-      utils::packageVersion("trackdown") < "1.4.0") {
+  if (!.td_ready()) {
     stop("This needs the development version of trackdown, which reads .qmd ",
          "files:\n  remotes::install_github(\"ClaudioZandonella/trackdown\")",
          call. = FALSE)
@@ -101,6 +103,14 @@ td_download <- function(section, gpath = NULL, path = NULL) {
          call. = FALSE)
   }
   f
+}
+
+#' Is the trackdown installed one that reads .qmd files? A function of its
+#' own, so the tests can answer it without that version installed.
+#' @noRd
+.td_ready <- function() {
+  requireNamespace("trackdown", quietly = TRUE) &&
+    utils::packageVersion("trackdown") >= "1.4.0"
 }
 
 #' The Google Doc's name: manuscript_02_introduction...

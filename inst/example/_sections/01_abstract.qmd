@@ -12,10 +12,11 @@ changes from place to place within a forest. We asked whether the number of
 tree species and the composition of the tree assemblage differ among the
 habitats of the forest of Barro Colorado Island, Panama, with the trees of
 its 50-ha plot as the vegan package distributes them. Species richness was
-modelled with a Poisson generalized linear model, and composition was compared
-among habitats with a PERMANOVA on Bray-Curtis dissimilarities, with a test
-of the homogeneity of their dispersions (PERMDISP) and a non-metric
-multidimensional scaling. How strongly habitat structures the forest, and
+modelled with a quasi-Poisson generalized linear model, and composition was
+compared among habitats with a PERMANOVA on Bray-Curtis dissimilarities, with
+a test of the homogeneity of their dispersions (PERMDISP), both with
+permutations restricted to spatial blocks of contiguous plots, and a
+non-metric multidimensional scaling. How strongly habitat structures the forest, and
 which species dominate it, are reported with their uncertainty. The analysis
 is a worked example: every number in the text, the figures and the tables is
 computed from the data when the manuscript is rendered.

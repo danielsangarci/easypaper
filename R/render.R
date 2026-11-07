@@ -272,20 +272,121 @@ preview <- function(path = NULL) {
 
 # --- The common road -----------------------------------------------------------
 
+#' Where RStudio, Positron and Quarto's own installer put Quarto, on each
+#' system. The quarto package looks only at QUARTO_PATH and the PATH, and
+#' RStudio puts its Quarto on the PATH of its own sessions alone: from
+#' Rscript, a terminal or another editor it was not found, though it was
+#' there.
+#' @noRd
+.quarto_candidates <- function() {
+  exe <- if (.Platform$OS.type == "windows") "quarto.exe" else "quarto"
+  home <- path.expand("~")
+  if (.Platform$OS.type == "windows") {
+    roots <- unique(c(Sys.getenv(c("ProgramFiles", "LOCALAPPDATA")),
+                      "C:/Program Files"))
+    roots <- roots[nzchar(roots)]
+    c(file.path(roots, "RStudio", "resources", "app", "bin", "quarto", "bin", exe),
+      file.path(roots, "Positron", "resources", "app", "quarto", "bin", exe),
+      file.path(roots, "Programs", "Positron", "resources", "app", "quarto", "bin", exe),
+      file.path(roots, "Quarto", "bin", exe))
+  } else if (Sys.info()[["sysname"]] == "Darwin") {
+    apps <- c("/Applications", file.path(home, "Applications"))
+    c(file.path(apps, "RStudio.app", "Contents", "Resources", "app", "quarto", "bin", exe),
+      file.path(apps, "Positron.app", "Contents", "Resources", "app", "quarto", "bin", exe),
+      file.path(apps, "quarto", "bin", exe))
+  } else {
+    c("/usr/lib/rstudio/resources/app/bin/quarto/bin/quarto",
+      "/usr/lib/rstudio-server/bin/quarto/bin/quarto",
+      "/usr/share/positron/resources/app/quarto/bin/quarto",
+      "/opt/quarto/bin/quarto")
+  }
+}
+
+#' The folder of the pandoc that ships with a Quarto: bin/tools/pandoc, or
+#' bin/tools/<architecture>/pandoc, this machine's architecture first. NULL
+#' when there is none.
+#' @noRd
+.quarto_pandoc_dir <- function(quarto) {
+  tools <- file.path(dirname(quarto), "tools")
+  exe <- if (.Platform$OS.type == "windows") "pandoc.exe" else "pandoc"
+  arch <- if (grepl("^(aarch64|arm64)", R.version$arch)) "aarch64" else "x86_64"
+  dirs <- c(file.path(tools, arch), file.path(tools, setdiff(c("aarch64", "x86_64"), arch)),
+            file.path(tools, "pandoc"), tools)
+  hit <- dirs[file.exists(file.path(dirs, exe))]
+  if (length(hit)) normalizePath(hit[1], winslash = "/") else NULL
+}
+
 #' Quarto is an external binary: renv does NOT capture it. Say which one ran:
 #' once a call, though render_all() and the make_*() run several renders.
+#'
+#' When the quarto package finds none, the folders .quarto_candidates() names
+#' are tried, and the one found is handed to it through QUARTO_PATH, and its
+#' folder put on the PATH, for as long as the calling function runs --
+#' `envir`, as .enter_project() does -- and no longer: the session is left as
+#' it was. The PATH too, because the R inside the render finds pandoc there:
+#' rmarkdown looks for it beside the `quarto` of the PATH, and flextable,
+#' finding none, refused to write a table into a .docx.
 #' @noRd
-.check_quarto <- function() {
+.check_quarto <- function(envir = parent.frame()) {
   path <- quarto::quarto_path()
   if (is.null(path) || !nzchar(path) || !file.exists(path)) {
-    stop("Cannot find the Quarto binary. It ships inside RStudio and ",
-         "Positron; otherwise install it from ",
-         "https://quarto.org/docs/get-started/ and check the installation ",
-         "with `quarto check` in a terminal.", call. = FALSE)
+    tried <- .quarto_candidates()
+    found <- tried[file.exists(tried)]
+    if (!length(found)) {
+      stop("Cannot find the Quarto binary. It ships inside RStudio and ",
+           "Positron; otherwise install it from ",
+           "https://quarto.org/docs/get-started/. Looked on the PATH, in ",
+           "QUARTO_PATH, and in:\n  ", paste(tried, collapse = "\n  "),
+           "\nIf it is somewhere else, point QUARTO_PATH at it: ",
+           "Sys.setenv(QUARTO_PATH = \"/path/to/quarto\").", call. = FALSE)
+    }
+    path <- normalizePath(found[1], winslash = "/")
+    old <- Sys.getenv("QUARTO_PATH", unset = NA)
+    old_path <- Sys.getenv("PATH")
+    Sys.setenv(QUARTO_PATH = path,
+               PATH = paste(dirname(path), old_path, sep = .Platform$path.sep))
+    reset <- if (is.na(old)) quote(Sys.unsetenv("QUARTO_PATH"))
+             else bquote(Sys.setenv(QUARTO_PATH = .(old)))
+    do.call(base::on.exit, list(reset, add = TRUE), envir = envir)
+    do.call(base::on.exit, list(bquote(Sys.setenv(PATH = .(old_path))), add = TRUE),
+            envir = envir)
+  }
+  # The R inside the render -- flextable, through rmarkdown -- looks for
+  # pandoc in RSTUDIO_PANDOC, on the PATH and in ~/opt/pandoc, and Quarto's
+  # own is in none of them: RStudio sets RSTUDIO_PANDOC in its sessions, and
+  # from a terminal flextable refused to write a table into a .docx. So it
+  # is pointed at Quarto's, for the call, when it has none of its own. What
+  # counts is what that new R process finds, not rmarkdown::pandoc_available()
+  # here, which remembers the pandoc it found during an earlier render.
+  if (!nzchar(Sys.getenv("RSTUDIO_PANDOC")) && !nzchar(Sys.which("pandoc"))) {
+    pd <- .quarto_pandoc_dir(path)
+    if (!is.null(pd)) {
+      Sys.setenv(RSTUDIO_PANDOC = pd)
+      do.call(base::on.exit, list(quote(Sys.unsetenv("RSTUDIO_PANDOC")), add = TRUE),
+              envir = envir)
+    }
   }
   v <- as.character(quarto::quarto_version())
+  .check_quarto_version(v)
   .say_once("quarto", "quarto ", v, " (", path, ")")
   invisible(v)
+}
+
+#' The oldest Quarto easypaper is checked with: the one RStudio shipped for
+#' longest at its release. Older ones are refused, with what to do.
+#' @noRd
+QUARTO_MIN <- "1.7"
+
+#' @noRd
+.check_quarto_version <- function(v) {
+  ok <- tryCatch(numeric_version(v) >= numeric_version(QUARTO_MIN),
+                 error = function(e) TRUE)
+  if (!ok) {
+    stop("Quarto ", v, " is older than ", QUARTO_MIN, ", the oldest easypaper ",
+         "is checked with. Update RStudio, or install a newer Quarto from ",
+         "https://quarto.org/docs/get-started/.", call. = FALSE)
+  }
+  invisible(TRUE)
 }
 
 #' Move a file Quarto produced to where it belongs, or stop saying why not.
@@ -450,6 +551,10 @@ preview <- function(path = NULL) {
                                      "_italic.json"))
   stamp <- unname(tools::md5sum(f))
   if (identical(.species_done[[f]], stamp) && file.exists(out)) return(out)
+  # Offline earlier in this same call -- the main text, then its supplement --
+  # the copy it left serves again: asking again only repeated the warning.
+  offline_key <- paste0("species-offline:", f, ":", stamp)
+  if (offline_key %in% .ep$said && file.exists(out)) return(out)
   res <- tryCatch(italicize_species(f, out, cache = .species_cache()),
                   error = function(e) {
     warning("The scientific names of ", basename(f), " could not be set in ",
@@ -458,8 +563,12 @@ preview <- function(path = NULL) {
     NULL
   })
   if (is.null(res)) return(f)
-  # Without a connection some names went unchecked: try again next render.
-  if (!isTRUE(attr(res, "offline"))) .species_done[[f]] <- stamp
+  # Without a connection some names went unchecked: try again next call.
+  if (!isTRUE(attr(res, "offline"))) {
+    .species_done[[f]] <- stamp
+  } else if (!is.null(.ep$root)) {
+    .ep$said <- union(.ep$said, offline_key)
+  }
   out
 }
 
@@ -470,7 +579,8 @@ preview <- function(path = NULL) {
 #' settle and what to write in the `.bib` to settle them. This says it again,
 #' without rendering. How the names are found is in [italicize_species()].
 #'
-#' What GBIF and Wikipedia said about each name is kept in
+#' Unlike the checks of [checks], which only read, this writes: what GBIF
+#' and Wikipedia said about each name it looks up is kept in
 #' `references/species_cache.rds`. Commit it: with it every computer renders
 #' the same italics, offline, years from now. Delete it to have every name
 #' looked up again. `italicize-species: false` in the `easypaper:` block of
@@ -793,6 +903,19 @@ export_figure_formats <- function(quiet = FALSE, path = NULL) {
        "", xml, perl = TRUE, useBytes = TRUE)
 }
 
+#' The title in the properties of a .docx, without the short title.
+#'
+#' The short title is a line of the title itself (.with_short_title()), and
+#' pandoc writes that title, both lines run together, into
+#' docProps/core.xml: Word's File > Properties, which a journal's system
+#' reads, said "... BCI data Short title: Habitat and ...". The other formats
+#' take their name from `title-meta`; the .docx does not.
+#' @noRd
+.plain_docx_title <- function(core) {
+  sub("\\s*Short title:[^<]*(</dc:title>)", "\\1", core, perl = TRUE,
+      useBytes = TRUE)
+}
+
 #' Close every table cell that ends in a table, and hand Word a file it will
 #' open.
 #'
@@ -857,15 +980,19 @@ export_figure_formats <- function(quiet = FALSE, path = NULL) {
   cp <- file.path(d, "docProps", "custom.xml")
   props <- if (file.exists(cp)) readChar(cp, file.size(cp), useBytes = TRUE)
   cleaned <- if (!is.null(props)) .drop_local_paths(props)
+  cx <- file.path(d, "docProps", "core.xml")
+  core <- if (file.exists(cx)) readChar(cx, file.size(cx), useBytes = TRUE)
+  titled <- if (!is.null(core)) .plain_docx_title(core)
 
   if (identical(fixed, xml) && identical(styled, styles) &&
-      identical(cleaned, props)) {
+      identical(cleaned, props) && identical(titled, core)) {
     unlink(d, recursive = TRUE)
     return(invisible(FALSE))
   }
   writeChar(fixed, x, eos = NULL, useBytes = TRUE)
   if (!identical(styled, styles)) writeChar(styled, s, eos = NULL, useBytes = TRUE)
   if (!identical(cleaned, props)) writeChar(cleaned, cp, eos = NULL, useBytes = TRUE)
+  if (!identical(titled, core)) writeChar(titled, cx, eos = NULL, useBytes = TRUE)
   # mode = "mirror" keeps the folders; "cherry-pick" would flatten them and
   # the .docx would no longer be a .docx. The order is the package's own, so
   # [Content_Types].xml stays first.

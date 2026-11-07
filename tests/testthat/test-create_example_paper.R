@@ -47,7 +47,12 @@ test_that("it writes the project of create_paper(), with the study in it", {
   expect_setequal(files_of(p),
                   c(expected,
                     file.path("data", c("tree_abundance.csv",
-                                        "plot_environment.csv"))))
+                                        "plot_environment.csv")),
+                    # The metadata of the deposit, started with where the
+                    # data come from.
+                    file.path("data", "metadata",
+                              c("access.csv", "attributes.csv", "biblio.csv",
+                                "creators.csv"))))
   # ...with every section written, and the example's references.
   for (f in list.files(system.file("example", "_sections", package = "easypaper"))) {
     expect_identical(readLines(file.path(p, "_sections", f)),
@@ -216,4 +221,26 @@ test_that("the example's results sections are named after their analyses", {
                         readLines(file.path(p, "_sections", "04.1_richness.qmd")))))
   expect_true(any(grepl("composition-model",
                         readLines(file.path(p, "_sections", "04.2_composition.qmd")))))
+})
+
+test_that("the example says where its data come from, and keeps it", {
+  skip_if_not_installed("vegan")
+  p <- tempfile("trees")
+  suppressMessages(create_example_paper(p, git = FALSE))
+  f <- file.path(p, "data", "metadata", "biblio.csv")
+  b <- utils::read.csv(f, colClasses = "character")
+  expect_match(b$geographicDescription, "Barro Colorado Island")
+  box <- as.numeric(c(b$northBoundCoord, b$southBoundCoord,
+                      b$eastBoundCoord, b$westBoundCoord))
+  expect_true(all(abs(box[1:2] - 9.15) < 0.01))
+  expect_true(all(abs(box[3:4] + 79.85) < 0.01))
+  expect_gt(box[1], box[2])
+  expect_gt(box[3], box[4])
+  # sync_metadata() fills in what is blank, and leaves the coverage alone.
+  suppressMessages(sync_metadata(path = p))
+  expect_identical(utils::read.csv(f, colClasses = "character")$northBoundCoord,
+                   b$northBoundCoord)
+  # And the next steps it prints name the project.
+  expect_message(create_example_paper(tempfile("trees"), git = FALSE),
+                 'set_paper(".")', fixed = TRUE)
 })

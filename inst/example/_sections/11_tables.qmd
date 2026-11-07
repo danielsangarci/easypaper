@@ -6,7 +6,7 @@
 ```{r}
 #| label: tbl-richness
 #| include: true
-#| tbl-cap: "Tree species per 1-ha plot by habitat: the number of plots, the mean observed, and the richness expected by the Poisson GLM with its 95% confidence interval."
+#| tbl-cap: "Tree species per 1-ha plot by habitat: the number of plots, the mean observed, and the richness expected by the quasi-Poisson GLM with its 95% confidence interval."
 tab <- data.frame(
   Habitat  = hab_title(levels(habitat)),
   Plots    = as.integer(n_hab),
@@ -31,7 +31,7 @@ flextable(tab) |>
 ```{r}
 #| label: tbl-community
 #| include: true
-#| tbl-cap: "PERMANOVA of the composition of the tree assemblages among habitats (Bray-Curtis dissimilarities of square-root abundances, 999 permutations)."
+#| tbl-cap: "PERMANOVA of the composition of the tree assemblages among habitats (Bray-Curtis dissimilarities of square-root abundances, 999 permutations within five spatial blocks of ten contiguous plots)."
 tab_c <- data.frame(
   Term = c("Habitat", "Residual"),
   df   = tab_perm[c("habitat", "Residual"), "Df"],

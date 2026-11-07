@@ -169,6 +169,10 @@ easypaper:
     - CRediT authorship contribution statement
     - Conflict of Interest Statement
     - Data availability statement
+  # References a double-blind manuscript leaves out, because they would name
+  # the authors -- their own software, their own data paper -- by their key
+  # in the .bib. The signed version cites them as usual. E.g. [R-easypaper].
+  blinded-drop-keys: []
   # Extensions convert_data() copies as they are, besides the open formats it
   # already knows, e.g. [las, laz].
   open-formats: []
@@ -182,5 +186,10 @@ easypaper:
   # is taken from crossref:.
   # caption-styles:
   #   custom: {fig: "Fig.", tbl: "Tab.", sfig: "Fig. S", stbl: "Tab. S", delim: ":"}  # Fig. 1: / Tab. 1:
+  # The headings manuscript_stats() counts the abstract and the reference
+  # list by, when they are not Abstract/Summary/Resumen and
+  # References/Literature cited/Bibliography, e.g. "Synopsis".
+  # abstract-heading: Abstract
+  # references-heading: References
   # The Google Drive folder td_upload() and friends use, e.g. "papers/ants".
   trackdown-folder: ""

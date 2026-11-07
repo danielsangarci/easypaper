@@ -38,6 +38,13 @@ n_top     <- min(30L, n_species)   # the species listed in the supplement
 # The permutations of every test: what a paper reports. The Methods say how
 # many, and the analyses of composition run them.
 n_perm <- 999
+# The plots are contiguous squares of a 1000 x 500 m grid, and neighbours
+# are alike: the permutations exchange plots only within one of five blocks
+# of ten contiguous plots, two columns of the grid each (200 x 500 m).
+grid_col <- as.integer(factor(env$UTM.EW))
+block    <- factor((grid_col - 1L) %/% 2L + 1L)
+n_block  <- nlevels(block)
+perm_design <- how(blocks = block, nperm = n_perm)
 
 # How the habitats are named in the text ("old forest on slopes") and in the
 # tables and axes ("Old, slope"). A level not in the list keeps its name.
@@ -78,8 +85,10 @@ tables are in `data/` and are described, column by column, in
 ## Statistical analysis
 
 Species richness, the number of species recorded in a plot, was modelled with
-a generalized linear model (GLM) with a Poisson distribution and habitat as
-the predictor, tested with a likelihood-ratio test.
+a generalized linear model (GLM) with a quasi-Poisson distribution and habitat
+as the predictor, tested with an *F* test: the quasi-Poisson model estimates
+the dispersion of the counts instead of fixing it at 1, as a Poisson model
+does, and richness is a count that need not vary as much as a Poisson one.
 
 The composition of the assemblages was compared with Bray-Curtis
 dissimilarities between plots, calculated on square-root-transformed
@@ -87,11 +96,17 @@ abundances. Its difference among habitats was tested with a permutational
 multivariate analysis of variance [PERMANOVA, @Anderson2001], and the
 homogeneity of the dispersions of the habitats with a permutational test of
 multivariate dispersions [PERMDISP, @Anderson2006], each with `r n_perm`
-permutations. The dissimilarities were represented with a non-metric
+permutations. The plots are contiguous, and neighbouring plots are alike, so
+the permutations were restricted to `r n_block` spatial blocks of ten
+contiguous plots (200 × 500 m): each exchanged plots only within a block.
+This allows for the broad spatial structure of the plot, though not for the
+similarity of adjacent plots within a block; the analysis is meant to show
+how a paper is written, not to settle the ecology of the forest. The
+dissimilarities were represented with a non-metric
 multidimensional scaling (NMDS) in two dimensions. The analyses of composition
 were run with vegan [@R-vegan], and all analyses in R [@R-base].
 
 The manuscript was written in Quarto, and its rendered documents and its data
 and code compendium were produced with easypaper [@R-easypaper]; the versions
-of the R packages were recorded with renv [@R-renv] and can be restored from
-`renv.lock`.
+of the R packages the analysis used are recorded, with renv [@R-renv], in the
+`renv.lock` of the compendium.

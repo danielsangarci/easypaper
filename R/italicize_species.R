@@ -521,6 +521,9 @@ italicize_species <- function(input,
                 file.path(Sys.getenv("QUARTO_BIN_PATH"),
                           c("quarto", "quarto.exe")),
               unname(Sys.which("quarto")))
+  # And where RStudio, Positron and Quarto's installer put Quarto, which
+  # from a terminal is on no PATH.
+  quarto <- c(quarto, .quarto_candidates())
   quarto <- quarto[nzchar(quarto) & file.exists(quarto)]
   if (length(quarto)) return(list(cmd = quarto[1], pre = "pandoc"))
   stop("Cannot find pandoc, which reads the .bib. It comes with Quarto and ",

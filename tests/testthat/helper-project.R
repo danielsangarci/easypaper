@@ -1,7 +1,16 @@
+# No test reaches the network. GBIF and Wikipedia are asked nothing: with the
+# option easypaper.species_offline, a name the cache cannot answer fails at
+# once, as without a connection. Set here, before any test file, so that a
+# render or a check that sets names in italics stays offline too, and not
+# only the tests of italicize_species().
+options(easypaper.species_offline = TRUE)
+
 # What ships in the template, as installed.
 tpl <- function(...) file.path(system.file("template", package = "easypaper"), ...)
 
-# A fresh project in tempdir(), made the way a user makes one.
+# A fresh project in tempdir(), made the way a user makes one. The template
+# ships the answers GBIF and Wikipedia gave about its references, so offline
+# its renders set the names in italics as online.
 new_project <- function(...) {
   p <- tempfile("paper")
   suppressMessages(create_paper(p, git = FALSE, ...))

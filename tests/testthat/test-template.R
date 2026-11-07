@@ -1505,9 +1505,10 @@ test_that(".bibliography() hands Quarto an italic copy, once per version of the 
                "  title = {Effects of Fire on Pinus halepensis Regeneration},",
                "  author = {P{\\'e}rez, Juan}, journal = {Oryx}, year = {2020}}"),
              file.path(refs, "references.bib"))
-  # Offline, from the answers the fixtures keep: nothing is looked up.
+  # Offline, from the answers the fixtures keep: nothing is looked up. In
+  # place of the cache the template ships.
   file.copy(test_path("fixtures", "italicize_species", "cache.rds"),
-            file.path(refs, "species_cache.rds"))
+            file.path(refs, "species_cache.rds"), overwrite = TRUE)
   old <- options(easypaper.species_offline = TRUE)
   on.exit(options(old), add = TRUE)
   rm(list = ls(.species_done), envir = .species_done)
@@ -1609,6 +1610,67 @@ test_that("what every render checks is said once a call", {
   expect_length(grep("Package citations not generated yet", msgs), 1L)
   expect_message(check_data(path = p), "never read by the analysis")
   expect_message(check_data(path = p), "never read by the analysis")
+})
+
+test_that("a citation with no entry in the .bib stops the check, naming it", {
+  p <- new_project()
+  ms <- readLines(file.path(p, "manuscript.qmd"))
+  i  <- which(ms == "# Acknowledgements")
+  writeLines(append(ms, c("", "As shown before [@Ada1843; @Nobody2020].", "",
+                          "And again by @Ghost1999, with R [@R-vegan]."),
+                    after = i),
+             file.path(p, "manuscript.qmd"))
+  cat("\n@article{Ada1843, author = {Lovelace, A.}, title = {Notes}, year = {1843}}\n",
+      file = file.path(p, "references", "references.bib"), append = TRUE)
+  # Both missing keys named, in brackets or in the sentence; the one in the
+  # .bib is not, and neither is the package citation the render will write.
+  err <- expect_error(check_citations(p), "Citations with no entry in references/\\*\\.bib")
+  expect_match(conditionMessage(err), "Nobody2020", fixed = TRUE)
+  expect_match(conditionMessage(err), "Ghost1999", fixed = TRUE)
+  expect_false(grepl("Ada1843", conditionMessage(err), fixed = TRUE))
+  expect_false(grepl("R-vegan", conditionMessage(err), fixed = TRUE))
+
+  # In a section file too, not only in manuscript.qmd.
+  q <- new_project()
+  cat("\nAs @Nowhere2001 found.\n",
+      file = file.path(q, "_sections", "02_introduction.qmd"), append = TRUE)
+  expect_error(check_citations(q), "Nowhere2001")
+  # A render stops on it before any work.
+  expect_error(in_project(q, check_citations()), "Nowhere2001")
+})
+
+test_that("a cross-reference with no figure or table stops the check, naming it", {
+  p <- new_project()
+  ms <- readLines(file.path(p, "manuscript.qmd"))
+  i  <- which(ms == "# Acknowledgements")
+  writeLines(append(ms, c("",
+                          "```{r}", "#| label: fig-real", "plot(1)", "```", "",
+                          "See @fig-real, @fig-missing and [@tbl-gone]."),
+                    after = i),
+             file.path(p, "manuscript.qmd"))
+  # Both missing labels named; the figure that exists is not. quiet = TRUE
+  # silences the notes, never the error.
+  err <- expect_error(check_crossrefs(quiet = TRUE, path = p),
+                      "Cross-references with no target")
+  expect_match(conditionMessage(err), "fig-missing", fixed = TRUE)
+  expect_match(conditionMessage(err), "tbl-gone", fixed = TRUE)
+  expect_false(grepl("fig-real", conditionMessage(err), fixed = TRUE))
+  expect_match(conditionMessage(err), "misspelled", fixed = TRUE)
+  # A render stops on it too, before any work.
+  expect_error(in_project(p, check_crossrefs()), "fig-missing")
+
+  # In a section file too, not only in manuscript.qmd.
+  q <- new_project()
+  cat("\nAs @sfig-nowhere shows.\n",
+      file = file.path(q, "_sections", "02_introduction.qmd"), append = TRUE)
+  expect_error(check_crossrefs(path = q), "sfig-nowhere")
+
+  # A label read out of a string in the code is evidence, not proof: it is
+  # noted, and it stops nothing.
+  r <- new_project()
+  writeLines('see_it <- function() "see @fig-ghost"', file.path(r, "R", "helpers.R"))
+  expect_message(check_crossrefs(path = r),
+                 "cited from R code, but no figure or table has that label: fig-ghost")
 })
 
 test_that("a check called on its own says when all is well", {
@@ -1970,4 +2032,260 @@ test_that("the figures are drawn at the project's dpi, or the call's", {
   grDevices::png(png, width = 4252, height = 2835); plot(1); invisible(grDevices::dev.off())
   in_project(p, expect_identical(.figure_name(1, png, "tiff"),
                                  "Figure_1_300dpi_360x240mm.tiff"))
+})
+
+test_that("the figures written carry the resolution they are named and set for", {
+  # Read back from the files themselves, not from the settings: a journal
+  # checks the dpi stored in the TIFF, and the size its name promises.
+  p <- new_project()
+  png_dir <- file.path(p, "figures", "png")
+  dir.create(png_dir, recursive = TRUE, showWarnings = FALSE)
+  # 90 x 60 mm at 600 dpi: 2126 x 1417 pixels, written without any density,
+  # as a device might leave it.
+  img <- magick::image_blank(2126, 1417, "white")
+  magick::image_write(img, file.path(png_dir, "fig-a-1.png"), format = "png")
+
+  density_of <- function(f) {
+    i <- magick::image_info(magick::image_read(f))
+    list(px = c(i$width, i$height),
+         dpi = as.numeric(strsplit(i$density, "x")[[1]]))
+  }
+  suppressMessages(export_figure_formats(path = p))
+  for (f in c("jpg", "tiff")) {
+    out <- file.path(p, "figures", f, paste0("fig-a-1.", f))
+    expect_true(file.exists(out), info = f)
+    d <- density_of(out)
+    expect_identical(d$px, c(2126L, 1417L), info = f)   # not resampled
+    expect_equal(d$dpi, c(600, 600), info = f)
+  }
+  # The TIFF compressed without loss, as journals ask: tag 259 of its first
+  # directory, Compression, is 5 for LZW. Read from the file, since magick
+  # does not report it.
+  tiff_compression <- function(f) {
+    con <- file(f, "rb")
+    on.exit(close(con))
+    order <- rawToChar(readBin(con, "raw", 2))
+    endian <- if (order == "II") "little" else "big"
+    readBin(con, "integer", size = 2, endian = endian)          # 42
+    ifd <- readBin(con, "integer", size = 4, endian = endian)
+    seek(con, ifd)
+    n <- readBin(con, "integer", size = 2, signed = FALSE, endian = endian)
+    for (k in seq_len(n)) {
+      tag <- readBin(con, "integer", size = 2, signed = FALSE, endian = endian)
+      readBin(con, "raw", 6)                                     # type, count
+      value <- readBin(con, "integer", size = 2, signed = FALSE, endian = endian)
+      readBin(con, "raw", 2)
+      if (tag == 259L) return(value)
+    }
+    NA_integer_
+  }
+  tif <- file.path(p, "figures", "tiff", "fig-a-1.tiff")
+  expect_identical(tiff_compression(tif), 5L)
+  # The standalone figure of a submission says its resolution and its
+  # printed size, the ones journals check.
+  in_project(p, expect_identical(.figure_name(1, tif, "tiff"),
+                                 "Figure_1_600dpi_90x60mm.tiff"))
+
+  # At the project's dpi when _quarto.yml sets another: the same pixels then
+  # print larger.
+  y <- readLines(file.path(p, "_quarto.yml"))
+  writeLines(sub("^    dpi: 600$", "    dpi: 300", y), file.path(p, "_quarto.yml"))
+  suppressMessages(export_figure_formats(path = p))
+  expect_equal(density_of(tif)$dpi, c(300, 300))
+  in_project(p, expect_identical(.figure_name(1, tif, "tiff"),
+                                 "Figure_1_300dpi_180x120mm.tiff"))
+})
+
+test_that("the title in a .docx's properties carries no short title", {
+  core <- paste0('<cp:coreProperties><dc:title>Habitat and trees: a worked ',
+                 'example Short title: Habitat and tropical tree assemblages',
+                 '</dc:title><dc:creator>A</dc:creator></cp:coreProperties>')
+  expect_identical(.plain_docx_title(core),
+                   paste0('<cp:coreProperties><dc:title>Habitat and trees: a ',
+                          'worked example</dc:title><dc:creator>A</dc:creator>',
+                          '</cp:coreProperties>'))
+  # A title with no short title is left as it is.
+  plain <- "<dc:title>Only a title</dc:title>"
+  expect_identical(.plain_docx_title(plain), plain)
+})
+
+test_that("the abstract and the references are found under the names journals give them", {
+  heads <- c("Summary", "Introduction", "Methods", "Literature cited")
+  p <- new_project()
+  in_project(p, {
+    expect_identical(.abstract_heading(heads), "Summary")
+    expect_identical(.references_heading(heads), "Literature cited")
+    expect_identical(.abstract_heading(c("ABSTRACT", "Intro")), "ABSTRACT")
+    expect_true(is.na(.abstract_heading(c("Synopsis", "Intro"))))
+  })
+  # Any other, named in _quarto.yml.
+  y <- readLines(file.path(p, "_quarto.yml"))
+  writeLines(sub("^  # abstract-heading: Abstract$", "  abstract-heading: Synopsis", y),
+             file.path(p, "_quarto.yml"))
+  in_project(p, expect_identical(.abstract_heading(c("Synopsis", "Intro")), "Synopsis"))
+
+  # And counted: the template's abstract renamed Summary still counts.
+  q <- new_project()
+  ms <- readLines(file.path(q, "manuscript.qmd"))
+  writeLines(sub("^# Abstract$", "# Summary", ms), file.path(q, "manuscript.qmd"))
+  skip_if_no_pandoc()
+  s1 <- manuscript_stats(quiet = TRUE, path = new_project())
+  s2 <- manuscript_stats(quiet = TRUE, path = q)
+  expect_gt(s2[["abstract_words"]], 0)
+  expect_identical(s2[["abstract_words"]], s1[["abstract_words"]])
+  expect_identical(s2[["main_words"]], s1[["main_words"]])
+})
+
+test_that("without a connection, a call warns once, not once per document", {
+  p <- new_project()
+  refs <- file.path(p, "references")
+  # A name the shipped cache cannot answer, offline.
+  writeLines(c("@article{x2020, title = {Notes on Unknownia novissima},",
+               "  author = {X, A}, journal = {J}, year = {2020}}"),
+             file.path(refs, "references.bib"))
+  rm(list = ls(.species_done), envir = .species_done)
+  skip_if_no_pandoc()
+  warned <- 0L
+  render <- function(path) {
+    .enter_project(path)
+    # The main text, then the supplement: two documents, one call.
+    .bibliography()
+    .bibliography()
+  }
+  withCallingHandlers(suppressMessages(render(p)), warning = function(w) {
+    if (grepl("No connection", conditionMessage(w))) warned <<- warned + 1L
+    invokeRestart("muffleWarning")
+  })
+  expect_identical(warned, 1L)
+  # The next call asks again, and says it again.
+  warned <- 0L
+  withCallingHandlers(suppressMessages(render(p)), warning = function(w) {
+    if (grepl("No connection", conditionMessage(w))) warned <<- warned + 1L
+    invokeRestart("muffleWarning")
+  })
+  expect_identical(warned, 1L)
+})
+
+test_that("the template and the example set their italics offline the first time", {
+  skip_if_no_pandoc()
+  for (d in c("template", "example")) {
+    refs <- system.file(d, "references", package = "easypaper")
+    expect_true(file.exists(file.path(refs, "species_cache.rds")), info = d)
+    cache <- tempfile(fileext = ".rds")
+    file.copy(file.path(refs, "species_cache.rds"), cache)
+    res <- italicize_species(file.path(refs, "references.bib"),
+                             tempfile(fileext = ".json"), cache = cache,
+                             quiet = TRUE)
+    expect_false(attr(res, "offline"), info = d)
+  }
+})
+
+test_that("check_renv() compares renv.lock with the library in use", {
+  # Without renv::init(), the way easypaper keeps a project, the library R is
+  # using is the one recorded, and the one compared.
+  p <- new_project()
+  lock <- function(pkgs) {
+    jsonlite::write_json(list(R = list(Version = "4.5.0"), Packages = pkgs),
+                         file.path(p, "renv.lock"), auto_unbox = TRUE)
+  }
+  here_v <- as.character(utils::packageVersion("jsonlite"))
+  lock(list(jsonlite = list(Package = "jsonlite", Version = here_v)))
+  expect_message(res <- check_renv(path = p), "in step with your library")
+  expect_true(res)
+
+  lock(list(jsonlite = list(Package = "jsonlite", Version = "0.0.1"),
+            notapackage = list(Package = "notapackage", Version = "1.0")))
+  w <- expect_warning(res <- check_renv(path = p), "does NOT describe")
+  expect_false(res)
+  expect_match(conditionMessage(w), "jsonlite (0.0.1 recorded", fixed = TRUE)
+  expect_match(conditionMessage(w), "Not installed: notapackage", fixed = TRUE)
+
+  # No lockfile: a warning, and FALSE.
+  unlink(file.path(p, "renv.lock"))
+  expect_warning(res <- check_renv(path = p), "There is no renv.lock")
+  expect_false(res)
+})
+
+test_that("the metadata page draws its map into the page, with no online tiles", {
+  # A Leaflet map fetches its tiles from OpenStreetMap whenever the page is
+  # opened; the page travels in a deposit, and is drawn whole instead.
+  skip_if_not_installed("dataspice", "1.2.1")
+  for (pkg in STATIC_MAP_PACKAGES) skip_if_not_installed(pkg)
+  p <- new_project(title = "Trees", authors = "Ada Lovelace")
+  writeLines("x,y\n1,2", file.path(p, "data", "a.csv"))
+  suppressMessages(sync_metadata(path = p))
+  f <- file.path(p, "data", "metadata", "biblio.csv")
+  b <- utils::read.csv(f)
+  b$geographicDescription <- "Barro Colorado Island"
+  b$northBoundCoord <- 9.17
+  b$southBoundCoord <- 9.14
+  b$eastBoundCoord  <- -79.83
+  b$westBoundCoord  <- -79.86
+  utils::write.csv(b, f, row.names = FALSE, na = "")
+  # From an empty folder: drawing the map left Rplots.pdf in the working
+  # directory, and nothing may be written there.
+  wd <- tempfile("wd")
+  dir.create(wd)
+  old <- setwd(wd)
+  on.exit(setwd(old), add = TRUE)
+  devices <- grDevices::dev.list()
+  suppressMessages(edit_metadata("write", path = p))
+  expect_length(list.files(wd, all.files = TRUE, no.. = TRUE), 0L)
+  # And the devices open before are the ones open after.
+  expect_identical(grDevices::dev.list(), devices)
+  page <- paste(readLines(file.path(p, "data", "metadata", "index_metadata.html"),
+                          warn = FALSE), collapse = "\n")
+  expect_match(page, "data:image/png;base64", fixed = TRUE)
+  expect_false(grepl("leaflet", page, ignore.case = TRUE))
+  expect_false(grepl("openstreetmap", page, ignore.case = TRUE))
+})
+
+test_that("the metadata page never loads a map from the internet", {
+  skip_if_not_installed("dataspice", "1.2.1")
+  page_of <- function(p) {
+    paste(readLines(file.path(p, "data", "metadata", "index_metadata.html"),
+                    warn = FALSE), collapse = "\n")
+  }
+  online <- "leaflet|openstreetmap|unpkg"
+  p <- new_project(title = "Trees", authors = "Ada Lovelace")
+  writeLines("x,y\n1,2", file.path(p, "data", "a.csv"))
+  suppressMessages(sync_metadata(path = p))
+
+  # No coordinates: no map at all.
+  suppressMessages(edit_metadata("write", path = p))
+  expect_false(grepl(online, page_of(p), ignore.case = TRUE))
+
+  # Coordinates, without the packages that draw the map: no map either --
+  # the coordinates are in the page's table -- and the call says so.
+  f <- file.path(p, "data", "metadata", "biblio.csv")
+  b <- utils::read.csv(f)
+  b$northBoundCoord <- 9.17
+  b$southBoundCoord <- 9.14
+  b$eastBoundCoord  <- -79.83
+  b$westBoundCoord  <- -79.86
+  utils::write.csv(b, f, row.names = FALSE, na = "")
+  local_mocked_bindings(.has_pkg = function(pkg) pkg != "sf")
+  expect_message(edit_metadata("write", path = p), "has no map", fixed = TRUE)
+  page <- page_of(p)
+  expect_false(grepl(online, page, ignore.case = TRUE))
+  expect_false(grepl("data:image/png", page, fixed = TRUE))
+  expect_match(page, "-79.86", fixed = TRUE)
+})
+
+test_that("a static map is asked for only with a box, and the packages to draw it", {
+  # A box of blanks has nothing to draw, and a static map of it stops
+  # dataspice.
+  expect_false(.spice_static_map("NA NA NA NA"))
+  expect_false(.spice_static_map(NULL))
+  expect_false(.spice_static_map("9.17 -79.83"))
+  # Without the packages, the online map, and the call says what to install.
+  p <- new_project()
+  local_mocked_bindings(.has_pkg = function(pkg) pkg != "sf")
+  in_project(p, {
+    expect_message(res <- .spice_static_map("9.17 -79.83 9.14 -79.86"),
+                   'install.packages("sf")', fixed = TRUE)
+    expect_false(res)
+  })
+  local_mocked_bindings(.has_pkg = function(pkg) TRUE)
+  expect_true(.spice_static_map("9.17 -79.83 9.14 -79.86"))
 })

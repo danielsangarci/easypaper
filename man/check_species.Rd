@@ -22,7 +22,8 @@ settle and what to write in the \code{.bib} to settle them. This says it again,
 without rendering. How the names are found is in \code{\link[=italicize_species]{italicize_species()}}.
 }
 \details{
-What GBIF and Wikipedia said about each name is kept in
+Unlike the checks of \link{checks}, which only read, this writes: what GBIF
+and Wikipedia said about each name it looks up is kept in
 \code{references/species_cache.rds}. Commit it: with it every computer renders
 the same italics, offline, years from now. Delete it to have every name
 looked up again. \code{italicize-species: false} in the \verb{easypaper:} block of

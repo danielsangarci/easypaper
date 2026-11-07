@@ -17,7 +17,7 @@
 # italics, and publisher.json the same titles with the publisher's italics.
 # They were drawn once and are not redrawn here.
 
-devtools::load_all()
+devtools::load_all(helpers = FALSE)
 fx <- file.path("tests", "testthat", "fixtures", "italicize_species")
 cache <- file.path(fx, "cache.rds")
 
@@ -40,3 +40,19 @@ expected <- stats::setNames(lapply(items, function(x) x$title),
                             vapply(items, function(x) x$id, ""))
 jsonlite::write_json(expected, file.path(fx, "realworld_expected.json"),
                      auto_unbox = TRUE, pretty = TRUE)
+
+# The caches the template and the worked example ship in references/: with
+# them a new project renders its italics the first time offline, and the
+# tests, which never reach the network, render them as a user would.
+for (d in c("template", "example")) {
+  bib <- file.path("inst", d, "references", "references.bib")
+  cache <- file.path("inst", d, "references", "species_cache.rds")
+  unlink(cache)
+  italicize_species(bib, tempfile(fileext = ".json"), cache = cache,
+                    quiet = TRUE)
+  op <- options(easypaper.species_offline = TRUE)
+  res <- italicize_species(bib, tempfile(fileext = ".json"), cache = cache,
+                           quiet = TRUE)
+  options(op)
+  stopifnot(!attr(res, "offline"))
+}

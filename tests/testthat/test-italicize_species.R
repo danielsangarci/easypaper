@@ -190,7 +190,7 @@ test_that("300 real references come out as they did", {
   for (id in names(pinned)) expect_identical(got[[id]], pinned[[id]], info = id)
 
   # And against the publishers: word by word, the italics agree on 241 of the
-  # 300 at 0.4.0. Of the other 59, 49 differ only in italics that are no genus
+  # 300 at 0.1.0. Of the other 59, 49 differ only in italics that are no genus
   # or species -- journal titles, viruses, genes, Latin phrases -- 4 are
   # reported as doubtful, 2 are the publisher's typos, 1 is the publisher
   # setting names in roman inside an italic title, and 3 are errors of this

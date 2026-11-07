@@ -111,6 +111,10 @@ test_that("make_submission() builds both, and a signed call only one", {
 })
 
 test_that("the blinded renv.lock names no author of any package", {
+  # The project's lockfile is the one under test: renv is made to fail, so
+  # the compendium takes it, as it does when renv cannot write its own.
+  local_mocked_bindings(snapshot = function(...) stop("no renv here"),
+                        .package = "renv")
   # renv records the DESCRIPTION of every package: knitr's contributors
   # include a Smith, and the example's John Smith was reported as still named.
   p  <- blind_project()
@@ -154,6 +158,10 @@ test_that("the blinded renv.lock names no author of any package", {
 })
 
 test_that("the blinded renv.lock gives away no GitHub account", {
+  # The project's lockfile is the one under test: renv is made to fail, so
+  # the compendium takes it, as it does when renv cannot write its own.
+  local_mocked_bindings(snapshot = function(...) stop("no renv here"),
+                        .package = "renv")
   # Installed from GitHub, a package's record names the account it came
   # from, in its pages and its remote; nothing looked for it, so the author
   # of a package who used it in a paper was named to the reviewers silently.
@@ -188,8 +196,11 @@ test_that("the blinded renv.lock gives away no GitHub account", {
   # A package of an author's own is reported, with what to do.
   expect_match(w, "renv.lock: adalovelace1815", fixed = TRUE)
   expect_match(w, "installed from an author's GitHub account", fixed = TRUE)
-  # The signed one keeps it all.
-  expect_false(is.null(jsonlite::read_json(file.path(dc, "renv.lock"))$Packages$easypaper))
+  # The signed one keeps the rest, but not easypaper either: the analysis
+  # does not run it, and the project's own renv.lock records it.
+  signed <- jsonlite::read_json(file.path(dc, "renv.lock"))$Packages
+  expect_null(signed$easypaper)
+  expect_false(is.null(signed$antstats$URL))
 })
 
 test_that("the accounts of the authors are what they are known by", {
@@ -418,4 +429,68 @@ test_that("the metadata list every file of data/, and the variables of each tabl
   a2 <- utils::read.csv(file.path(p, "data", "metadata", "attributes.csv"))
   expect_identical(a2$description[1], "Colony id")
   expect_identical(nrow(a2), 4L)
+})
+
+test_that("a double-blind manuscript leaves out the references it is told to", {
+  x <- c("produced with easypaper [@R-easypaper]; the versions",
+         "as in [@Anderson2001; @R-easypaper] and @R-easypaper.",
+         "[see @R-easypaper, p. 3; @b]",
+         "keep @R-easypaperx, [@a] and an e-mail: me@R-easypaper.org")
+  out <- .drop_blinded_citations(x, "R-easypaper")
+  expect_identical(out[1], "produced with easypaper (reference removed for review); the versions")
+  # Among others it goes alone; written in the sentence it is replaced.
+  expect_identical(out[2], "as in [@Anderson2001] and (reference removed for review).")
+  expect_identical(out[3], "[@b]")
+  # A longer key, and what is no citation, are left as they are.
+  expect_identical(out[4], x[4])
+  # Nothing listed, nothing changed.
+  expect_identical(.drop_blinded_citations(x, character(0)), x)
+
+  # The list is the project's, in _quarto.yml.
+  p <- new_project()
+  in_project(p, expect_identical(.blinded_drop_keys(), character(0)))
+  y <- readLines(file.path(p, "_quarto.yml"))
+  writeLines(sub("^  blinded-drop-keys: \\[\\]$", "  blinded-drop-keys: [R-easypaper, \"@Mine2020\"]", y),
+             file.path(p, "_quarto.yml"))
+  in_project(p, expect_identical(.blinded_drop_keys(), c("R-easypaper", "Mine2020")))
+})
+
+test_that("the blinded main text a reviewer reads is searched for the authors", {
+  skip_if_no_pandoc()
+  d <- tempfile("blind")
+  dir.create(d)
+  md <- file.path(d, "main.md")
+  writeLines(c("As we showed before (Lovelace 1843), and see",
+               "https://github.com/adalovelace/engine."), md)
+  f <- file.path(d, "main_JoE.docx")
+  expect_true(.pandoc_run(c(shQuote(md), "-o", shQuote(f))))
+  clean <- file.path(d, "supporting_information_JoE.docx")
+  writeLines("Nothing here names anyone.", md)
+  expect_true(.pandoc_run(c(shQuote(md), "-o", shQuote(clean))))
+
+  w <- expect_warning(left <- .warn_named_in_documents(
+    c(f, clean), ids = c("Lovelace", "adalovelace", "Turing")),
+    "The blinded manuscript still names the authors")
+  expect_match(conditionMessage(w), "main_JoE.docx: Lovelace, adalovelace",
+               fixed = TRUE)
+  expect_false(grepl("supporting_information", conditionMessage(w), fixed = TRUE))
+  expect_match(conditionMessage(w), "blinded-drop-keys", fixed = TRUE)
+  # Nothing to report, nothing said.
+  expect_no_warning(.warn_named_in_documents(clean, ids = "Lovelace"))
+})
+
+test_that("the compendium's lockfile carries the analysis, not easypaper", {
+  skip_on_cran()   # renv writes its cache in the user's home
+  skip_if_not_installed("renv")
+  p <- new_project()
+  dest <- tempfile(fileext = ".lock")
+  in_project(p, .analysis_lock(dest))
+  expect_true(file.exists(dest))
+  lock <- jsonlite::read_json(dest)
+  expect_false("easypaper" %in% names(lock$Packages))
+  # What the template's analysis loads is there.
+  expect_true(all(c("flextable", "knitr") %in% names(lock$Packages)))
+  # And the dependencies of easypaper alone are not: dataspice and its
+  # shiny, which only the metadata of the deposit uses.
+  expect_false("dataspice" %in% names(lock$Packages))
 })
