@@ -4,18 +4,21 @@
 and gets it ready for submission.**
 
 Write it in Quarto, one section per file, with the analysis inside it.
-easypaper renders it for any journal, checks it before every render, and
-builds the folder you send.
+easypaper renders it in the citation style of any journal that has a CSL
+style, checks it before every render, and builds the folder you send.
 
 - 📄 **One source, every output.** The journal’s `.docx`, a `.pdf` for
   the preprint server, a working `.html` and the supplement, each in the
   citation style of the journal you name.
-- 🕶️ **Double-blind review, done for you.** A title page and an
+- 🕶️ **Double-blind review, prepared for you.** A title page and an
   anonymous main text, figures at 600 dpi, a cover letter, and a copy of
-  the data and code that names nobody, for the reviewers.
-- 🌿 **Scientific names checked against GBIF.** In italics in the
-  reference list, where citeproc leaves them in roman, and reviewed in
-  the text: italics, first mention, authority.
+  the data and code that names nobody, for the reviewers. What it sends
+  is read back for your names, emails and ORCID: what your own text
+  still says is reported, for you to rewrite.
+- 🌿 **Scientific names checked against GBIF and Wikipedia.** In italics
+  in the reference list, where citeproc leaves them in roman, and
+  reviewed in the text: italics, first mention, authority. The cases it
+  cannot settle are reported, for you to decide.
 - ✅ **Checks before every render.** Citations with no entry, figures
   nobody cites, data nobody reads, packages nobody installed, and the
   word counts a submission form asks for.
@@ -96,3 +99,13 @@ citation("easypaper")
 MIT for the code. The projects it writes carry MIT for their code and CC
 BY 4.0 for their text, figures, tables and data, the pairing most
 journals and data repositories expect.
+
+## Contributing
+
+Problems and ideas go in the
+[issues](https://github.com/danielsangarci/easypaper/issues);
+[CONTRIBUTING](https://github.com/danielsangarci/easypaper/blob/main/.github/CONTRIBUTING.md)
+says how to propose a change. Please note that easypaper is released
+with a [Contributor Code of
+Conduct](https://github.com/danielsangarci/easypaper/blob/main/CODE_OF_CONDUCT.md).
+By contributing to this project, you agree to abide by its terms.

@@ -54,7 +54,11 @@ First release.
   and
   [`make_submission()`](https://danielsangarci.github.io/easypaper/reference/make_submission.md)
   compile it into `dataspice.json` and its page before they build the
-  compendium, so the deposit describes the data as they are.
+  compendium, so the deposit describes the data as they are. The page of
+  the metadata draws the area the data cover as a map inside it, with
+  dataspice 1.2.1 and sf, maps and base64enc; without them it has no
+  map. It never loads one from the internet: it opens offline and
+  fetches nothing.
 
 ### Rendering
 
@@ -72,6 +76,9 @@ First release.
   and
   [`export_code()`](https://danielsangarci.github.io/easypaper/reference/export_code.md)
   in one go.
+- Quarto is found where RStudio, Positron or Quarto’s installer put it,
+  also from `Rscript` or a terminal, where it is not on the PATH. It has
+  to be 1.7 or later.
   [`preview()`](https://danielsangarci.github.io/easypaper/reference/render.md)
   reloads as you save. Every document is named after the project,
   `manuscript_<project>.docx`, with the journal added when it is not the
@@ -117,9 +124,10 @@ First release.
 - Every render checks citations, cross-references, packages, data files
   and the title first
   ([`?checks`](https://danielsangarci.github.io/easypaper/reference/checks.md)),
-  and records the environment it came out of in `renv.lock`;
+  and the documents for others and the submissions record the
+  environment they came out of in `renv.lock`;
   [`check_renv()`](https://danielsangarci.github.io/easypaper/reference/checks.md)
-  says whether that record matches the library.
+  compares that record with the library, package by package.
 - Every render sets the scientific names of the reference list in
   italics, checked against GBIF;
   [`italicize_species()`](https://danielsangarci.github.io/easypaper/reference/italicize_species.md)
@@ -132,7 +140,9 @@ First release.
 - [`manuscript_stats()`](https://danielsangarci.github.io/easypaper/reference/manuscript_stats.md)
   gives what a submission form asks for: characters of the title, words
   of the abstract and the main text, references, figures and tables.
-  Every render prints it.
+  Every render prints it. It finds the abstract and the reference list
+  under the names journals give them – Summary, Literature cited – or
+  under the ones `abstract-heading:` and `references-heading:` name.
 
 ### Submitting
 
@@ -147,6 +157,14 @@ First release.
   checklist, and a data and code compendium – with a copy for the
   reviewers that names nobody either. `blind = FALSE` for a signed
   manuscript.
+- A double-blind submission is read back for the authors’ names, emails,
+  ORCID, affiliations and accounts, and what the text itself still says
+  is reported, file by file; a reference that would name them – their
+  own software, their own data paper – is left out of it when
+  `blinded-drop-keys:` lists it.
+- The compendium carries a `renv.lock` of its analysis: the packages it
+  loads and what they need, without easypaper, which built the documents
+  and is recorded in the project’s own.
 - [`make_preprint()`](https://danielsangarci.github.io/easypaper/reference/make_preprint.md)
   builds the preprint: one signed PDF and its supplement, with the same
   compendium.
@@ -169,3 +187,5 @@ First release.
   and
   [`td_update()`](https://danielsangarci.github.io/easypaper/reference/trackdown.md)
   share a section with co-authors in Google Docs, through trackdown.
+  Experimental: they need the development version of trackdown, which is
+  not on CRAN.

@@ -45,10 +45,11 @@ which does the same for the data deposit.
 ``` r
 dir <- file.path(tempdir(), "my_paper")
 create_paper(dir, authors = c("Ada Lovelace", "Alan Turing"), git = FALSE)
-#> Project created: /tmp/Rtmp7WOf6b/my_paper
+#> Project created: /tmp/Rtmp92gqjt/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
-#>   3. render_html()      # see ?render for every command
+#>   3. set_paper(".")      # the project to work on, once a session
+#>   4. render_html()      # see ?render for every command
 sync_licenses(path = dir)
 #> Copyright holders: Ada Lovelace & Alan Turing (2026)
 readLines(file.path(dir, "LICENSE-CODE.txt"), n = 3)

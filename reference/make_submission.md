@@ -3,10 +3,11 @@
 Writes `submission/<label>/`: the manuscript split the way journals with
 double-blind review ask for – a title page, and a main text that opens
 with the title and names nobody – or, signed, the main text alone; the
-supplement as its own document, every figure on its own, named with its
-resolution and printed size, a cover letter – dated, with the title of
-the manuscript, signed by the corresponding author, and with the DOI of
-the data once
+supplement as its own document, every figure of the main text on its
+own, named with its resolution and printed size – the supplementary
+figures stay inside the supplement, which is how journals take them – a
+cover letter – dated, with the title of the manuscript, signed by the
+corresponding author, and with the DOI of the data once
 [`deposit_zenodo()`](https://danielsangarci.github.io/easypaper/reference/deposit_zenodo.md)
 has reserved it; for a second journal, the text of the last letter with
 those brought up to date – a checklist of what is left to do by hand,
@@ -121,9 +122,11 @@ The path of the submission folder, invisibly.
 
 ## Details
 
-It records `renv.lock` first, so the compendium carries the environment
-this submission came out of – the version of easypaper that built it
-included.
+It records `renv.lock` first: the project's records the environment this
+submission came out of, the version of easypaper that built it included,
+and the compendium gets one of its own, with the packages its analysis
+loads and what they need, and not easypaper, which the analysis does not
+run.
 
 Double-blind review also needs the sections that identify you off the
 main text. They move to the title page: by default the Acknowledgements,
@@ -162,10 +165,11 @@ for the documents alone.
 dir <- file.path(tempdir(), "my_paper")
 create_paper(dir, title = "Ant colonies", authors = "Ada Lovelace",
              git = FALSE)
-#> Project created: /tmp/Rtmp7WOf6b/my_paper
+#> Project created: /tmp/Rtmp92gqjt/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
-#>   3. render_html()      # see ?render for every command
+#>   3. set_paper(".")      # the project to work on, once a session
+#>   4. render_html()      # see ?render for every command
 
 # It renders the manuscript, so it needs Quarto (https://quarto.org).
 if (FALSE) { # \dontrun{

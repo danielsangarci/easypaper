@@ -27,11 +27,14 @@ The bibliography files a render would hand Quarto, invisibly.
 
 ## Details
 
-What GBIF and Wikipedia said about each name is kept in
-`references/species_cache.rds`. Commit it: with it every computer
-renders the same italics, offline, years from now. Delete it to have
-every name looked up again. `italicize-species: false` in the
-`easypaper:` block of `_quarto.yml` turns the italics off.
+Unlike the checks of
+[checks](https://danielsangarci.github.io/easypaper/reference/checks.md),
+which only read, this writes: what GBIF and Wikipedia said about each
+name it looks up is kept in `references/species_cache.rds`. Commit it:
+with it every computer renders the same italics, offline, years from
+now. Delete it to have every name looked up again.
+`italicize-species: false` in the `easypaper:` block of `_quarto.yml`
+turns the italics off.
 
 ## See also
 
@@ -43,17 +46,16 @@ the same for any bibliography outside a project.
 ``` r
 dir <- file.path(tempdir(), "my_paper")
 create_paper(dir, git = FALSE)
-#> Project created: /tmp/Rtmp7WOf6b/my_paper
+#> Project created: /tmp/Rtmp92gqjt/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
-#>   3. render_html()      # see ?render for every command
+#>   3. set_paper(".")      # the project to work on, once a session
+#>   4. render_html()      # see ?render for every command
 # Offline: only the cache answers, and a name it does not know stays in
 # roman, with a warning. Online, a render looks each new name up once.
 old <- options(easypaper.species_offline = TRUE)
 if (rmarkdown::pandoc_available()) try(check_species(dir))
-#> Looking up new names in GBIF...
-#> Warning: No connection to GBIF/Wikipedia: 6 candidate words could not be checked, so this version may be missing italics. Run again with a connection; what has been checked stays in the cache (species_cache.rds).
-#> No scientific names found in references.bib (none could be checked without a connection)
+#> Scientific names in italics (2): Maculinea rebeli, Myrmica
 options(old)
 unlink(dir, recursive = TRUE)
 ```

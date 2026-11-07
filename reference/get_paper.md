@@ -28,14 +28,15 @@ get_paper()   # NULL: none named yet
 
 dir <- file.path(tempdir(), "my_paper")
 create_paper(dir, git = FALSE)
-#> Project created: /tmp/Rtmp7WOf6b/my_paper
+#> Project created: /tmp/Rtmp92gqjt/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
-#>   3. render_html()      # see ?render for every command
+#>   3. set_paper(".")      # the project to work on, once a session
+#>   4. render_html()      # see ?render for every command
 old <- set_paper(dir)
-#> Working on /tmp/Rtmp7WOf6b/my_paper
+#> Working on /tmp/Rtmp92gqjt/my_paper
 get_paper()
-#> Working on /tmp/Rtmp7WOf6b/my_paper
+#> Working on /tmp/Rtmp92gqjt/my_paper
 set_paper(old)
 unlink(dir, recursive = TRUE)
 ```
