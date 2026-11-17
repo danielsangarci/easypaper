@@ -99,7 +99,7 @@ if (requireNamespace("vegan", quietly = TRUE)) {
   list.files(file.path(dir, "data"))
   unlink(dir, recursive = TRUE)
 }
-#> Example project created: /tmp/Rtmp92gqjt/example_paper
+#> Example project created: /tmp/RtmpZHt8kX/example_paper
 #>   1. open example_paper.Rproj
 #>   2. library(easypaper)
 #>   3. set_paper(".")      # the project to work on, once a session

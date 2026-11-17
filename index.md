@@ -30,12 +30,14 @@ style, checks it before every render, and builds the folder you send.
 
 ``` r
 
-# install.packages("remotes")
-remotes::install_github("danielsangarci/easypaper")
+install.packages("easypaper")
 
 library(easypaper)
 create_paper("my_paper")
 ```
+
+The development version, with what is not on CRAN yet, comes from
+GitHub: `remotes::install_github("danielsangarci/easypaper")`.
 
 Open the `.Rproj` it creates, write in `_sections/`, and:
 

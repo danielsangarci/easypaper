@@ -165,7 +165,7 @@ for the documents alone.
 dir <- file.path(tempdir(), "my_paper")
 create_paper(dir, title = "Ant colonies", authors = "Ada Lovelace",
              git = FALSE)
-#> Project created: /tmp/Rtmp92gqjt/my_paper
+#> Project created: /tmp/RtmpZHt8kX/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
 #>   3. set_paper(".")      # the project to work on, once a session
