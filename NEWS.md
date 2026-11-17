@@ -1,3 +1,60 @@
+# easypaper (development version)
+
+## Rendering
+
+* Quarto is found where RStudio, Positron or Quarto's installer put it,
+  also from `Rscript` or a terminal, where it is not on the PATH, together
+  with the pandoc it ships. It has to be 1.7 or later.
+* The title in the properties of a `.docx` (File > Properties) no longer
+  carries the short title.
+* Without a connection to GBIF, a call warns once, not once per document.
+  The template and the worked example ship the answers their references
+  need, so their first render sets the italics offline.
+
+## Checks
+
+* `check_renv()` compares `renv.lock` with the library in use, package by
+  package, and names what differs.
+* `manuscript_stats()` finds the abstract and the reference list under the
+  names journals give them -- Summary, Literature cited -- or under the ones
+  `abstract-heading:` and `references-heading:` name in `_quarto.yml`.
+* `check_species()` says in its help that it writes the cache of names.
+
+## Submitting
+
+* A double-blind submission is read back for the authors' names, emails,
+  ORCID, affiliations and accounts, and what the text itself still says is
+  reported, file by file. A reference that would name them -- their own
+  software, their own data paper -- is left out of it when
+  `blinded-drop-keys:` in `_quarto.yml` lists it.
+* The compendium carries a `renv.lock` of its analysis alone: the packages
+  it loads and what they need, without easypaper, which built the
+  documents and is recorded in the project's own. In the worked example,
+  68 packages instead of 118.
+
+## Data
+
+* The page of the metadata draws the area the data cover as a map inside
+  it, with dataspice 1.2.1 and sf, maps and base64enc; without them it has
+  no map. It never loads one from the internet, and opens offline. The
+  worked example says where its data come from, the 50-ha plot of Barro
+  Colorado Island.
+
+## The worked example
+
+* Species richness is modelled with a quasi-Poisson GLM, tested with an
+  *F* test, and the PERMANOVA and PERMDISP permute plots only within five
+  spatial blocks of contiguous plots. The Methods say what this allows for
+  and what it does not.
+
+## Other
+
+* The next steps `create_paper()` and `create_example_paper()` print name
+  `set_paper(".")`.
+* `td_upload()`, `td_update()` and `td_download()` are marked experimental:
+  they need a trackdown that is not on CRAN.
+* A code of conduct and a guide to contributing.
+
 # easypaper 0.1.0
 
 First release.
@@ -43,10 +100,6 @@ First release.
   -- and `edit_metadata()` opens an editor for the rest. `make_preprint()` and
   `make_submission()` compile it into `dataspice.json` and its page before
   they build the compendium, so the deposit describes the data as they are.
-  The page of the metadata draws the area the data cover as a map inside
-  it, with dataspice 1.2.1 and sf, maps and base64enc; without them it has
-  no map. It never loads one from the internet: it opens offline and
-  fetches nothing.
 
 ## Rendering
 
@@ -54,9 +107,6 @@ First release.
   `render_supplementary()` write documents to read into `output/`, in the
   style of the journal the manuscript names or of any other; `render_all()`
   runs `render_docx()`, `render_pdf()` and `export_code()` in one go.
-* Quarto is found where RStudio, Positron or Quarto's installer put it,
-  also from `Rscript` or a terminal, where it is not on the PATH. It has to
-  be 1.7 or later.
   `preview()` reloads as you save. Every document is named after the
   project, `manuscript_<project>.docx`, with the journal added when it is
   not the manuscript's own.
@@ -93,9 +143,8 @@ First release.
 ## Checks
 
 * Every render checks citations, cross-references, packages, data files and
-  the title first (`?checks`), and the documents for others and the
-  submissions record the environment they came out of in `renv.lock`;
-  `check_renv()` compares that record with the library, package by package.
+  the title first (`?checks`), and records the environment it came out of in
+  `renv.lock`; `check_renv()` says whether that record matches the library.
 * Every render sets the scientific names of the reference list in italics,
   checked against GBIF; `italicize_species()` does it for any bibliography,
   into the CSL-JSON file you name, and `check_species()` lists the names left
@@ -104,10 +153,7 @@ First release.
   first mention, abbreviation, authority.
 * `manuscript_stats()` gives what a submission form asks for: characters of
   the title, words of the abstract and the main text, references, figures
-  and tables. Every render prints it. It finds the abstract and the
-  reference list under the names journals give them -- Summary, Literature
-  cited -- or under the ones `abstract-heading:` and `references-heading:`
-  name.
+  and tables. Every render prints it.
 
 ## Submitting
 
@@ -121,14 +167,6 @@ First release.
   journal -- a checklist, and a
   data and code compendium -- with a copy for the reviewers that names nobody
   either. `blind = FALSE` for a signed manuscript.
-* A double-blind submission is read back for the authors' names, emails,
-  ORCID, affiliations and accounts, and what the text itself still says is
-  reported, file by file; a reference that would name them -- their own
-  software, their own data paper -- is left out of it when
-  `blinded-drop-keys:` lists it.
-* The compendium carries a `renv.lock` of its analysis: the packages it
-  loads and what they need, without easypaper, which built the documents
-  and is recorded in the project's own.
 * `make_preprint()` builds the preprint: one signed PDF and its supplement,
   with the same compendium.
 * A submission is never overwritten: a second `make_submission()` or
@@ -143,5 +181,4 @@ First release.
 ## Co-authors
 
 * `td_upload()`, `td_download()` and `td_update()` share a section with
-  co-authors in Google Docs, through trackdown. Experimental: they need the
-  development version of trackdown, which is not on CRAN.
+  co-authors in Google Docs, through trackdown.

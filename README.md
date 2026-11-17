@@ -1,6 +1,7 @@
 # easypaper <a href="https://danielsangarci.github.io/easypaper/"><img src="man/figures/logo.png" align="right" height="138" alt="easypaper website" /></a>
 
 <!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version/easypaper)](https://CRAN.R-project.org/package=easypaper)
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![R CMD check](https://github.com/danielsangarci/easypaper/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/danielsangarci/easypaper/actions/workflows/R-CMD-check.yaml)
@@ -37,12 +38,14 @@ style, checks it before every render, and builds the folder you send.
 ## Quick start
 
 ```r
-# install.packages("remotes")
-remotes::install_github("danielsangarci/easypaper")
+install.packages("easypaper")
 
 library(easypaper)
 create_paper("my_paper")
 ```
+
+The development version, with what is not on CRAN yet, comes from GitHub:
+`remotes::install_github("danielsangarci/easypaper")`.
 
 Open the `.Rproj` it creates, write in `_sections/`, and:
 
