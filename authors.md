@@ -8,16 +8,16 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/danielsangarci/easypaper/blob/main/inst/CITATION)
+[`inst/CITATION`](https://github.com/danielsangarci/easypaper/blob/v0.1.0/inst/CITATION)
 
 Sanchez-Garcia, D. (2026). easypaper: Automate Reproducible Quarto
-Manuscripts Ready for Submission. R package version 0.1.0.9000.
+Manuscripts Ready for Submission. R package version 0.1.0.
 https://github.com/danielsangarci/easypaper
 
     @Manual{easypaper,
       title = {easypaper: Automate Reproducible Quarto Manuscripts Ready for Submission},
       author = {Daniel Sanchez-Garcia},
       year = {2026},
-      note = {R package version 0.1.0.9000},
+      note = {R package version 0.1.0},
       url = {https://github.com/danielsangarci/easypaper},
     }

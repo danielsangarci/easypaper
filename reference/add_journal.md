@@ -72,11 +72,10 @@ for the styles a project has.
 dir  <- file.path(tempdir(), "my_paper")
 repo <- file.path(tempdir(), "styles")
 create_paper(dir, git = FALSE)
-#> Project created: /tmp/RtmpZHt8kX/my_paper
+#> Project created: /tmp/RtmpkQBUQS/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
-#>   3. set_paper(".")      # the project to work on, once a session
-#>   4. render_html()      # see ?render for every command
+#>   3. render_html()      # see ?render for every command
 dir.create(repo, showWarnings = FALSE)
 file.copy(file.path(dir, "references", "journal-of-ecology.csl"),
           file.path(repo, "my-journal.csl"))

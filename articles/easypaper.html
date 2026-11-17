@@ -32,7 +32,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">easypaper</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,7 +65,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Getting started with easypaper</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/danielsangarci/easypaper/blob/main/vignettes/easypaper.Rmd" class="external-link"><code>vignettes/easypaper.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/danielsangarci/easypaper/blob/v0.1.0/vignettes/easypaper.Rmd" class="external-link"><code>vignettes/easypaper.Rmd</code></a></small>
       <div class="d-none name"><code>easypaper.Rmd</code></div>
     </div>
 
@@ -783,13 +783,12 @@ section at a time, through the trackdown package:</p>
 <p>The chunks are hidden in the Google Doc, so they see prose. Download
 before you edit locally, and commit right after downloading: git then
 shows exactly what each co-author changed. The Drive folder is
-<code>trackdown-folder:</code> in <code>_quarto.yml</code>. These three
-are experimental: trackdown has to be its development version, the only
-one that reads <code>.qmd</code>
-(<code>remotes::install_github("ClaudioZandonella/trackdown")</code>),
-which has not reached CRAN, and while it has not they may change. Those
-who would rather read the typeset paper get the <code>.docx</code> from
-<code>output/</code>.</p>
+<code>trackdown-folder:</code> in <code>_quarto.yml</code>. trackdown
+has to be its development version, the only one that reads
+<code>.qmd</code>:
+<code>remotes::install_github("ClaudioZandonella/trackdown")</code>.
+Those who would rather read the typeset paper get the <code>.docx</code>
+from <code>output/</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="scientific-names">Scientific names<a class="anchor" aria-label="anchor" href="#scientific-names"></a>
@@ -1448,16 +1447,16 @@ everything the package writes into it — the creators of the metadata
 (<code>creators.csv</code>, <code>dataspice.json</code> and its page),
 the copyright line of <code>LICENSE-CODE.txt</code>, the README, and the
 authors and the pages of the packages <code>renv.lock</code> records,
-which restoring it does not need. easypaper is in neither lockfile of
-the compendium: the analysis does not use it and, installed from GitHub,
-it names the account it came from. What it does not write, a comment in
-a script or a column of the data, it searches: a name, email, ORCID,
-affiliation or account of an author still in the copy is reported with
-the file it is in, to take out of the project before you run
-<code><a href="../reference/make_submission.html">make_submission()</a></code> again. An account is the user part of an
-author’s email and the owner of the project’s GitHub repository: a
-package of your own installed from GitHub, which renv needs from there
-to restore it, is reported that way.</p>
+which restoring it does not need. easypaper itself is taken out of that
+copy of the lockfile altogether: the analysis does not use it and,
+installed from GitHub, it names the account it came from. What it does
+not write, a comment in a script or a column of the data, it searches: a
+name, email, ORCID, affiliation or account of an author still in the
+copy is reported with the file it is in, to take out of the project
+before you run <code><a href="../reference/make_submission.html">make_submission()</a></code> again. An account is the
+user part of an author’s email and the owner of the project’s GitHub
+repository: a package of your own installed from GitHub, which renv
+needs from there to restore it, is reported that way.</p>
 <p><strong>The cover letter</strong> is written once per submission and
 never overwritten: it is yours to finish. It comes dated, with the title
 and the journal, and signed by the corresponding author. Once you have
@@ -2101,12 +2100,10 @@ block of _quarto.yml.</code></pre>
 <code><a href="https://rdrr.io/r/utils/update.packages.html" class="external-link">update.packages()</a></code>: the functions live in the package, not
 in the project. The project keeps only what is the paper’s, and
 <code>renv.lock</code> records the version of easypaper that built each
-document, with every other package. The data and code compendium the
-reader downloads carries the analysis and a lockfile of its own, with
-only the packages the analysis loads and what they need: it reproduces
-the results without easypaper at all. A lockfile records the R packages;
-R itself, Quarto, pandoc and LaTeX are not in it, and are named in
-<code>sessionInfo.txt</code>.</p>
+document, with every other package — so <code><a href="https://rstudio.github.io/renv/reference/restore.html" class="external-link">renv::restore()</a></code>
+brings back the one a paper was built with, years later. The data and
+code compendium the reader downloads carries the analysis and that
+lockfile, and reproduces the results without easypaper at all.</p>
 </div>
 <div class="section level3">
 <h3 id="requirements">Requirements<a class="anchor" aria-label="anchor" href="#requirements"></a>
@@ -2116,17 +2113,11 @@ nothing to install if you use either. Rendering the PDF also needs a
 LaTeX installation (<code><a href="https://rdrr.io/pkg/tinytex/man/install_tinytex.html" class="external-link">tinytex::install_tinytex()</a></code> is enough).
 The R packages a project needs for every step — rendering, figures, the
 data deposit’s metadata, converting spreadsheets — are installed
-together with easypaper. Three of them, flextable, here and ragg,
-easypaper never calls itself: the project’s own files do, inside the
-render — <code>R/setup.R</code> makes the tables with flextable,
-<code>manuscript.qmd</code> finds it with here, and
-<code>_quarto.yml</code> draws every figure with ragg. They are imports
-on purpose, so that a new computer does not find one missing a minute
-into its first render. The one exception is <code>trackdown</code>, for
-<a href="#writing-with-co-authors">co-authors in Google Docs</a>, which
-has to come from GitHub. Two more are needed only by the function that
-uses them: vegan by <code><a href="../reference/create_example_paper.html">create_example_paper()</a></code>, which says what
-to install when it is missing, and curl by
+together with easypaper. The one exception is <code>trackdown</code>,
+for <a href="#writing-with-co-authors">co-authors in Google Docs</a>,
+which has to come from GitHub. Two more are needed only by the function
+that uses them: vegan by <code><a href="../reference/create_example_paper.html">create_example_paper()</a></code>, which says
+what to install when it is missing, and curl by
 <code><a href="../reference/deposit_zenodo.html">deposit_zenodo()</a></code>.</p>
 </div>
 <div class="section level3">
@@ -2213,8 +2204,8 @@ a new project already has it there, as the last paragraph of
 <blockquote>
 <p>The manuscript was written in Quarto, and its rendered documents and
 its data and code compendium were produced with easypaper <span class="citation">[@R-easypaper]</span>; the versions of the R packages
-the analysis used are recorded, with renv <span class="citation">[@R-renv]</span>, in the <code>renv.lock</code> of the
-compendium.</p>
+were recorded with renv <span class="citation">[@R-renv]</span> and can
+be restored from <code>renv.lock</code>.</p>
 </blockquote>
 <p>Keep it at the end of your Methods, after the software of your
 analysis.</p>

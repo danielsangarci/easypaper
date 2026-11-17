@@ -67,11 +67,10 @@ block itself.
 ``` r
 dir <- file.path(tempdir(), "my_paper")
 create_paper(dir, authors = c("Ada Lovelace", "Alan Turing"), git = FALSE)
-#> Project created: /tmp/RtmpZHt8kX/my_paper
+#> Project created: /tmp/RtmpkQBUQS/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
-#>   3. set_paper(".")      # the project to work on, once a session
-#>   4. render_html()      # see ?render for every command
+#>   3. render_html()      # see ?render for every command
 affiliations(dir)
 #> ^1^ Institution 1, Department, City, Country
 #> ^2^ Institution 2, Department, City, Country

@@ -53,11 +53,10 @@ for the rest.
 dir <- file.path(tempdir(), "my_paper")
 create_paper(dir, title = "Ant colonies", authors = "Ada Lovelace",
              git = FALSE)
-#> Project created: /tmp/RtmpZHt8kX/my_paper
+#> Project created: /tmp/RtmpkQBUQS/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
-#>   3. set_paper(".")      # the project to work on, once a session
-#>   4. render_html()      # see ?render for every command
+#>   3. render_html()      # see ?render for every command
 write.csv(data.frame(colony = 1:3, richness = c(4, 7, 5)),
           file.path(dir, "data", "colonies.csv"), row.names = FALSE)
 sync_metadata(path = dir)
