@@ -93,7 +93,7 @@ citation("easypaper")
 
 > Sanchez-Garcia, D. (2026). easypaper: Automate Reproducible Quarto
 > Manuscripts Ready for Submission. R package version 0.1.0.
-> https://github.com/danielsangarci/easypaper
+> https://doi.org/10.32614/CRAN.package.easypaper
 
 ## Licence
 

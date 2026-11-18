@@ -699,6 +699,30 @@ check_species <- function(path = NULL) {
   setdiff(p, BASE_PACKAGES)
 }
 
+#' The packages the analysis loads, read from its code, each with the
+#' version installed: the lines sessionInfo.txt ends with. With them, the
+#' ones they attach in turn -- their Depends -- which the code uses without
+#' loading them by name: vegan attaches permute, whose how() restricts the
+#' permutations of the worked example.
+#' @noRd
+.analysis_versions <- function() {
+  pkgs <- setdiff(tryCatch(.analysis_packages(), error = function(e) character(0)),
+                  "easypaper")
+  if (!length(pkgs)) return(character(0))
+  attached <- unlist(lapply(pkgs, function(p) {
+    d <- suppressWarnings(utils::packageDescription(p, fields = "Depends"))
+    if (is.null(d) || length(d) != 1L || is.na(d)) return(character(0))
+    trimws(sub("[(].*", "", strsplit(d, ",")[[1]]))
+  }))
+  pkgs <- unique(c(pkgs, setdiff(attached, c("R", BASE_PACKAGES, ""))))
+  v <- vapply(sort(pkgs), function(p) {
+    x <- suppressWarnings(utils::packageDescription(p, fields = "Version"))
+    if (is.null(x) || length(x) != 1L || is.na(x)) "not installed" else x
+  }, "")
+  c("Packages the analysis loads (read from its code), as installed:",
+    sprintf("  %-14s %s", names(v), v))
+}
+
 #' The packages that come with R itself, which renv does not record. Listed,
 #' rather than asked of installed.packages(), which reads every installed
 #' package and is slow; the list has not changed since R 2.x.
@@ -1181,11 +1205,16 @@ export_code <- function(path = NULL) {
   writeLines(c(head, index, unlist(body)), out)
 
   # The exact environment the results were produced in. renv.lock captures the
-  # R packages; the Quarto version has to be recorded by hand.
+  # R packages; the Quarto version has to be recorded by hand. sessionInfo()
+  # describes the session that called this, not the one Quarto starts for
+  # the render, where the analysis runs: vegan, which the analysis loads,
+  # was in neither list. So the packages the analysis loads are listed too,
+  # with the version installed.
   info <- utils::capture.output(utils::sessionInfo())
   v <- tryCatch(as.character(quarto::quarto_version()),
                 error = function(e) "not found")
-  writeLines(c(info, "", paste("quarto:", v)), .out("sessionInfo.txt"))
+  writeLines(c(info, "", paste("quarto:", v), "", .analysis_versions()),
+             .out("sessionInfo.txt"))
   if (file.exists(.p("renv.lock"))) {
     file.copy(.p("renv.lock"), .out("renv.lock"), overwrite = TRUE)
   }

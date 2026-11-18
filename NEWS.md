@@ -31,6 +31,18 @@
   it loads and what they need, without easypaper, which built the
   documents and is recorded in the project's own. In the worked example,
   68 packages instead of 118.
+* The compendium carries `data/` with its subfolders. It took only the top
+  level, while `check_data()` looked in the subfolders too: a script
+  reading `data/raw/counts.csv` passed the check, and the compendium
+  published stopped on it.
+* Its `sessionInfo.txt` lists the packages the analysis loads, and those
+  they attach, with their versions -- vegan and permute in the worked
+  example -- which the session that wrote it had not loaded. Its README
+  names the formats the data are in, and no others.
+* `add_journal()` gives a journal's style its own card -- its identifier,
+  author guidelines, field and ISSN -- instead of the parent style's, which
+  named the template's Journal of Ecology style APA, for psychology and
+  law. The rules, and so every citation, are unchanged.
 
 ## Data
 
@@ -46,6 +58,9 @@
   *F* test, and the PERMANOVA and PERMDISP permute plots only within five
   spatial blocks of contiguous plots. The Methods say what this allows for
   and what it does not.
+* The Results name the richest and the poorest habitat only when the test
+  says habitats differ; otherwise they give the range, and say the model
+  does not tell it apart from chance.
 
 ## Other
 
@@ -54,6 +69,8 @@
 * `td_upload()`, `td_update()` and `td_download()` are marked experimental:
   they need a trackdown that is not on CRAN.
 * A code of conduct and a guide to contributing.
+* `citation("easypaper")` gives the DOI CRAN assigned to the package,
+  `10.32614/CRAN.package.easypaper`, and its CRAN page.
 
 # easypaper 0.1.0
 

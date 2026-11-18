@@ -4,7 +4,8 @@ year <- "2026"
 # meta$Version, not packageVersion(): R CMD check reads this file with the
 # package NOT installed, and packageVersion() then fails.
 vers <- sprintf("R package version %s", meta$Version)
-url  <- "https://github.com/danielsangarci/easypaper"
+doi  <- "10.32614/CRAN.package.easypaper"
+url  <- "https://CRAN.R-project.org/package=easypaper"
 
 citHeader("To cite easypaper in publications, use:")
 
@@ -17,8 +18,10 @@ bibentry(
                     comment = c(ORCID = "0000-0002-0710-6292")),
   year     = year,
   note     = vers,
+  doi      = doi,
   url      = url,
   textVersion = paste0(
     "Sanchez-Garcia, D. (", year, "). easypaper: Automate Reproducible ",
-    "Quarto Manuscripts Ready for Submission. ", vers, ". ", url)
+    "Quarto Manuscripts Ready for Submission. ", vers, ". ",
+    "https://doi.org/", doi)
 )

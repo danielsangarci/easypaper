@@ -182,11 +182,52 @@ add_journal <- function(journal, path = NULL, overwrite = FALSE, repo = NULL) {
   parent[i] <- sub("<title>[^<]*</title>", t, parent[i])
   # The parent's short title would still name the parent.
   parent <- parent[!grepl("<title-short>", parent, fixed = TRUE)]
+  parent <- .csl_info_of(parent, dependent)
   note <- sprintf(paste0("  <!-- The rules of the '%s' style, under the name ",
                          "of the journal that uses them. -->"), pname)
   j <- grep("<info>", parent, fixed = TRUE)[1]
   if (!is.na(j)) parent <- append(parent, note, after = j - 1L)
   parent
+}
+
+#' The parent's <info> made the journal's: the journal's identifier, its
+#' links -- its author guidelines -- its fields and its ISSN, in place of
+#' the parent's, which named the style APA, for psychology and law. The
+#' parent stays named, as the template the rules come from; its authors and
+#' its licence stay, being whose rules they are. The journal's locale goes
+#' on the style, as a dependent style sets it.
+#' @noRd
+.csl_info_of <- function(parent, dependent) {
+  a <- grep("<info>", parent, fixed = TRUE)[1]
+  b <- grep("</info>", parent, fixed = TRUE)[1]
+  if (is.na(a) || is.na(b) || b <= a) return(parent)
+  info <- parent[(a + 1L):(b - 1L)]
+  pick <- function(x, rx) x[grepl(rx, x)]
+  self <- regmatches(paste(pick(info, 'rel="self"'), collapse = ""),
+                     regexpr('href="[^"]+"', paste(pick(info, 'rel="self"'), collapse = "")))
+  dep_id    <- pick(dependent, "<id>")
+  dep_links <- pick(dependent, "<link ")
+  dep_links <- dep_links[!grepl('rel="independent-parent"', dep_links)]
+  dep_cats  <- pick(dependent, "<category ")
+  dep_issn  <- pick(dependent, "<e?issn>")
+  if (!length(dep_id)) return(parent)
+  # The parent's identity goes; its title, authors, update and rights stay.
+  keep <- info[!grepl("<id>|<link |<category |<summary>|<e?issn>", info)]
+  ttl <- grep("<title>", keep)[1]
+  extra <- c(dep_id,
+             dep_links,
+             if (length(self)) sprintf('    <link %s rel="template"/>', self),
+             dep_cats,
+             dep_issn)
+  keep <- append(keep, extra, after = if (is.na(ttl)) 0L else ttl)
+  out <- c(parent[seq_len(a)], keep, parent[b:length(parent)])
+  loc <- regmatches(paste(dependent, collapse = " "),
+                    regexpr('default-locale="[^"]+"', paste(dependent, collapse = " ")))
+  st <- grep("<style ", out)[1]
+  if (length(loc) && !is.na(st) && !grepl("default-locale=", out[st])) {
+    out[st] <- sub("<style ", paste0("<style ", loc, " "), out[st], fixed = TRUE)
+  }
+  out
 }
 
 #' The style's own title, for the message; NA when it has none.

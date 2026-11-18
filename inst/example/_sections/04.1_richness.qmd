@@ -32,6 +32,17 @@ pred_rich <- data.frame(habitat = levels(habitat),
                         upper = exp(pr$fit + 1.96 * pr$se.fit))
 hab_max <- pred_rich$habitat[which.max(pred_rich$fit)]
 hab_min <- pred_rich$habitat[which.min(pred_rich$fit)]
+# Which habitat is richest is a finding only when the test says habitats
+# differ; otherwise the text gives the range and says so.
+rich_ranking <- if (p_hab < 0.05) {
+  paste0("It was highest in the ", hab_text(hab_max), " and lowest in the ",
+         hab_text(hab_min))
+} else {
+  paste0("The expected richness ranged from ", round(min(pred_rich$fit)),
+         " species per plot in the ", hab_text(hab_min), " to ",
+         round(max(pred_rich$fit)), " in the ", hab_text(hab_max),
+         ", a range the model does not tell apart from chance")
+}
 ```
 
 ## Species richness
@@ -43,6 +54,5 @@ per plot (mean `r round(mean(richness), 1)`). Richness
 habitats (quasi-Poisson GLM, *F* = `r round(f_rich, 2)`,
 df = `r df_hab` and `r df_res`, *P* `r fmt_p(p_hab)`; dispersion
 `r round(dispersion, 2)`;
-@tbl-richness): it was highest in the
-`r hab_text(hab_max)` and lowest in the `r hab_text(hab_min)`
-(@fig-richness).
+@tbl-richness).
+`r rich_ranking` (@fig-richness).

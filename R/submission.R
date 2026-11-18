@@ -1152,6 +1152,23 @@ AFFILIATIONS_SLOT <- "^\\s*<!--\\s*affiliations\\s*-->\\s*$"
   invisible(x)
 }
 
+#' What the README of a compendium says of the formats of its data: the
+#' ones it holds, read from its files -- it said "a GeoPackage, a NetCDF" of
+#' a deposit of two .csv files. Empty when there are no data.
+#' @noRd
+.formats_paragraph <- function(dir) {
+  f <- list.files(dir, recursive = TRUE)
+  f <- f[!basename(f) %in% c("README.md", "README.txt", ".gitkeep")]
+  ext <- sort(unique(tolower(tools::file_ext(f))))
+  ext <- ext[nzchar(ext)]
+  if (!length(ext)) return(character(0))
+  strwrap(paste0("Data are distributed in open format",
+                 if (length(ext) > 1L) "s", " (",
+                 paste0(".", ext, collapse = ", "),
+                 "): none of it needs proprietary software to read."),
+          width = 76)
+}
+
 #' Data and code compendium, ready for Zenodo/Dryad.
 #' @noRd
 .export_data_code <- function(dest, blinded = TRUE) {
@@ -1159,13 +1176,19 @@ AFFILIATIONS_SLOT <- "^\\s*<!--\\s*affiliations\\s*-->\\s*$"
   dir.create(file.path(dest, "data"), recursive = TRUE, showWarnings = FALSE)
   dir.create(file.path(dest, "scripts"), showWarnings = FALSE)
 
-  # data/ travels whole, minus its subfolders: metadata/ goes out on its own,
-  # below. Whatever the project reads is what the deposit carries -- that is
-  # the point of there being one folder.
+  # data/ travels whole, its subfolders with it -- metadata/ goes out on its
+  # own, below. Whatever the project reads is what the deposit carries --
+  # that is the point of there being one folder. Only its top level went,
+  # once: check_data(), which looks in the subfolders too, passed a script
+  # reading data/raw/counts.csv, and the compendium published stopped on it.
   if (dir.exists(.p("data"))) {
-    files <- list.files(.p("data"), full.names = TRUE)
-    files <- files[!dir.exists(files)]
-    if (length(files)) file.copy(files, file.path(dest, "data"))
+    rel <- list.files(.p("data"), recursive = TRUE)
+    rel <- rel[!startsWith(rel, "metadata/")]
+    for (r in rel) {
+      to <- file.path(dest, "data", r)
+      dir.create(dirname(to), recursive = TRUE, showWarnings = FALSE)
+      file.copy(.p("data", r), to)
+    }
   }
   non_open <- list.files(file.path(dest, "data"), recursive = TRUE,
                          pattern = "[.](xlsx|xls|sav|dta|mdb|accdb)$",
@@ -1599,14 +1622,7 @@ AFFILIATIONS_SLOT <- "^\\s*<!--\\s*affiliations\\s*-->\\s*$"
           if (!is.na(d)) return(unname(d))
           if (grepl("[.]R$", f)) .first_comment(f) else ""
         }),
-    strwrap(paste("Data are distributed in open formats: .csv where the table",
-                  "allows it, and the original open format where converting it",
-                  "would destroy it -- a GeoPackage, a NetCDF, a SQLite",
-                  "database. None of it needs proprietary software to read.",
-                  "The spreadsheets and statistical files some of it was",
-                  "converted from are not part of this deposit: they stay in",
-                  "the authors' project as the archive copy."),
-            width = 76), ""
+    .formats_paragraph(file.path(dest, "data")), ""
   )
 
   has_lock <- file.exists(file.path(dest, "renv.lock"))

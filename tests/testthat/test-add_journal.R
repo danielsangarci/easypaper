@@ -9,6 +9,10 @@ fake_repo <- function() {
     '  <info>',
     '    <title>American Psychological Association 7th edition</title>',
     '    <id>http://www.zotero.org/styles/apa</id>',
+    '    <link href="http://www.zotero.org/styles/apa" rel="self"/>',
+    '    <category citation-format="author-date"/>',
+    '    <category field="psychology"/>',
+    '    <summary>Author-date system of the APA Publication Manual</summary>',
     '  </info>',
     '  <citation><layout><text variable="title"/></layout></citation>',
     '  <bibliography><layout><text variable="title"/></layout></bibliography>',
@@ -18,7 +22,13 @@ fake_repo <- function() {
     '<style xmlns="http://purl.org/net/xbiblio/csl" version="1.0" default-locale="en-US">',
     '  <info>',
     '    <title>Journal of Made-up Results</title>',
+    '    <id>http://www.zotero.org/styles/made-up-results</id>',
+    '    <link href="http://www.zotero.org/styles/made-up-results" rel="self"/>',
     '    <link href="http://www.zotero.org/styles/apa" rel="independent-parent"/>',
+    '    <link href="https://made-up.example.org/author-guidelines" rel="documentation"/>',
+    '    <category citation-format="author-date"/>',
+    '    <category field="biology"/>',
+    '    <issn>1234-5678</issn>',
     '  </info>',
     '</style>'), file.path(r, "dependent", "made-up-results.csl"))
   writeLines("<html><body>Not Found</body></html>", file.path(r, "broken.csl"))
@@ -70,9 +80,21 @@ test_that("a dependent style is saved with its parent's rules, and says so", {
   expect_identical(grep("<title>", got, value = TRUE),
                    "    <title>Journal of Made-up Results</title>")
   expect_true(any(grepl("The rules of the 'apa' style", got, fixed = TRUE)))
-  expect_identical(setdiff(got, apa),
-                   c("  <!-- The rules of the 'apa' style, under the name of the journal that uses them. -->",
-                     "    <title>Journal of Made-up Results</title>"))
+  # The rules are the parent's, line for line.
+  rules <- function(x) x[seq(grep("</info>", x, fixed = TRUE), length(x))]
+  expect_identical(rules(got), rules(apa))
+  # The card is the journal's: its identifier, its guidelines, its field and
+  # its ISSN; the parent named as the template, its field and summary gone.
+  info <- got[seq(grep("<info>", got, fixed = TRUE), grep("</info>", got, fixed = TRUE))]
+  expect_true("    <id>http://www.zotero.org/styles/made-up-results</id>" %in% info)
+  expect_true('    <link href="https://made-up.example.org/author-guidelines" rel="documentation"/>' %in% info)
+  expect_true('    <link href="http://www.zotero.org/styles/apa" rel="template"/>' %in% info)
+  expect_true('    <category field="biology"/>' %in% info)
+  expect_true("    <issn>1234-5678</issn>" %in% info)
+  expect_false(any(grepl("styles/apa</id>|psychology|<summary>|independent-parent", info)))
+  expect_identical(sum(grepl('rel="self"', info)), 1L)
+  # And the journal's locale, which a dependent style sets.
+  expect_match(grep("<style ", got, value = TRUE), 'default-locale="en-US"', fixed = TRUE)
   expect_identical(in_project(p, .journal_name("made-up-results")),
                    "Journal of Made-up Results")
 })

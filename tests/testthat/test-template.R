@@ -2289,3 +2289,47 @@ test_that("a static map is asked for only with a box, and the packages to draw i
   local_mocked_bindings(.has_pkg = function(pkg) TRUE)
   expect_true(.spice_static_map("9.17 -79.83 9.14 -79.86"))
 })
+
+test_that("the template's style is Journal of Ecology's, not APA's under its name", {
+  csl <- readLines(tpl("references", "journal-of-ecology.csl"), warn = FALSE)
+  info <- csl[seq(grep("<info>", csl, fixed = TRUE), grep("</info>", csl, fixed = TRUE))]
+  expect_true("    <id>http://www.zotero.org/styles/journal-of-ecology</id>" %in% info)
+  expect_true(any(grepl("<issn>0022-0477</issn>", info, fixed = TRUE)))
+  expect_true(any(grepl('category field="biology"', info, fixed = TRUE)))
+  expect_false(any(grepl("psychology|styles/apa</id>", info)))
+})
+
+test_that("the compendium carries the subfolders of data/, and says which formats", {
+  p <- new_project()
+  dir.create(file.path(p, "data", "raw"))
+  writeLines("x,y\n1,2", file.path(p, "data", "raw", "counts.csv"))
+  writeLines("x,y\n1,2", file.path(p, "data", "top.csv"))
+  file.create(file.path(p, "data", "plots.gpkg"))
+  writeLines('d <- read.csv("data/raw/counts.csv")', file.path(p, "R", "analysis.R"))
+  dc <- file.path(p, "submission", "J", "data_and_code")
+  in_project(p, suppressWarnings(suppressMessages(.export_data_code(dc, blinded = FALSE))))
+  # What check_data() passed is what the compendium carries.
+  expect_true(file.exists(file.path(dc, "data", "raw", "counts.csv")))
+  expect_true(file.exists(file.path(dc, "data", "top.csv")))
+  expect_false(dir.exists(file.path(dc, "data", "metadata")))
+  # Its README names the formats it holds, and no other.
+  expect_identical(paste(.formats_paragraph(file.path(dc, "data")), collapse = " "),
+                   "Data are distributed in open formats (.csv, .gpkg): none of it needs proprietary software to read.")
+  expect_identical(.formats_paragraph(tempfile("none")), character(0))
+})
+
+test_that("sessionInfo.txt names the packages the analysis loads", {
+  p <- new_project()
+  writeLines("library(jsonlite)", file.path(p, "R", "analysis_extra.R"))
+  v <- in_project(p, .analysis_versions())
+  expect_match(v[1], "Packages the analysis loads", fixed = TRUE)
+  expect_true(any(grepl(paste0("jsonlite +", utils::packageVersion("jsonlite")), v)))
+  expect_false(any(grepl("easypaper", v[-1], fixed = TRUE)))
+  # With what they attach: vegan attaches permute, which the code uses
+  # without loading it by name.
+  skip_if_not_installed("vegan")
+  writeLines("library(vegan)", file.path(p, "R", "analysis_extra.R"))
+  v <- in_project(p, .analysis_versions())
+  expect_true(any(grepl("^  vegan ", v)))
+  expect_true(any(grepl("^  permute ", v)))
+})
