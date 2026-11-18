@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">easypaper</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,9 +29,54 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/danielsangarci/easypaper/blob/v0.1.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/danielsangarci/easypaper/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="easypaper-development-version">easypaper (development version)<a class="anchor" aria-label="anchor" href="#easypaper-development-version"></a></h2>
+<div class="section level3">
+<h3 id="rendering-development-version">Rendering<a class="anchor" aria-label="anchor" href="#rendering-development-version"></a></h3>
+<ul><li>Quarto is found where RStudio, Positron or Quarto’s installer put it, also from <code>Rscript</code> or a terminal, where it is not on the PATH, together with the pandoc it ships. It has to be 1.7 or later.</li>
+<li>The title in the properties of a <code>.docx</code> (File &gt; Properties) no longer carries the short title.</li>
+<li>Without a connection to GBIF, a call warns once, not once per document. The template and the worked example ship the answers their references need, so their first render sets the italics offline.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="checks-development-version">Checks<a class="anchor" aria-label="anchor" href="#checks-development-version"></a></h3>
+<ul><li>
+<code><a href="../reference/checks.html">check_renv()</a></code> compares <code>renv.lock</code> with the library in use, package by package, and names what differs.</li>
+<li>
+<code><a href="../reference/manuscript_stats.html">manuscript_stats()</a></code> finds the abstract and the reference list under the names journals give them – Summary, Literature cited – or under the ones <code>abstract-heading:</code> and <code>references-heading:</code> name in <code>_quarto.yml</code>.</li>
+<li>
+<code><a href="../reference/check_species.html">check_species()</a></code> says in its help that it writes the cache of names.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="submitting-development-version">Submitting<a class="anchor" aria-label="anchor" href="#submitting-development-version"></a></h3>
+<ul><li>A double-blind submission is read back for the authors’ names, emails, ORCID, affiliations and accounts, and what the text itself still says is reported, file by file. A reference that would name them – their own software, their own data paper – is left out of it when <code>blinded-drop-keys:</code> in <code>_quarto.yml</code> lists it.</li>
+<li>The compendium carries a <code>renv.lock</code> of its analysis alone: the packages it loads and what they need, without easypaper, which built the documents and is recorded in the project’s own. In the worked example, 68 packages instead of 118.</li>
+<li>The compendium carries <code>data/</code> with its subfolders. It took only the top level, while <code><a href="../reference/checks.html">check_data()</a></code> looked in the subfolders too: a script reading <code>data/raw/counts.csv</code> passed the check, and the compendium published stopped on it.</li>
+<li>Its <code>sessionInfo.txt</code> lists the packages the analysis loads, and those they attach, with their versions – vegan and permute in the worked example – which the session that wrote it had not loaded. Its README names the formats the data are in, and no others.</li>
+<li>
+<code><a href="../reference/add_journal.html">add_journal()</a></code> gives a journal’s style its own card – its identifier, author guidelines, field and ISSN – instead of the parent style’s, which named the template’s Journal of Ecology style APA, for psychology and law. The rules, and so every citation, are unchanged.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="data-development-version">Data<a class="anchor" aria-label="anchor" href="#data-development-version"></a></h3>
+<ul><li>The page of the metadata draws the area the data cover as a map inside it, with dataspice 1.2.1 and sf, maps and base64enc; without them it has no map. It never loads one from the internet, and opens offline. The worked example says where its data come from, the 50-ha plot of Barro Colorado Island.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="the-worked-example-development-version">The worked example<a class="anchor" aria-label="anchor" href="#the-worked-example-development-version"></a></h3>
+<ul><li>Species richness is modelled with a quasi-Poisson GLM, tested with an <em>F</em> test, and the PERMANOVA and PERMDISP permute plots only within five spatial blocks of contiguous plots. The Methods say what this allows for and what it does not.</li>
+<li>The Results name the richest and the poorest habitat only when the test says habitats differ; otherwise they give the range, and say the model does not tell it apart from chance.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="other-development-version">Other<a class="anchor" aria-label="anchor" href="#other-development-version"></a></h3>
+<ul><li>The next steps <code><a href="../reference/create_paper.html">create_paper()</a></code> and <code><a href="../reference/create_example_paper.html">create_example_paper()</a></code> print name <code>set_paper(".")</code>.</li>
+<li>
+<code><a href="../reference/trackdown.html">td_upload()</a></code>, <code><a href="../reference/trackdown.html">td_update()</a></code> and <code><a href="../reference/trackdown.html">td_download()</a></code> are marked experimental: they need a trackdown that is not on CRAN.</li>
+<li>A code of conduct and a guide to contributing.</li>
+<li>
+<code>citation("easypaper")</code> gives the DOI CRAN assigned to the package, <code>10.32614/CRAN.package.easypaper</code>, and its CRAN page.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="easypaper-010">easypaper 0.1.0<a class="anchor" aria-label="anchor" href="#easypaper-010"></a></h2><p class="text-muted">CRAN release: 2026-11-13</p>
 <p>First release.</p>

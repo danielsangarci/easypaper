@@ -1,5 +1,90 @@
 # Changelog
 
+## easypaper (development version)
+
+### Rendering
+
+- Quarto is found where RStudio, Positron or Quarto’s installer put it,
+  also from `Rscript` or a terminal, where it is not on the PATH,
+  together with the pandoc it ships. It has to be 1.7 or later.
+- The title in the properties of a `.docx` (File \> Properties) no
+  longer carries the short title.
+- Without a connection to GBIF, a call warns once, not once per
+  document. The template and the worked example ship the answers their
+  references need, so their first render sets the italics offline.
+
+### Checks
+
+- [`check_renv()`](https://danielsangarci.github.io/easypaper/reference/checks.md)
+  compares `renv.lock` with the library in use, package by package, and
+  names what differs.
+- [`manuscript_stats()`](https://danielsangarci.github.io/easypaper/reference/manuscript_stats.md)
+  finds the abstract and the reference list under the names journals
+  give them – Summary, Literature cited – or under the ones
+  `abstract-heading:` and `references-heading:` name in `_quarto.yml`.
+- [`check_species()`](https://danielsangarci.github.io/easypaper/reference/check_species.md)
+  says in its help that it writes the cache of names.
+
+### Submitting
+
+- A double-blind submission is read back for the authors’ names, emails,
+  ORCID, affiliations and accounts, and what the text itself still says
+  is reported, file by file. A reference that would name them – their
+  own software, their own data paper – is left out of it when
+  `blinded-drop-keys:` in `_quarto.yml` lists it.
+- The compendium carries a `renv.lock` of its analysis alone: the
+  packages it loads and what they need, without easypaper, which built
+  the documents and is recorded in the project’s own. In the worked
+  example, 68 packages instead of 118.
+- The compendium carries `data/` with its subfolders. It took only the
+  top level, while
+  [`check_data()`](https://danielsangarci.github.io/easypaper/reference/checks.md)
+  looked in the subfolders too: a script reading `data/raw/counts.csv`
+  passed the check, and the compendium published stopped on it.
+- Its `sessionInfo.txt` lists the packages the analysis loads, and those
+  they attach, with their versions – vegan and permute in the worked
+  example – which the session that wrote it had not loaded. Its README
+  names the formats the data are in, and no others.
+- [`add_journal()`](https://danielsangarci.github.io/easypaper/reference/add_journal.md)
+  gives a journal’s style its own card – its identifier, author
+  guidelines, field and ISSN – instead of the parent style’s, which
+  named the template’s Journal of Ecology style APA, for psychology and
+  law. The rules, and so every citation, are unchanged.
+
+### Data
+
+- The page of the metadata draws the area the data cover as a map inside
+  it, with dataspice 1.2.1 and sf, maps and base64enc; without them it
+  has no map. It never loads one from the internet, and opens offline.
+  The worked example says where its data come from, the 50-ha plot of
+  Barro Colorado Island.
+
+### The worked example
+
+- Species richness is modelled with a quasi-Poisson GLM, tested with an
+  *F* test, and the PERMANOVA and PERMDISP permute plots only within
+  five spatial blocks of contiguous plots. The Methods say what this
+  allows for and what it does not.
+- The Results name the richest and the poorest habitat only when the
+  test says habitats differ; otherwise they give the range, and say the
+  model does not tell it apart from chance.
+
+### Other
+
+- The next steps
+  [`create_paper()`](https://danielsangarci.github.io/easypaper/reference/create_paper.md)
+  and
+  [`create_example_paper()`](https://danielsangarci.github.io/easypaper/reference/create_example_paper.md)
+  print name `set_paper(".")`.
+- [`td_upload()`](https://danielsangarci.github.io/easypaper/reference/trackdown.md),
+  [`td_update()`](https://danielsangarci.github.io/easypaper/reference/trackdown.md)
+  and
+  [`td_download()`](https://danielsangarci.github.io/easypaper/reference/trackdown.md)
+  are marked experimental: they need a trackdown that is not on CRAN.
+- A code of conduct and a guide to contributing.
+- `citation("easypaper")` gives the DOI CRAN assigned to the package,
+  `10.32614/CRAN.package.easypaper`, and its CRAN page.
+
 ## easypaper 0.1.0
 
 CRAN release: 2026-11-13

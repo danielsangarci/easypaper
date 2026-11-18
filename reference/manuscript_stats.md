@@ -41,31 +41,35 @@ Words are counted the way Word counts them in the rendered document, not
 in the source: a citation counts as the text the journal's style prints
 for it – `[@smith2020]` as "(Smith 2020)" – a cross-reference as "Figure
 1", and code, comments and markup not at all. The abstract is the
-`# Abstract` section without its keywords line; the main text is every
-section from the one after the abstract to the reference list, less the
-statements at the end – acknowledgements, funding, author contributions,
-conflicts of interest, data availability, ethics – whatever they are
-called: Introduction to Discussion, in the template. The reference list
-is the one the paper prints, in the journal's style. The value of inline
-R code is not known until it runs, and counts as one word.
+`# Abstract` section without its keywords line – or `# Summary`, as the
+journals of the British Ecological Society call it, or `# Resumen`; any
+other heading is named with `abstract-heading:` in the `easypaper:`
+block of `_quarto.yml`. The main text is every section from the one
+after the abstract to the reference list, less the statements at the end
+– acknowledgements, funding, author contributions, conflicts of
+interest, data availability, ethics – whatever they are called:
+Introduction to Discussion, in the template. The reference list is the
+one the paper prints, in the journal's style. The value of inline R code
+is not known until it runs, and counts as one word.
 
 ## Examples
 
 ``` r
 dir <- file.path(tempdir(), "my_paper")
 create_paper(dir, title = "Ant colonies", git = FALSE)
-#> Project created: /tmp/RtmpkQBUQS/my_paper
+#> Project created: /tmp/RtmpHi6qdT/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
-#>   3. render_html()      # see ?render for every command
+#>   3. set_paper(".")      # the project to work on, once a session
+#>   4. render_html()      # see ?render for every command
 if (rmarkdown::pandoc_available()) manuscript_stats(path = dir)
 #> Manuscript summary
 #>   Title                    12 characters
 #>   Title, without spaces    11 characters
 #>   Abstract                 14 words
 #>   Keywords                  3
-#>   Main text                42 words
-#>   Main text + references  105 words
+#>   Main text                45 words
+#>   Main text + references  108 words
 #>   References                3
 #>   Figures                   2
 #>   Tables                    2

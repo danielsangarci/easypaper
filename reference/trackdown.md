@@ -57,9 +57,11 @@ downloading: git then shows exactly what each co-author changed. If they
 would rather read the typeset paper, send them the `.docx` from
 `output/` and keep this for the sections they are actively editing.
 
-It needs the development version of trackdown, which reads `.qmd` files:
+**Experimental.** These need the development version of trackdown, which
+reads `.qmd` files:
 `remotes::install_github("ClaudioZandonella/trackdown")`. The version on
-CRAN does not.
+CRAN (1.1.1) does not, and trackdown has not been released since; while
+it is not, these may change, or go.
 
 ## Examples
 

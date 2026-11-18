@@ -42,7 +42,8 @@ check_renv(quiet = FALSE, path = NULL)
 `TRUE` invisibly and stop with an error naming what is missing.
 `check_title()` and `check_data()` return `TRUE` or `FALSE` invisibly,
 with a warning when `FALSE`. `check_renv()` returns `TRUE` in sync,
-`FALSE` not, `NA` when it cannot tell.
+`FALSE` not, with a warning naming what differs, and `NA` when it cannot
+tell.
 
 ## Details
 
@@ -69,7 +70,12 @@ with a warning when `FALSE`. `check_renv()` returns `TRUE` in sync,
   files there nothing reads – they would travel to the data repository
   all the same. It reports; it never removes.
 
-- `check_renv()`: `renv.lock` is there and matches the library in use.
+- `check_renv()`: `renv.lock` is there and matches the library in use,
+  package by package: renv's own project library when the project has
+  one
+  ([`renv::init()`](https://rstudio.github.io/renv/reference/init.html)),
+  and otherwise the library R is using, which is the one easypaper
+  records.
 
 An e-mail address is not a citation, however it is written: an `@` glued
 to a letter or a digit – any letter, accented ones too – is an address,
@@ -88,10 +94,11 @@ which runs every one of these first.
 ``` r
 dir <- file.path(tempdir(), "my_paper")
 create_paper(dir, title = "Ant colonies", git = FALSE)
-#> Project created: /tmp/RtmpkQBUQS/my_paper
+#> Project created: /tmp/RtmpHi6qdT/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
-#>   3. render_html()      # see ?render for every command
+#>   3. set_paper(".")      # the project to work on, once a session
+#>   4. render_html()      # see ?render for every command
 check_citations(dir)
 #> Citations: all 3 found in references/*.bib.
 check_crossrefs(path = dir)

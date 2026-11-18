@@ -42,8 +42,11 @@ The metadata folder, invisibly.
 
 `what = "write"` opens nothing: it compiles the four files into
 `data/metadata/dataspice.json`, the machine-readable description, and
-writes `data/metadata/index_metadata.html`, a page to read it. You need
-it only to look at them:
+writes `data/metadata/index_metadata.html`, a page to read it. The area
+the data cover, when `biblio.csv` gives its coordinates, is drawn on
+that page as a map inside it, which opens offline: it needs sf, maps and
+base64enc, and without them the page has no map, and says so: it never
+loads one from the internet. You need it only to look at them:
 [`make_submission()`](https://danielsangarci.github.io/easypaper/reference/make_submission.md)
 and
 [`make_preprint()`](https://danielsangarci.github.io/easypaper/reference/make_preprint.md)
@@ -60,15 +63,16 @@ and <https://docs.ropensci.org/dataspice/> for what each field means.
 ``` r
 dir <- file.path(tempdir(), "my_paper")
 create_paper(dir, git = FALSE)
-#> Project created: /tmp/RtmpkQBUQS/my_paper
+#> Project created: /tmp/RtmpHi6qdT/my_paper
 #>   1. open my_paper.Rproj
 #>   2. library(easypaper)
-#>   3. render_html()      # see ?render for every command
+#>   3. set_paper(".")      # the project to work on, once a session
+#>   4. render_html()      # see ?render for every command
 write.csv(head(iris), file.path(dir, "data", "iris.csv"), row.names = FALSE)
 
 edit_metadata("write", path = dir)   # dataspice.json and its web page
-#> Written: /tmp/RtmpkQBUQS/my_paper/data/metadata/dataspice.json
-#>          /tmp/RtmpkQBUQS/my_paper/data/metadata/index_metadata.html
+#> Written: /tmp/RtmpHi6qdT/my_paper/data/metadata/dataspice.json
+#>          /tmp/RtmpHi6qdT/my_paper/data/metadata/index_metadata.html
 list.files(file.path(dir, "data", "metadata"))
 #> [1] "access.csv"          "attributes.csv"      "biblio.csv"         
 #> [4] "creators.csv"        "dataspice.json"      "index_metadata.html"
